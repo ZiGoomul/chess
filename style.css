@@ -1,0 +1,335 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --panel-bg: #f8f9fa;
+    --border-color: #e0e0e0;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+    --bg-color: #202020;
+    --text-color: #e0e0e0;
+    --panel-bg: #2d2d2d;
+    --border-color: #444444;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: block; /* Remove previous flex centering */
+}
+
+.container {
+    display: none; /* Hide old container if it exists */
+}
+
+h1 {
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+.controls, .fen-controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}
+
+button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focus-visible {
+  outline: 3px solid #f39c12;
+  outline-offset: 2px;
+}
+
+#boardContainer {
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.material-piece {
+    width: 25px;
+    height: 25px;
+    margin-right: -5px;
+}
+
+.material-score {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+/* Tabs */
+.tab-btn:hover {
+    background-color: rgba(0,0,0,0.05);
+    cursor: pointer;
+}
+[data-theme="dark"] .tab-btn:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+select, input[type="text"] {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.in-check {
+    box-shadow: inset 0 0 15px 5px rgba(255, 0, 0, 0.9) !important;
+    background-color: rgba(255, 0, 0, 0.4) !important;
+}
+
+.hint-square {
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.8) !important;
+    background-color: rgba(52, 152, 219, 0.4) !important;
+}
+
+/* Цветовые темы доски */
+[data-board-theme="green"] .white-1e1d7 { background-color: #eeeed2; color: #769656; }
+[data-board-theme="green"] .black-3c85d { background-color: #769656; color: #eeeed2; }
+
+[data-board-theme="blue"] .white-1e1d7 { background-color: #dee3e6; color: #8ca2ad; }
+[data-board-theme="blue"] .black-3c85d { background-color: #8ca2ad; color: #dee3e6; }
+
+[data-board-theme="gray"] .white-1e1d7 { background-color: #e0e0e0; color: #888888; }
+[data-board-theme="gray"] .black-3c85d { background-color: #888888; color: #e0e0e0; }
+
+[data-board-theme="wood"] .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+[data-board-theme="wood"] .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
+}
+[data-theme="dark"] .slider {
+  background-color: #555;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--accent-color);
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Move History */
+.move-text:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+/* Navigation Buttons */
+.nav-btn {
+  flex: 1;
+  padding: 8px 0;
+  background-color: var(--border-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.nav-btn:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+/* Active Move Highlight */
+.move-text.active-move {
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: bold;
+}
+
+.fen-error {
+    color: #e74c3c;
+    font-size: 13px;
+}
+
+.board-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.flip-board-btn {
+  min-height: 42px;
+  padding: 10px 14px;
+  background: var(--panel-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.flip-board-btn:hover {
+  background: var(--border-color);
+  color: var(--text-color);
+}
+
+.new-game-btn {
+  min-height: 42px;
+  padding: 10px 18px;
+  font-weight: 700;
+}
+
+/* Timer Classes */
+.chess-clock {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    background: #222;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    min-width: 65px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: background 0.3s, color 0.3s;
+}
+
+.chess-clock.active {
+    background: #333;
+    border: 2px solid var(--accent-color);
+}
+
+.chess-clock.danger {
+    color: #ff4757;
+}
+
+.timer-settings {
+    display: none;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.timer-settings select {
+    padding: 6px;
+    border-radius: 4px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+  .main-layout > * {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+@media (max-width: 1000px) {
+  .main-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 18px !important;
+  }
+
+  .board-column, .history-column, .sidebar-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  .history-column {
+    height: 220px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 10px 14px !important;
+  }
+
+  .app-header h1 {
+    font-size: 20px !important;
+  }
+
+  .main-layout {
+    padding: 0 12px !important;
+    gap: 14px !important;
+  }
+
+  .history-column {
+    height: 170px !important;
+  }
+
+  .board-actions .new-game-btn {
+    flex: 1;
+  }
+
+  .board-actions .flip-board-btn {
+    flex: 1;
+    padding: 10px 8px;
+  }
+
+  .flip-board-btn span {
+    font-size: 13px;
+  }
+
+  .sidebar-column {
+    padding: 14px !important;
+  }
+
+  .tab-btn {
+    min-width: 0;
+    padding: 8px 5px !important;
+    font-size: 13px !important;
+  }
+
+  .timer-settings {
+    flex-wrap: wrap;
+  }
+}
+
