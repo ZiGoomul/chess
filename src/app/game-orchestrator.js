@@ -24,16 +24,47 @@ import { createMoveHistoryView } from '../ui/move-history.js';
 import { createPostGameReviewView } from '../ui/post-game-review.js';
 import { retainCastlingRights } from '../domain/castling-rights.js';
 import { resolveSquareClick, getLegalMovesForSquare, getSquareFromCoords } from '../domain/move-input.js';
+import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 
 $(document).ready(function() {
+    const storedSettings = loadStoredSettings();
     const eventBus = createEventBus();
-    const store = createGameStore({ game: new Chess() });
+    const store = createGameStore({
+        game: new Chess(),
+        orientation: storedSettings.playerColor === 'black' ? 'black' : 'white',
+        settings: {
+            highlightMoves: storedSettings.highlightMoves,
+            highlightAttacks: storedSettings.highlightAttacks,
+            highlightDefenses: storedSettings.highlightDefenses,
+            autoHint: storedSettings.autoHint,
+            botLevel: storedSettings.botLevel,
+            hintLevel: storedSettings.hintLevel
+        }
+    });
     const engineWorkers = createEngineWorkers();
     
     const boardView = createBoardView({ $, eventBus, store });
     const shellView = createShellView({ $, eventBus, store });
     const evalBarView = createEvalBarView({ $, eventBus });
     const materialView = createMaterialView({ $, eventBus, Chess });
+
+    // Sync UI inputs with stored settings
+    $('#botLevel').val(storedSettings.botLevel);
+    $('#hintLevel').val(storedSettings.hintLevel);
+    $('#autoHintCb').prop('checked', storedSettings.autoHint);
+    $('#highlightMovesCb').prop('checked', storedSettings.highlightMoves);
+    $('#highlightAttacksCb').prop('checked', storedSettings.highlightAttacks);
+    $('#highlightDefensesCb').prop('checked', storedSettings.highlightDefenses);
+    $('#timerEnableCb').prop('checked', storedSettings.timerEnabled);
+    $('#timerBase').val(storedSettings.timerBase);
+    $('#timerInc').val(storedSettings.timerInc);
+
+    $('.color-btn').removeClass('active').css('border-color', 'transparent');
+    $(`.color-btn[data-color="${storedSettings.playerColor || 'white'}"]`).addClass('active').css('border-color', '#27ae60');
+    if (storedSettings.playerColor === 'black') {
+        boardView.orientation('black');
+        eventBus.emit('board:orientation-changed', { orientation: 'black' });
+    }
     
     // Provide the engine wrapper that was missing
     let analysisCoordinator;
@@ -722,6 +753,10 @@ $(document).ready(function() {
     });
 
     $('#highlightAttacksCb, #highlightDefensesCb').on('change', function() {
+        saveStoredSettings({
+            highlightAttacks: $('#highlightAttacksCb').is(':checked'),
+            highlightDefenses: $('#highlightDefensesCb').is(':checked')
+        });
         const state = store.getState();
         var isHistoricalPosition = state.currentViewPly < state.historyFENs.length - 1;
         var displayedGame = isHistoricalPosition ? new Chess(state.historyFENs[state.currentViewPly]) : state.game;
@@ -729,6 +764,7 @@ $(document).ready(function() {
     });
 
     $('#highlightMovesCb').on('change', function() {
+        saveStoredSettings({ highlightMoves: $(this).is(':checked') });
         if (store.getState().selectedSquare) {
             const state = store.getState();
             var isHistoricalPosition = state.currentViewPly < state.historyFENs.length - 1;
@@ -782,12 +818,21 @@ $(document).ready(function() {
         botCoordinator.cancelBotSearch();
         const level = parseInt($(this).val(), 10);
         store.setState({ settings: { ...store.getState().settings, botLevel: level } });
+        saveStoredSettings({ botLevel: level });
         eventBus.emit('settings:changed', { botLevel: level });
         updateStatus();
     });
 
+    $('#hintLevel').on('change', function() {
+        const level = parseInt($(this).val(), 10);
+        store.setState({ settings: { ...store.getState().settings, hintLevel: level } });
+        saveStoredSettings({ hintLevel: level });
+    });
+
     $('#autoHintCb').on('change', function() {
-        store.setState({ settings: { ...store.getState().settings, autoHint: $(this).is(':checked') } });
+        const isChecked = $(this).is(':checked');
+        store.setState({ settings: { ...store.getState().settings, autoHint: isChecked } });
+        saveStoredSettings({ autoHint: isChecked });
         analysisCoordinator.autoHintIfNeeded();
     });
 
@@ -884,6 +929,11 @@ $(document).ready(function() {
         clock.applySettings(true);
         updateTimePresetSelection();
         updateSelectedTimePill();
+        saveStoredSettings({
+            timerEnabled: $('#timerEnableCb').is(':checked'),
+            timerBase: Number($('#timerBase').val()),
+            timerInc: Number($('#timerInc').val())
+        });
     });
 
     function getTimeCategory(baseMinutes) {
@@ -938,6 +988,11 @@ $(document).ready(function() {
         clock.applySettings(true);
         updateTimePresetSelection();
         updateSelectedTimePill();
+        saveStoredSettings({
+            timerEnabled: $('#timerEnableCb').is(':checked'),
+            timerBase: Number($('#timerBase').val()),
+            timerInc: inc
+        });
 
         if (base >= 1440) {
             var days = Math.round(base / 1440);
@@ -964,6 +1019,7 @@ $(document).ready(function() {
         $(this).addClass('active').css('border-color', '#27ae60');
 
         var color = $(this).data('color');
+        saveStoredSettings({ playerColor: color });
         if (color === 'white' || color === 'black') {
             boardView.orientation(color);
             store.setState({ orientation: color });

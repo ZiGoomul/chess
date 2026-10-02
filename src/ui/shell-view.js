@@ -1,17 +1,35 @@
+import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
+
 export function createShellView({ $, eventBus, store }) {
     function initShell() {
+        const stored = loadStoredSettings();
+
+        // Apply stored theme (default to dark)
+        const theme = stored.theme || 'dark';
+        $('body').attr('data-theme', theme);
+        eventBus.emit('theme:changed', { theme: theme });
+
+        // Apply stored board and piece themes
+        if (stored.boardTheme) {
+            $('#boardThemeSelect').val(stored.boardTheme);
+            $('body').attr('data-board-theme', stored.boardTheme);
+        } else {
+            $('body').attr('data-board-theme', $('#boardThemeSelect').val());
+        }
+
+        if (stored.pieceTheme) {
+            $('#pieceThemeSelect').val(stored.pieceTheme);
+            eventBus.emit('settings:changed', { pieceTheme: stored.pieceTheme });
+        }
+
         // --- Redesign Logic (Themes and Tabs) ---
         $('#themeToggleBtn').on('click', function() {
             var current = $('body').attr('data-theme');
             var next = current === 'dark' ? 'light' : 'dark';
             $('body').attr('data-theme', next);
+            saveStoredSettings({ theme: next });
             eventBus.emit('theme:changed', { theme: next });
         });
-        
-        // Set default dark theme
-        if (!$('body').attr('data-theme')) {
-            $('body').attr('data-theme', 'dark');
-        }
 
         $('.tab-btn').on('click', function() {
             $('.tab-btn').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1')
@@ -39,17 +57,16 @@ export function createShellView({ $, eventBus, store }) {
         // Theme selects
         $('#pieceThemeSelect').on('change', function() {
             var theme = $(this).val();
+            saveStoredSettings({ pieceTheme: theme });
             eventBus.emit('settings:changed', { pieceTheme: theme });
         });
 
         $('#boardThemeSelect').on('change', function() {
             var theme = $(this).val();
             $('body').attr('data-board-theme', theme);
+            saveStoredSettings({ boardTheme: theme });
             eventBus.emit('settings:changed', { boardTheme: theme });
         });
-        
-        // Apply initial board theme
-        $('body').attr('data-board-theme', $('#boardThemeSelect').val());
 
         // FEN inputs
         $('#getFenBtn').on('click', function() {
