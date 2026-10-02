@@ -1,0 +1,264 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --panel-bg: #f8f9fa;
+    --border-color: #e0e0e0;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+    --bg-color: #202020;
+    --text-color: #e0e0e0;
+    --panel-bg: #2d2d2d;
+    --border-color: #444444;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: block; /* Remove previous flex centering */
+}
+
+.container {
+    display: none; /* Hide old container if it exists */
+}
+
+h1 {
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+.controls, .fen-controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}
+
+button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focus-visible {
+  outline: 3px solid #f39c12;
+  outline-offset: 2px;
+}
+
+#boardContainer {
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.material-piece {
+    width: 25px;
+    height: 25px;
+    margin-right: -5px;
+}
+
+.material-score {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+/* Tabs */
+.tab-btn:hover {
+    background-color: rgba(0,0,0,0.05);
+    cursor: pointer;
+}
+
+@media (min-width: 900px) and (max-height: 850px) {
+  .main-layout {
+    max-width: 1080px !important;
+    grid-template-columns: minmax(0, min(46vw, calc(100vh - 230px))) minmax(160px, min(20vw, 230px)) minmax(220px, 1fr) !important;
+  }
+}
+
+[data-theme="dark"] .tab-btn:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+  .main-layout > * {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+@media (max-width: 1100px), (max-height: 850px) {
+  .main-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 0.48fr) minmax(230px, 0.62fr) !important;
+    gap: 14px !important;
+  }
+
+  .board-column, .history-column, .sidebar-column {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 850px) {
+  .main-layout {
+    height: auto;
+    min-height: calc(100vh - 88px);
+    max-height: none;
+    overflow: visible;
+    align-items: flex-start !important;
+  }
+
+  .board-column, .sidebar-column {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .board-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-column {
+    overflow: visible;
+    padding: 8px !important;
+  }
+
+  .sidebar-column .tabs-header {
+    margin-bottom: 10px !important;
+  }
+
+  .sidebar-column .tab-content {
+    gap: 10px !important;
+  }
+
+  #tab-play > div:last-child {
+    gap: 6px !important;
+    padding-top: 12px !important;
+  }
+
+  #tab-play > div:last-child > div[style*="border-top"] {
+    margin: 8px 0 !important;
+  }
+
+  .timer-settings {
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .time-preset-options {
+    gap: 4px;
+  }
+
+  .time-preset-btn {
+    min-height: 40px;
+  }
+
+  .history-column {
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 850px) {
+  .main-layout {
+    max-width: 1080px !important;
+    grid-template-columns: minmax(0, min(46vw, calc(100vh - 230px))) minmax(160px, min(20vw, 230px)) minmax(220px, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .main-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 18px !important;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .board-column, .history-column, .sidebar-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  .history-column {
+    height: 220px !important;
+  }
+
+  .sidebar-column {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 10px 14px !important;
+  }
+
+  .app-header h1 {
+    font-size: 20px !important;
+  }
+
+  .main-layout {
+    padding: 0 12px !important;
+    gap: 14px !important;
+  }
+
+  .history-column {
+    height: 170px !important;
+  }
+
+  .board-actions .new-game-btn {
+    flex: 1;
+  }
+
+  .board-actions .flip-board-btn {
+    flex: 1;
+    padding: 10px 8px;
+  }
+
+  .flip-board-btn span {
+    font-size: 13px;
+  }
+
+  .sidebar-column {
+    padding: 14px !important;
+  }
+
+  .tab-btn {
+    min-width: 0;
+    padding: 8px 5px !important;
+    font-size: 13px !important;
+  }
+
+  .timer-settings {
+    flex-wrap: wrap;
+  }
+
+  .time-control-dialog {
+    padding: 16px;
+  }
+}
+

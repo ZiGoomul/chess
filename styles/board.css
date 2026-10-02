@@ -1,0 +1,147 @@
+.in-check {
+    box-shadow: inset 0 0 15px 5px rgba(255, 0, 0, 0.9) !important;
+    background-color: rgba(255, 0, 0, 0.4) !important;
+}
+
+.hint-square {
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.8) !important;
+    background-color: rgba(52, 152, 219, 0.4) !important;
+}
+
+.square-55d63 {
+    position: relative !important;
+}
+
+/* Выбранная фигура (в стиле Chess.com) */
+.square-55d63.selected-square {
+    background-color: #cdd26a !important;
+}
+
+.square-55d63.black-3c85d.selected-square {
+    background-color: #aaa23a !important;
+}
+
+
+/* Точки и кольца взятия для возможных ходов (в стиле Chess.com) */
+.move-dest-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.move-dest-marker::after {
+    content: '';
+    width: 28%;
+    height: 28%;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.24);
+}
+
+.move-dest-marker.is-capture::after {
+    width: 82%;
+    height: 82%;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 5px solid rgba(0, 0, 0, 0.24);
+    box-sizing: border-box;
+}
+
+[data-theme="dark"] .move-dest-marker::after {
+    background-color: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] .move-dest-marker.is-capture::after {
+    background-color: transparent;
+    border-color: rgba(0, 0, 0, 0.32);
+}
+
+.square-55d63.has-dest-marker,
+.square-55d63:has(.move-dest-marker) {
+    cursor: pointer;
+}
+
+
+.attacked-by-white {
+    position: relative;
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.7) !important;
+    background-color: rgba(52, 152, 219, 0.35) !important;
+}
+
+.attacked-by-white::after {
+    content: attr(data-attacks);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(52, 152, 219, 0.95);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.attacked-by-black {
+    position: relative;
+    box-shadow: inset 0 0 10px 5px rgba(243, 156, 18, 0.7) !important;
+    background-color: rgba(243, 156, 18, 0.35) !important;
+}
+
+.attacked-by-black::after {
+    content: attr(data-attacks);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(243, 156, 18, 0.95);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.defenders-badge {
+    position: relative;
+}
+
+.defenders-badge::before {
+    content: attr(data-defenders);
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: rgba(46, 204, 113, 0.95);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Цветовые темы доски */
+[data-board-theme="green"] .white-1e1d7 { background-color: #eeeed2; color: #769656; }
+[data-board-theme="green"] .black-3c85d { background-color: #769656; color: #eeeed2; }
+
+[data-board-theme="blue"] .white-1e1d7 { background-color: #dee3e6; color: #8ca2ad; }
+[data-board-theme="blue"] .black-3c85d { background-color: #8ca2ad; color: #dee3e6; }
+
+[data-board-theme="gray"] .white-1e1d7 { background-color: #e0e0e0; color: #888888; }
+[data-board-theme="gray"] .black-3c85d { background-color: #888888; color: #e0e0e0; }
+
+[data-board-theme="wood"] .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+[data-board-theme="wood"] .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+
