@@ -384,8 +384,9 @@ export function createBoardView({ $, eventBus, store }) {
         });
 
         eventBus.on('board:orientation-changed', function(data) {
-             if (board && data.color) {
-                 board.orientation(data.color);
+             var color = data && (data.orientation || data.color);
+             if (board && color) {
+                 board.orientation(color);
              }
         });
 

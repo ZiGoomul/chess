@@ -951,10 +951,42 @@ $(document).ready(function() {
         panel.slideToggle(150);
     });
 
+    // Color selection buttons
+    $('.color-btn').on('click', function() {
+        $('.color-btn').removeClass('active').css('border-color', 'transparent');
+        $(this).addClass('active').css('border-color', '#27ae60');
+
+        var color = $(this).data('color');
+        if (color === 'white' || color === 'black') {
+            boardView.orientation(color);
+            store.setState({ orientation: color });
+            eventBus.emit('board:orientation-changed', { orientation: color });
+            clock.updateClockUI();
+        }
+    });
+
     $('#ccStartGameBtn').on('click', function() {
         if (isPuzzleMode) exitPuzzleMode();
         else $('#startPositionBtn').trigger('click');
         clock.applySettings(true);
+        clock.startClock();
+
+        var chosen = $('.color-btn.active').data('color') || 'white';
+        if (chosen === 'random') {
+            chosen = Math.random() < 0.5 ? 'white' : 'black';
+        }
+
+        boardView.orientation(chosen);
+        store.setState({ orientation: chosen });
+        eventBus.emit('board:orientation-changed', { orientation: chosen });
+        clock.updateClockUI();
+
+        // If playing as black, bot (white) makes the opening move
+        if (chosen === 'black') {
+            window.setTimeout(function() {
+                botCoordinator.makeBotMove();
+            }, 300);
+        }
     });
 
     // History height sync
