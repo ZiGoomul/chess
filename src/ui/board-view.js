@@ -112,8 +112,22 @@ export function createBoardView({ $, eventBus, store }) {
         if (group) group.appendChild(svgElem);
     }
 
+    function highlightLastMove(from, to) {
+        $('#myBoard .square-55d63').removeClass('last-move-highlight');
+        if (from) {
+            $('#myBoard [data-square="' + from + '"], #myBoard .square-' + from).addClass('last-move-highlight');
+        }
+        if (to) {
+            $('#myBoard [data-square="' + to + '"], #myBoard .square-' + to).addClass('last-move-highlight');
+        }
+    }
+
+    function clearLastMoveHighlight() {
+        $('#myBoard .square-55d63').removeClass('last-move-highlight');
+    }
+
     function removeHighlights() {
-        $('#myBoard .square-55d63').css('background', '').removeClass('selected-square has-dest-marker');
+        $('#myBoard .square-55d63').removeClass('selected-square has-dest-marker');
         $('#myBoard .move-dest-marker').remove();
     }
 
@@ -307,6 +321,9 @@ export function createBoardView({ $, eventBus, store }) {
             sparePieces: true,
             position: 'start',
             pieceTheme: getPieceThemeUrl,
+            moveSpeed: 240,
+            snapSpeed: 60,
+            snapbackSpeed: 60,
             onDragStart: function(source, piece, position, orientation) {
                 var event = { source, piece, position, orientation, cancel: false };
                 eventBus.emit('board:drag-start', event);
@@ -324,6 +341,13 @@ export function createBoardView({ $, eventBus, store }) {
                 eventBus.emit('board:mouseover-square', { square, piece });
             },
             onSnapEnd: function() {
+                var state = store ? store.getState() : null;
+                var currentFen = state && state.historyFENs && typeof state.currentViewPly === 'number' 
+                    ? state.historyFENs[state.currentViewPly] 
+                    : (state && state.game ? state.game.fen() : null);
+                if (board && currentFen) {
+                    board.position(currentFen, false);
+                }
                 eventBus.emit('board:snap-end');
             }
         };
@@ -378,7 +402,11 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('game:move-made', function(data) {
              if (board && data.fen) {
-                 board.position(data.fen, false);
+                 var useAnimation = data.animate !== undefined ? data.animate : true;
+                 board.position(data.fen, useAnimation);
+                 if (data.move && data.move.from && data.move.to) {
+                     highlightLastMove(data.move.from, data.move.to);
+                 }
              }
         });
 
@@ -433,6 +461,12 @@ export function createBoardView({ $, eventBus, store }) {
     initBoard();
 
     return {
+        position: function(fen, useAnimation) {
+            if (board) {
+                if (fen === undefined) return board.position();
+                return board.position(fen, useAnimation !== undefined ? useAnimation : true);
+            }
+        },
         setFen: function(fen) { if (board) board.position(fen); },
         getFen: function() { return board ? board.fen() : null; },
         orientation: function(color) { 
@@ -449,6 +483,8 @@ export function createBoardView({ $, eventBus, store }) {
         clearArrows: clearArrows,
         showMoveHints: showMoveHints,
         removeHighlights: removeHighlights,
+        highlightLastMove: highlightLastMove,
+        clearLastMoveHighlight: clearLastMoveHighlight,
         highlightCheck: highlightCheck,
         highlightAttackedPieces: highlightAttackedPieces
     };

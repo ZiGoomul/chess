@@ -54,9 +54,21 @@ export function createMoveHistoryView({
     const historyFENs = getHistoryFENs();
     const boundedPly = Math.max(0, Math.min(ply, historyFENs.length - 1));
     setCurrentViewPly(boundedPly);
-    getBoard().position(historyFENs[boundedPly]);
+    const board = getBoard();
+    if (board && typeof board.position === 'function') {
+      board.position(historyFENs[boundedPly], true);
+    }
     clearArrows();
     updateActiveMove();
+    if (board && typeof board.highlightLastMove === 'function') {
+      const history = game.history({ verbose: true });
+      if (boundedPly > 0 && history[boundedPly - 1]) {
+        const lastMove = history[boundedPly - 1];
+        board.highlightLastMove(lastMove.from, lastMove.to);
+      } else if (typeof board.clearLastMoveHighlight === 'function') {
+        board.clearLastMoveHighlight();
+      }
+    }
     onPositionChange();
   }
 

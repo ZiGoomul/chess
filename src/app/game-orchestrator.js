@@ -636,7 +636,8 @@ $(document).ready(function() {
         
         moveHistoryView.updateMoveHistory();
         boardView.clearArrows();
-        eventBus.emit('game:move-made', { fen: game.fen() });
+        boardView.clearLastMoveHighlight?.();
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
     }
 
     function exitPuzzleMode() {
@@ -794,26 +795,28 @@ $(document).ready(function() {
         gameCompletion?.reset();
         botCoordinator.cancelBotSearch();
         boardView.clearArrows();
+        boardView.clearLastMoveHighlight?.();
         const game = store.getState().game;
         game.reset();
         store.setState({ historyFENs: [game.fen()], currentViewPly: 0 });
         playSound('gameStart');
         clock.applySettings();
         updateStatus();
-        eventBus.emit('game:move-made', { fen: game.fen() });
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
     });
 
     $('#clearBoardBtn').on('click', function() {
         gameCompletion?.reset();
         botCoordinator.cancelBotSearch();
         boardView.clearArrows();
+        boardView.clearLastMoveHighlight?.();
         const game = store.getState().game;
         game.clear();
         store.setState({ historyFENs: [game.fen()], currentViewPly: 0 });
         playSound('gameStart');
         clock.applySettings();
         updateStatus();
-        eventBus.emit('game:move-made', { fen: game.fen() });
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
     });
 
     $('#botLevel').on('change', function() {

@@ -21,6 +21,17 @@
     background-color: #aaa23a !important;
 }
 
+/* Подсветка последнего сделанного хода (в стиле Chess.com) */
+.square-55d63.last-move-highlight {
+    background-color: rgba(245, 246, 130, 0.6) !important;
+    transition: background-color 0.15s ease;
+}
+
+.square-55d63.black-3c85d.last-move-highlight {
+    background-color: rgba(187, 203, 43, 0.6) !important;
+    transition: background-color 0.15s ease;
+}
+
 
 /* Точки и кольца взятия для возможных ходов (в стиле Chess.com) */
 .move-dest-marker {
