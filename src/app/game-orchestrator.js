@@ -55,7 +55,9 @@ $(document).ready(function() {
         onHint: (info) => {
             if (analysisCoordinator) analysisCoordinator.handleHintInfo(info);
         },
-        onHintComplete: () => {}
+        onHintComplete: () => {
+            if (analysisCoordinator) analysisCoordinator.handleHintComplete();
+        }
     });
 
     const botCoordinator = createBotCoordinator({ eventBus, store, engine });
@@ -711,7 +713,12 @@ $(document).ready(function() {
 
     // --- Wire buttons ---
     $('#hintBtn').on('click', function() {
+        $(this).text('Анализ...').prop('disabled', true);
         analysisCoordinator.requestHint();
+    });
+
+    eventBus.on('engine:hint-completed', function() {
+        $('#hintBtn').text('Подсказать лучший ход').prop('disabled', false);
     });
 
     $('#highlightAttacksCb, #highlightDefensesCb').on('change', function() {

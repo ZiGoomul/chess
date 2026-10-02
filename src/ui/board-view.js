@@ -372,13 +372,20 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('engine:hints-updated', function(data) {
              clearArrows();
-             if (data && data.hints && data.game) {
+             if (!data) return;
+             var game = data.game || (store && store.getState() ? store.getState().game : null);
+             if (data.hints) {
                  for (var i = 3; i >= 1; i--) {
                      if (data.hints[i]) {
                          var from = data.hints[i].substring(0, 2);
                          var to = data.hints[i].substring(2, 4);
-                         drawArrow(from, to, i, data.game);
+                         drawArrow(from, to, i, game);
                      }
+                 }
+             } else if (data.arrows && Array.isArray(data.arrows)) {
+                 for (var a = 0; a < data.arrows.length; a++) {
+                     var arr = data.arrows[a];
+                     drawArrow(arr.from, arr.to, arr.rank, game);
                  }
              }
         });

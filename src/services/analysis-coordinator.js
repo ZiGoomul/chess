@@ -26,12 +26,22 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
         const isGameOver = typeof state.game?.game_over === 'function' ? state.game.game_over() : false;
         if (isGameOver) return;
         
-        const level = state.settings?.hintLevel || 10;
+        const domLevel = (typeof window !== 'undefined' && window.$ && window.$('#hintLevel').length) ? parseInt(window.$('#hintLevel').val(), 10) : 10;
+        const level = state.settings?.hintLevel || domLevel || 10;
         const fen = typeof state.game?.fen === 'function' ? state.game.fen() : state.game?.fen;
         
         currentHints = {};
         eventBus.emit('engine:hints-updated', { arrows: [] });
         engine.requestHint(fen, level);
+    }
+
+    function emitHints() {
+        const game = store.getState().game;
+        eventBus.emit('engine:hints-updated', {
+            arrows: getArrowsData(),
+            hints: currentHints,
+            game: game
+        });
     }
 
     function handleHintInfo(info) {
@@ -40,8 +50,13 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
             if (info.multipv === 1) {
                 eventBus.emit('engine:eval-updated', { cp: info.cp, mate: info.mate });
             }
-            eventBus.emit('engine:hints-updated', { arrows: getArrowsData() });
+            emitHints();
         }
+    }
+
+    function handleHintComplete() {
+        emitHints();
+        eventBus.emit('engine:hint-completed');
     }
 
     function getArrowsData() {
@@ -60,7 +75,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     }
 
     function drawHintArrows() {
-        eventBus.emit('engine:hints-updated', { arrows: getArrowsData() });
+        emitHints();
     }
 
     if (eventBus) {
@@ -68,5 +83,5 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
         eventBus.on('game:ply-changed', () => autoHintIfNeeded());
     }
 
-    return { autoHintIfNeeded, requestHint, drawHintArrows, handleHintInfo };
+    return { autoHintIfNeeded, requestHint, drawHintArrows, handleHintInfo, handleHintComplete };
 }
