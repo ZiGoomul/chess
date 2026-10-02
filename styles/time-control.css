@@ -531,3 +531,27 @@
 }
 
 
+
+
+@media (min-width: 761px) and (max-height: 850px) {
+  .timer-settings {
+      gap: 6px;
+      margin-top: 6px;
+    }
+  .time-preset-options {
+      gap: 4px;
+    }
+  .time-preset-btn {
+      min-height: 40px;
+    }
+}
+
+
+@media (max-width: 600px) {
+  .timer-settings {
+      flex-wrap: wrap;
+    }
+  .time-control-dialog {
+      padding: 16px;
+    }
+}

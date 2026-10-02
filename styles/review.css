@@ -187,3 +187,10 @@
   border: none;
 }
 
+
+
+@media (max-width: 600px) {
+  .board-actions .new-game-btn {
+      flex: 1;
+    }
+}

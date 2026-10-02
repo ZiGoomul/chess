@@ -43,26 +43,11 @@ h1 {
     gap: 10px;
 }
 
-button {
-    padding: 8px 16px;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
 
-button:hover {
-    background-color: var(--accent-hover);
-}
 
-button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focus-visible {
-  outline: 3px solid #f39c12;
-  outline-offset: 2px;
-}
+
+
+
 
 #boardContainer {
     margin-bottom: 20px;
@@ -72,24 +57,12 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     border-radius: 8px;
 }
 
-.material-piece {
-    width: 25px;
-    height: 25px;
-    margin-right: -5px;
-}
 
-.material-score {
-    font-weight: bold;
-    color: var(--text-color);
-    margin-left: 10px;
-    font-size: 14px;
-}
+
+
 
 /* Tabs */
-.tab-btn:hover {
-    background-color: rgba(0,0,0,0.05);
-    cursor: pointer;
-}
+
 
 @media (min-width: 900px) and (max-height: 850px) {
   .main-layout {
@@ -98,9 +71,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
   }
 }
 
-[data-theme="dark"] .tab-btn:hover {
-    background-color: rgba(255,255,255,0.05);
-}
+
   .main-layout > * {
     box-sizing: border-box;
     min-width: 0;
@@ -152,27 +123,15 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     gap: 10px !important;
   }
 
-  #tab-play > div:last-child {
-    gap: 6px !important;
-    padding-top: 12px !important;
-  }
+  
 
-  #tab-play > div:last-child > div[style*="border-top"] {
-    margin: 8px 0 !important;
-  }
+  
 
-  .timer-settings {
-    gap: 6px;
-    margin-top: 6px;
-  }
+  
 
-  .time-preset-options {
-    gap: 4px;
-  }
+  
 
-  .time-preset-btn {
-    min-height: 40px;
-  }
+  
 
   .history-column {
     overflow: hidden;
@@ -230,35 +189,20 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     height: 170px !important;
   }
 
-  .board-actions .new-game-btn {
-    flex: 1;
-  }
+  
 
-  .board-actions .flip-board-btn {
-    flex: 1;
-    padding: 10px 8px;
-  }
+  
 
-  .flip-board-btn span {
-    font-size: 13px;
-  }
+  
 
   .sidebar-column {
     padding: 14px !important;
   }
 
-  .tab-btn {
-    min-width: 0;
-    padding: 8px 5px !important;
-    font-size: 13px !important;
-  }
+  
 
-  .timer-settings {
-    flex-wrap: wrap;
-  }
+  
 
-  .time-control-dialog {
-    padding: 16px;
-  }
+  
 }
 
