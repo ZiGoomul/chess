@@ -2,9 +2,12 @@
 import { Chess } from 'chess.js';
 
 export function createGameStore(initialState = {}) {
+    const game = initialState.game || new Chess();
+    const historyFENs = initialState.historyFENs || [game.fen()];
+    
     let state = {
-        game: new Chess(),
-        historyFENs: [new Chess().fen()],
+        game,
+        historyFENs,
         currentViewPly: 0,
         selectedSquare: null,
         mode: 'free', // 'free' | 'bot' | 'puzzle'
@@ -28,7 +31,8 @@ export function createGameStore(initialState = {}) {
             return state;
         },
         setState(partial) {
-            state = { ...state, ...partial };
+            const nextPartial = typeof partial === 'function' ? partial(state) : partial;
+            state = { ...state, ...nextPartial };
             listeners.forEach(listener => listener(state));
         },
         subscribe(listener) {

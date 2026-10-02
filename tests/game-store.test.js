@@ -17,3 +17,34 @@ test('GameStore initializes with default state and allows subscription', () => {
     assert.strictEqual(notified, true);
     assert.strictEqual(store.getState().mode, 'bot');
 });
+
+test('GameStore handles custom initialState', () => {
+    const customGame = new Chess();
+    customGame.move('e4');
+    const store = createGameStore({ game: customGame, mode: 'puzzle' });
+    const state = store.getState();
+    assert.strictEqual(state.mode, 'puzzle');
+    assert.strictEqual(state.game, customGame);
+    assert.strictEqual(state.historyFENs[0], customGame.fen());
+});
+
+test('GameStore unsubscribe function works', () => {
+    const store = createGameStore();
+    let count = 0;
+    const unsubscribe = store.subscribe(() => { count++; });
+    
+    store.setState({ mode: 'bot' });
+    assert.strictEqual(count, 1);
+    
+    unsubscribe();
+    store.setState({ mode: 'free' });
+    assert.strictEqual(count, 1); // Should not increase
+});
+
+test('GameStore setState accepts an updater function', () => {
+    const store = createGameStore();
+    store.setState(prev => ({ currentViewPly: prev.currentViewPly + 1 }));
+    assert.strictEqual(store.getState().currentViewPly, 1);
+    store.setState(prev => ({ currentViewPly: prev.currentViewPly + 2 }));
+    assert.strictEqual(store.getState().currentViewPly, 3);
+});
