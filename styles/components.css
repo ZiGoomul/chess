@@ -118,3 +118,12 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
       font-size: 13px !important;
     }
 }
+
+.color-btn {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.color-btn:hover {
+    filter: brightness(1.1);
+}
+
