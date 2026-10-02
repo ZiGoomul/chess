@@ -1,9 +1,10 @@
-export function createBotCoordinator({ eventBus, store, engineWorker }) {
+export function createBotCoordinator({ eventBus, store, engine }) {
     function makeBotMove() {
         const state = store.getState();
         const level = state.settings?.botLevel || 0;
         
-        if (level === 0 || state.game?.isPuzzleMode || state.game?.isGameOver) {
+        const isGameOver = typeof state.game?.game_over === 'function' ? state.game.game_over() : false;
+        if (level === 0 || state.mode === 'puzzle' || isGameOver) {
             return;
         }
 
@@ -15,38 +16,19 @@ export function createBotCoordinator({ eventBus, store, engineWorker }) {
             }
         }
 
-        // Invoke engineWorker and emit the move when ready
-        engineWorker.requestBotMove(state.game.fen, level).then(result => {
-            if (result) {
-                eventBus.emit('bot:move-ready', {
-                    uci: result.bestmove || result.uci,
-                    bestmove: result.bestmove || result.uci,
-                    ponder: result.ponder
-                });
-            }
-        }).catch(err => console.error('Error requesting bot move:', err));
+        engine.requestBotMove(state.game.fen(), level);
     }
 
     function cancelBotSearch() {
-        if (engineWorker.cancelBotMove) {
-            engineWorker.cancelBotMove();
-        } else if (engineWorker.cancelSearch) {
-            engineWorker.cancelSearch();
-        }
+        engine.cancelBotMove();
     }
 
     function updateStockfishLevel(level) {
-        if (engineWorker.setBotLevel) {
-            engineWorker.setBotLevel(level);
-        }
+        engine.setBotLevel(level);
     }
 
-    // Listen to events
     if (eventBus) {
-        eventBus.on('game:move-made', () => {
-            makeBotMove();
-        });
-
+        eventBus.on('game:move-made', () => makeBotMove());
         eventBus.on('settings:changed', (settings) => {
             if (settings && settings.botLevel !== undefined) {
                 updateStockfishLevel(settings.botLevel);
@@ -54,9 +36,5 @@ export function createBotCoordinator({ eventBus, store, engineWorker }) {
         });
     }
 
-    return {
-        makeBotMove,
-        cancelBotSearch,
-        updateStockfishLevel
-    };
+    return { makeBotMove, cancelBotSearch, updateStockfishLevel };
 }

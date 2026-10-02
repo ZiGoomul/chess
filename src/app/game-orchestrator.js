@@ -1,5 +1,7 @@
 import { createEventBus } from '../core/event-bus.js';
 import { createGameStore } from '../core/game-store.js';
+import { createChessEngine } from '../services/chess-engine.js';
+
 import { createBotCoordinator } from '../services/bot-coordinator.js';
 import { createAnalysisCoordinator } from '../services/analysis-coordinator.js';
 import { createBoardView } from '../ui/board-view.js';
@@ -33,8 +35,31 @@ $(document).ready(function() {
     const evalBarView = createEvalBarView({ $, eventBus });
     const materialView = createMaterialView({ $, eventBus, Chess });
     
-    const botCoordinator = createBotCoordinator({ eventBus, store, engineWorker: engineWorkers.game });
-    const analysisCoordinator = createAnalysisCoordinator({ eventBus, store, engineWorker: engineWorkers.hints });
+    // Provide the engine wrapper that was missing
+    let analysisCoordinator;
+    const engine = createChessEngine({
+        gameWorker: engineWorkers.game,
+        hintWorker: engineWorkers.hints,
+        getCurrentFen: () => store.getState().game.fen(),
+        onBotMove: (botMove) => {
+            if (botMove) {
+                const uciStr = botMove.from + botMove.to + (botMove.promotion && botMove.promotion !== 'q' ? botMove.promotion : '');
+                eventBus.emit('bot:move-ready', { bestmove: uciStr, uci: uciStr });
+            } else {
+                eventBus.emit('bot:move-ready', null);
+            }
+        },
+        onBotThinkingChange: (thinking) => {
+            store.setState({ isThinking: thinking });
+        },
+        onHint: (info) => {
+            if (analysisCoordinator) analysisCoordinator.handleHintInfo(info);
+        },
+        onHintComplete: () => {}
+    });
+
+    const botCoordinator = createBotCoordinator({ eventBus, store, engine });
+    analysisCoordinator = createAnalysisCoordinator({ eventBus, store, engine });
 
     let localRepository = null;
     let puzzleCatalog = null;
