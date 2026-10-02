@@ -1,1 +1,1 @@
-import './app/game-controller.js';
+import './app/game-orchestrator.js';
