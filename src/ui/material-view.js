@@ -1,9 +1,10 @@
-export function createMaterialView({ $, eventBus }) {
+export function createMaterialView({ $, eventBus, Chess }) {
     let currentOrientation = 'white';
     let currentPositionGame = null;
+    let currentPieceTheme = 'chesscom_neo';
 
     function getPieceThemeUrl(piece) {
-        var theme = $('#pieceThemeSelect').val();
+        var theme = currentPieceTheme;
         if (theme === 'wikipedia') {
             return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
         } else if (theme && theme.startsWith('chesscom_')) {
@@ -68,11 +69,20 @@ export function createMaterialView({ $, eventBus }) {
         }
     });
 
+    eventBus.on('theme:changed', (payload) => {
+        if (payload && payload.pieceTheme) {
+            currentPieceTheme = payload.pieceTheme;
+            if (currentPositionGame) {
+                updateMaterial(currentPositionGame);
+            }
+        }
+    });
+
     const handlePositionChange = (payload) => {
         if (payload.positionGame) {
             currentPositionGame = payload.positionGame;
         } else if (payload.fen) {
-            if (typeof Chess !== 'undefined') {
+            if (Chess) {
                 currentPositionGame = new Chess(payload.fen);
             }
         }
