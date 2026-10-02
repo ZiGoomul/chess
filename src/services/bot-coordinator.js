@@ -8,12 +8,10 @@ export function createBotCoordinator({ eventBus, store, engine }) {
             return;
         }
 
-        if (state.mode === 'bot') {
-            const humanTurn = state.orientation === 'white' ? 'w' : 'b';
-            const currentTurn = typeof state.game?.turn === 'function' ? state.game.turn() : state.game?.turn;
-            if (currentTurn === humanTurn) {
-                return;
-            }
+        const humanTurn = state.orientation === 'white' ? 'w' : 'b';
+        const currentTurn = typeof state.game?.turn === 'function' ? state.game.turn() : state.game?.turn;
+        if (currentTurn === humanTurn) {
+            return;
         }
 
         engine.requestBotMove(state.game.fen(), level);

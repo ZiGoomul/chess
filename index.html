@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Шахматные этюды</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
     <div class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: var(--panel-bg); box-shadow: var(--shadow); margin-bottom: 20px;">
@@ -59,10 +59,42 @@
                     <div id="bottomClock" class="chess-clock">05:00</div>
                 </div>
             </div>
-            <div class="board-actions">
-                <button id="flipOrientationBtn" class="flip-board-btn" aria-label="Перевернуть доску" title="Перевернуть доску">⟳ <span>Перевернуть доску</span></button>
-                <button id="newGameBtn" class="new-game-btn">Новая партия</button>
-            </div>
+            <dialog id="timeControlDialog" class="time-control-dialog" aria-labelledby="timeControlTitle">
+                <div class="time-control-header">
+                    <h2 id="timeControlTitle">Новая партия</h2>
+                    <button id="closeTimeControlBtn" class="dialog-close-btn" aria-label="Закрыть">×</button>
+                </div>
+                <div class="time-control-group">
+                    <h3>Пуля</h3>
+                    <div class="time-control-options">
+                        <button class="time-control-option" data-base="1" data-inc="0"><strong>1+0</strong><span>1 минута</span></button>
+                        <button class="time-control-option" data-base="2" data-inc="1"><strong>2+1</strong><span>2 минуты · +1 сек</span></button>
+                    </div>
+                </div>
+                <div class="time-control-group">
+                    <h3>Блиц</h3>
+                    <div class="time-control-options">
+                        <button class="time-control-option" data-base="3" data-inc="0"><strong>3+0</strong><span>3 минуты</span></button>
+                        <button class="time-control-option" data-base="3" data-inc="2"><strong>3+2</strong><span>3 минуты · +2 сек</span></button>
+                        <button class="time-control-option" data-base="5" data-inc="0"><strong>5+0</strong><span>5 минут</span></button>
+                        <button class="time-control-option" data-base="5" data-inc="3"><strong>5+3</strong><span>5 минут · +3 сек</span></button>
+                    </div>
+                </div>
+                <div class="time-control-group">
+                    <h3>Рапид</h3>
+                    <div class="time-control-options">
+                        <button class="time-control-option" data-base="10" data-inc="0"><strong>10+0</strong><span>10 минут</span></button>
+                        <button class="time-control-option" data-base="15" data-inc="10"><strong>15+10</strong><span>15 минут · +10 сек</span></button>
+                    </div>
+                </div>
+                <div class="time-control-custom">
+                    <h3>Свой контроль</h3>
+                    <label>Минуты <input id="customTimerBase" type="number" min="1" max="180" value="5" required></label>
+                    <label>Добавление, сек <input id="customTimerInc" type="number" min="0" max="60" value="0" required></label>
+                    <button id="startCustomTimeBtn" class="custom-time-start-btn">Начать партию</button>
+                </div>
+                <button id="startUntimedGameBtn" class="untimed-game-btn">Без часов</button>
+            </dialog>
         </div>
 
         <!-- Middle Column: Move History -->
@@ -74,6 +106,10 @@
                 <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">◀</button>
                 <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">▶</button>
                 <button id="navLastBtn" class="nav-btn" aria-label="К последней позиции" title="К последней позиции">▶|</button>
+            </div>
+            <div class="board-actions">
+                <button id="flipOrientationBtn" class="flip-board-btn" aria-label="Перевернуть доску" title="Перевернуть доску">⟳ <span>Перевернуть доску</span></button>
+                <button id="newGameBtn" class="new-game-btn">Новая партия</button>
             </div>
         </div>
 
@@ -93,6 +129,7 @@
                     <h3 style="margin: 0;">Решение задач</h3>
                     <span id="puzzlesScore" style="font-weight: bold; color: var(--accent-color);">Решено: 0</span>
                 </div>
+                <div id="puzzleCatalogCount" class="puzzle-catalog-count" aria-live="polite">Доступно: 0 · загружено: 0</div>
                 
                 <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div id="puzzleStatusText" style="font-size: 16px; font-weight: bold; margin-bottom: 10px; text-align: center;">Нажмите "Новая задача", чтобы начать!</div>
@@ -100,31 +137,123 @@
                 </div>
 
                 <button id="loadPuzzleBtn" style="padding: 12px; font-size: 16px; background-color: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Новая случайная задача</button>
+                <label class="puzzle-theme-label" for="puzzleThemeSelect">Тема для загрузки
+                    <select id="puzzleThemeSelect">
+                        <option value="">Любая доступная тема</option>
+                        <option value="mate">Матовые атаки</option>
+                        <option value="fork">Вилки</option>
+                        <option value="pin">Связки</option>
+                        <option value="skewer">Сквозные удары</option>
+                        <option value="opening">Дебют</option>
+                        <option value="endgame">Эндшпиль</option>
+                    </select>
+                </label>
+                <button id="loadMorePuzzlesBtn" class="puzzle-secondary-btn">Загрузить задачи по теме</button>
+                <button id="clearPuzzleDataBtn" class="puzzle-secondary-btn">Очистить локальные данные</button>
+                <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite">Подготавливаем локальный каталог…</div>
                 <button id="exitPuzzleBtn" style="padding: 10px; font-size: 14px; background-color: transparent; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Выйти из режима задач</button>
             </div>
 
             <!-- TAB 1: Play -->
-            <div class="tab-content" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false" style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; text-align: center;">
-                    <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true" style="font-weight: bold; font-size: 18px; color: var(--accent-color);"></span>
+            <div class="tab-content" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false" style="display: flex; flex-direction: column; gap: 0;">
+                <!-- Game status bar -->
+                <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                    <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true" style="font-weight: bold; font-size: 16px; color: var(--accent-color);"></span>
+                </div>
+                <section class="review-panel" aria-label="Разбор партии">
+                    <div class="review-status" id="reviewStatus" role="status" aria-live="polite">Разбор появится после завершённой партии против бота.</div>
+                    <ol id="reviewMoments" class="review-moments" hidden></ol>
+                    <div class="review-actions">
+                        <button type="button" id="reviewCancelBtn" class="puzzle-secondary-btn" hidden>Отменить разбор</button>
+                        <button type="button" id="reviewRetryBtn" class="puzzle-secondary-btn" hidden>Повторить разбор</button>
+                        <button type="button" id="reviewPuzzleBtn" class="review-puzzle-btn" hidden></button>
+                    </div>
+                </section>
+
+                <!-- Chess.com-style time control selector pill -->
+                <div id="selectedTimeControlPill" class="cc-selected-pill">
+                    <span class="cc-pill-icon">⏱</span>
+                    <span id="selectedTimeText" class="cc-pill-text">10 + 0 (Рапид)</span>
                 </div>
 
-                <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold;">
-                    Играть против:
-                    <select id="botLevel">
-                        <option value="0">Откл. (Редактор позиций)</option>
-                        <option value="1">Бот: Ур 1 (~800 ELO)</option>
-                        <option value="5">Бот: Ур 5 (~1200 ELO)</option>
-                        <option value="10">Бот: Ур 10 (~1700 ELO)</option>
-                        <option value="15">Бот: Ур 15 (~2200 ELO)</option>
-                        <option value="20">Бот: Ур 20 (~3000+ ELO)</option>
+                <!-- Game mode selector -->
+                <div class="cc-mode-selector">
+                    <span class="cc-mode-icon">♟</span>
+                    <select id="botLevel" class="cc-mode-select">
+                        <option value="0">Редактор позиций</option>
+                        <option value="1">Бот: Ур 1 (~800)</option>
+                        <option value="5">Бот: Ур 5 (~1200)</option>
+                        <option value="10">Бот: Ур 10 (~1700)</option>
+                        <option value="15">Бот: Ур 15 (~2200)</option>
+                        <option value="20">Бот: Ур 20 (~3000+)</option>
                     </select>
-                </label>
+                    <span class="cc-mode-chevron">▾</span>
+                </div>
 
-                <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                    <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold;">
+                <!-- Timer toggle -->
+                <div class="cc-rated-row">
+                    <span>На время</span>
+                    <label class="cc-toggle">
+                        <input type="checkbox" id="timerEnableCb" checked>
+                        <span class="cc-toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Time control categories -->
+                <div class="cc-time-categories">
+                    <!-- Пуля -->
+                    <div class="cc-time-category">
+                        <span class="cc-category-label">⚡ Пуля</span>
+                        <div class="cc-category-options">
+                            <button type="button" class="cc-time-btn" data-base="1" data-inc="0">1 мин.</button>
+                            <button type="button" class="cc-time-btn" data-base="1" data-inc="1">1 + 1</button>
+                            <button type="button" class="cc-time-btn" data-base="2" data-inc="1">2 + 1</button>
+                        </div>
+                    </div>
+
+                    <!-- Блиц -->
+                    <div class="cc-time-category">
+                        <span class="cc-category-label">⚡ Блиц</span>
+                        <div class="cc-category-options">
+                            <button type="button" class="cc-time-btn" data-base="3" data-inc="0">3 мин.</button>
+                            <button type="button" class="cc-time-btn" data-base="3" data-inc="2">3 + 2</button>
+                            <button type="button" class="cc-time-btn" data-base="5" data-inc="0">5 мин.</button>
+                        </div>
+                    </div>
+
+                    <!-- Рапид -->
+                    <div class="cc-time-category">
+                        <span class="cc-category-label">⏱ Рапид</span>
+                        <div class="cc-category-options">
+                            <button type="button" class="cc-time-btn" data-base="10" data-inc="0">10 мин.</button>
+                            <button type="button" class="cc-time-btn cc-time-btn-selected" data-base="10" data-inc="5">10 + 5</button>
+                            <button type="button" class="cc-time-btn" data-base="15" data-inc="10">15 + 10</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom time controls expander -->
+                <button type="button" id="ccCustomTimeToggle" class="cc-custom-toggle">
+                    Другие контроли времени <span class="cc-custom-chevron">▾</span>
+                </button>
+
+                <div id="ccCustomTimePanel" class="cc-custom-panel" style="display: none;">
+                    <div class="cc-custom-inputs">
+                        <div class="cc-custom-field">
+                            <label for="timerBase">Минут</label>
+                            <input id="timerBase" type="number" min="1" max="180" value="10">
+                        </div>
+                        <div class="cc-custom-field">
+                            <label for="timerInc">Добавление (сек)</label>
+                            <input id="timerInc" type="number" min="0" max="60" value="5">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 5px; display: flex; flex-direction: column; gap: 8px;">
+                    <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold; font-size: 13px;">
                         Сила подсказки:
-                        <select id="hintLevel">
+                        <select id="hintLevel" style="padding: 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
                             <option value="1">Ур 1 (~800 ELO)</option>
                             <option value="5">Ур 5 (~1200 ELO)</option>
                             <option value="10" selected>Ур 10 (~1700 ELO)</option>
@@ -132,46 +261,17 @@
                             <option value="20">Ур 20 (~3000+ ELO)</option>
                         </select>
                     </label>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 13px;">
                         <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
                     </label>
-
-                    <div style="border-top: 1px solid var(--border-color); margin: 15px 0;"></div>
-
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                        <div class="switch"><input type="checkbox" id="timerEnableCb" checked><span class="slider"></span></div> Игра на время
-                    </label>
-                    
-                    <div id="timerSettingsRow" class="timer-settings">
-                        <div style="flex: 1; display: flex; flex-direction: column;">
-                            <label style="font-size: 12px; color: #888; margin-bottom: 4px;">Минут</label>
-                            <select id="timerBase">
-                                <option value="1">1 мин</option>
-                                <option value="2">2 мин</option>
-                                <option value="3">3 мин</option>
-                                <option value="5" selected>5 мин</option>
-                                <option value="10">10 мин</option>
-                                <option value="15">15 мин</option>
-                                <option value="30">30 мин</option>
-                                <option value="60">60 мин</option>
-                            </select>
-                        </div>
-                        <div style="flex: 1; display: flex; flex-direction: column;">
-                            <label style="font-size: 12px; color: #888; margin-bottom: 4px;">Добавление (сек)</label>
-                            <select id="timerInc">
-                                <option value="0" selected>0 сек</option>
-                                <option value="1">+1 сек</option>
-                                <option value="2">+2 сек</option>
-                                <option value="3">+3 сек</option>
-                                <option value="5">+5 сек</option>
-                                <option value="10">+10 сек</option>
-                                <option value="15">+15 сек</option>
-                                <option value="30">+30 сек</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button id="hintBtn" style="background-color: #27ae60; margin-top: 5px;">Подсказать лучший ход</button>
+                    <button id="hintBtn" style="background-color: #27ae60; margin-top: 5px; padding: 10px; font-weight: bold; border-radius: 6px;">Подсказать лучший ход</button>
                 </div>
+
+                <!-- Big green START button -->
+                <button id="ccStartGameBtn" class="cc-start-btn" style="margin-top: 15px;">Начать партию</button>
+
+                <!-- Hidden timer settings row for backward compat -->
+                <div id="timerSettingsRow" class="timer-settings" style="display: none !important;"></div>
             </div>
 
             <!-- TAB 2: Setup -->
@@ -218,6 +318,14 @@
 
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
                     <div class="switch"><input type="checkbox" id="highlightMovesCb" checked><span class="slider"></span></div> Подсвечивать возможные ходы
+                </label>
+
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <div class="switch"><input type="checkbox" id="highlightAttacksCb"><span class="slider"></span></div> Подсвечивать нападения
+                </label>
+
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <div class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></div> Подсвечивать защиту
                 </label>
             </div>
 

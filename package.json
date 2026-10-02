@@ -11,9 +11,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "tsx --test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "import-puzzles": "node scripts/import-lichess-puzzles.js"
   },
   "devDependencies": {
+    "chess.js": "^0.10.3",
+    "csv-parse": "^6.2.1",
+    "fake-indexeddb": "^6.2.5",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.1"
