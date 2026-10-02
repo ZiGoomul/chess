@@ -11,12 +11,17 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function getSquareCenter(square) {
-        var squareEl = $('#myBoard .square-' + square);
+        var squareEl = $('#myBoard [data-square="' + square + '"]');
+        if (!squareEl.length) {
+            squareEl = $('#myBoard .square-' + square);
+        }
         var overlayEl = $('#arrowOverlay');
-        if (squareEl.length === 0 || overlayEl.length === 0) return { x: 0, y: 0 };
+        if (!squareEl.length || !overlayEl.length) return { x: 0, y: 0 };
 
         var squareOffset = squareEl.offset();
         var overlayOffset = overlayEl.offset();
+        if (!squareOffset || !overlayOffset) return { x: 0, y: 0 };
+
         return {
             x: squareOffset.left - overlayOffset.left + squareEl.outerWidth() / 2,
             y: squareOffset.top - overlayOffset.top + squareEl.outerHeight() / 2
@@ -26,6 +31,13 @@ export function createBoardView({ $, eventBus, store }) {
     function drawArrow(source, target, multipv, game) {
         var p1 = getSquareCenter(source);
         var p2 = getSquareCenter(target);
+        if ((!p1.x && !p1.y) || (!p2.x && !p2.y)) return;
+
+        if (multipv === 1) {
+            $('#myBoard .square-' + source + ', #myBoard [data-square="' + source + '"]').addClass('hint-square');
+            $('#myBoard .square-' + target + ', #myBoard [data-square="' + target + '"]').addClass('hint-square');
+        }
+
         var piece = game ? game.get(source) : null;
         var isKnight = piece && piece.type === 'n';
 
@@ -409,7 +421,12 @@ export function createBoardView({ $, eventBus, store }) {
         });
 
         $(window).resize(function() {
-            if (board) board.resize();
+            if (board) {
+                board.resize();
+                setTimeout(function() {
+                    eventBus.emit('board:resized');
+                }, 100);
+            }
         });
     }
 

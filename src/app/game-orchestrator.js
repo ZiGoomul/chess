@@ -71,7 +71,13 @@ $(document).ready(function() {
     const engine = createChessEngine({
         gameWorker: engineWorkers.game,
         hintWorker: engineWorkers.hints,
-        getCurrentFen: () => store.getState().game.fen(),
+        getCurrentFen: () => {
+            const s = store.getState();
+            if (s.historyFENs && typeof s.currentViewPly === 'number' && s.historyFENs[s.currentViewPly]) {
+                return s.historyFENs[s.currentViewPly];
+            }
+            return s.game.fen();
+        },
         onBotMove: (botMove) => {
             if (botMove) {
                 const uciStr = botMove.from + botMove.to + (botMove.promotion && botMove.promotion !== 'q' ? botMove.promotion : '');
@@ -266,8 +272,6 @@ $(document).ready(function() {
             if (game.turn() === 'b' && event.piece.search(/^w/) !== -1) { event.cancel = true; return; }
         }
         if (!isPuzzleMode && !isEditor && clock.timedOut) { event.cancel = true; return; }
-
-        boardView.clearArrows();
 
         if (state.currentViewPly < state.historyFENs.length - 1) {
             let fens = state.historyFENs.slice();
@@ -570,7 +574,6 @@ $(document).ready(function() {
 
         if (resolution.action === 'select' || resolution.action === 'switch_selection') {
             store.setState({ selectedSquare: resolution.square });
-            boardView.clearArrows();
             boardView.showMoveHints(resolution.square, resolution.moves, positionGame);
         } else if (resolution.action === 'deselect') {
             clearSelection();
@@ -1049,6 +1052,10 @@ $(document).ready(function() {
             window.setTimeout(function() {
                 botCoordinator.makeBotMove();
             }, 300);
+        } else {
+            window.setTimeout(function() {
+                analysisCoordinator.autoHintIfNeeded();
+            }, 300);
         }
     });
 
@@ -1074,4 +1081,5 @@ $(document).ready(function() {
     clock.applySettings();
     updateTimePresetSelection();
     updateSelectedTimePill();
+    analysisCoordinator.autoHintIfNeeded();
 });
