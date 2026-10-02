@@ -7,8 +7,16 @@ export function createBotCoordinator({ eventBus, store, engineWorker }) {
             return;
         }
 
+        if (state.mode === 'bot') {
+            const humanTurn = state.orientation === 'white' ? 'w' : 'b';
+            const currentTurn = typeof state.game?.turn === 'function' ? state.game.turn() : state.game?.turn;
+            if (currentTurn === humanTurn) {
+                return;
+            }
+        }
+
         // Invoke engineWorker and emit the move when ready
-        Promise.resolve(engineWorker.requestBotMove(state.game.fen, level)).then(result => {
+        engineWorker.requestBotMove(state.game.fen, level).then(result => {
             if (result) {
                 eventBus.emit('bot:move-ready', {
                     uci: result.bestmove || result.uci,

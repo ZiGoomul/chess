@@ -9,6 +9,13 @@ export function createEngineWorkers() {
 
   return {
     game: new Worker(workerUrl),
-    hints: new Worker(workerUrl)
+    hints: new Worker(workerUrl),
+    review: new Worker(workerUrl),
+    terminate() {
+      this.game.terminate();
+      this.hints.terminate();
+      this.review.terminate();
+      URL.revokeObjectURL(workerUrl);
+    }
   };
 }

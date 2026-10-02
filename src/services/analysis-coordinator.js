@@ -37,6 +37,7 @@ export function createAnalysisCoordinator({ eventBus, store, engineWorker }) {
                 if (info.multipv === 1) {
                     eventBus.emit('engine:eval-updated', { cp: info.cp, mate: info.mate });
                 }
+                eventBus.emit('engine:hints-updated', { arrows: getArrowsData() });
             }
         });
 
