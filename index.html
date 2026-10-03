@@ -115,10 +115,10 @@
         </div>
 
         <!-- Middle Column: Move History -->
-        <div class="history-column" style="flex: 0 0 250px; background-color: var(--panel-bg); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 500px; padding-bottom: 10px;" aria-labelledby="moveHistoryTitle">
-            <h3 id="moveHistoryTitle" style="margin: 0; padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 16px; text-align: center;">История ходов</h3>
-            <div id="moveHistoryList" role="list" aria-label="Ходы партии" style="flex: 1; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 14px; display: flex; flex-direction: column; gap: 4px;"></div>
-            <div style="display: flex; gap: 5px; padding: 0 10px; justify-content: center; margin-top: 10px;">
+        <div class="history-column" aria-labelledby="moveHistoryTitle">
+            <h3 id="moveHistoryTitle">История ходов</h3>
+            <div id="moveHistoryList" role="list" aria-label="Ходы партии"></div>
+            <div class="history-controls">
                 <button id="navFirstBtn" class="nav-btn" aria-label="К начальной позиции" title="К начальной позиции">|◀</button>
                 <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">◀</button>
                 <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">▶</button>
