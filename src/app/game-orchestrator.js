@@ -349,7 +349,7 @@ $(document).ready(function() {
             store.setState({ historyFENs: [game.fen()], currentViewPly: 0 });
             playSoundForMove(null);
             updateStatus();
-            eventBus.emit('game:move-made', { fen: game.fen() });
+            eventBus.emit('game:move-made', { fen: game.fen(), game: game });
             return;
         }
 
@@ -644,7 +644,8 @@ $(document).ready(function() {
         moveHistoryView.updateMoveHistory();
         boardView.clearArrows();
         boardView.clearLastMoveHighlight?.();
-        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
+        boardView.highlightCheck(game);
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game });
     }
 
     function exitPuzzleMode() {

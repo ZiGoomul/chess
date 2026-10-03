@@ -406,7 +406,7 @@ export function createBoardView({ $, eventBus, store }) {
                  if (data.move && data.move.from && data.move.to) {
                      highlightLastMove(data.move.from, data.move.to);
                  }
-                 var checkGame = data.game || currentCheckGame;
+                 var checkGame = data.game || (store && store.getState ? store.getState().game : currentCheckGame);
                  if (checkGame) {
                      highlightCheck(checkGame);
                  }

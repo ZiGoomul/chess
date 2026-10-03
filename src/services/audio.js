@@ -15,7 +15,7 @@ export function getAudioContext() {
   if (typeof window === 'undefined') return null;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return null;
-  if (!sharedAudioCtx) {
+  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
     try {
       sharedAudioCtx = new AudioCtx();
     } catch {
