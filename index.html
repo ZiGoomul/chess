@@ -8,10 +8,13 @@
     <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
-    <div class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: var(--panel-bg); box-shadow: var(--shadow); margin-bottom: 20px;">
-        <h1 style="margin: 0; font-size: 24px; color: var(--text-color);">Шахматные этюды</h1>
-        <button id="themeToggleBtn" style="padding: 8px 12px; border-radius: 20px; background: none; color: var(--text-color); border: 1px solid var(--border-color); box-shadow: none;">☀️ / 🌙</button>
-    </div>
+    <header class="app-header">
+        <h1>Шахматные этюды</h1>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Переключить тему">
+            <span class="theme-toggle-icon">☀️ / 🌙</span>
+            <span class="theme-toggle-label">Тема</span>
+        </button>
+    </header>
 
     <div class="main-layout" style="display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; padding: 0 20px; align-items: flex-start; flex-wrap: wrap;">
         <!-- Left Column: Board -->
@@ -105,9 +108,9 @@
                     <h3>Свой контроль</h3>
                     <label>Минуты <input id="customTimerBase" type="number" min="1" max="180" value="5" required></label>
                     <label>Добавление, сек <input id="customTimerInc" type="number" min="0" max="60" value="0" required></label>
-                    <button id="startCustomTimeBtn" class="custom-time-start-btn">Начать партию</button>
+                    <button id="startCustomTimeBtn" class="custom-time-start-btn btn-primary">Начать партию</button>
                 </div>
-                <button id="startUntimedGameBtn" class="untimed-game-btn">Без часов</button>
+                <button id="startUntimedGameBtn" class="untimed-game-btn btn-secondary">Без часов</button>
             </dialog>
         </div>
 
@@ -126,11 +129,11 @@
         <!-- Right Column: Sidebar -->
         <div class="sidebar-column" style="flex: 1; min-width: 300px; background: var(--panel-bg); border-radius: 8px; box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; min-height: 500px;">
             
-            <div class="tabs-header" role="tablist" aria-label="Разделы приложения" aria-orientation="horizontal" style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px;">
-                <button id="tab-play-button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-play" tabindex="0" data-tab="tab-play" style="flex: 1; background: none; color: var(--text-color); box-shadow: none; border-radius: 0; padding: 10px; border: none; border-bottom: 2px solid var(--accent-color); font-weight: bold;">Игра</button>
-                <button id="tab-puzzles-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-puzzles" tabindex="-1" data-tab="tab-puzzles" style="flex: 1; background: none; color: var(--text-color); box-shadow: none; border-radius: 0; padding: 10px; border: none; border-bottom: 2px solid transparent;">Задачи</button>
-                <button id="tab-setup-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-setup" tabindex="-1" data-tab="tab-setup" style="flex: 1; background: none; color: var(--text-color); box-shadow: none; border-radius: 0; padding: 10px; border: none; border-bottom: 2px solid transparent;">Ред</button>
-                <button id="tab-style-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-style" tabindex="-1" data-tab="tab-style" style="flex: 1; background: none; color: var(--text-color); box-shadow: none; border-radius: 0; padding: 10px; border: none; border-bottom: 2px solid transparent;">Вид</button>
+            <div class="tabs-header" role="tablist" aria-label="Разделы приложения" aria-orientation="horizontal">
+                <button id="tab-play-button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-play" tabindex="0" data-tab="tab-play">Игра</button>
+                <button id="tab-puzzles-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-puzzles" tabindex="-1" data-tab="tab-puzzles">Задачи</button>
+                <button id="tab-setup-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-setup" tabindex="-1" data-tab="tab-setup">Ред</button>
+                <button id="tab-style-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-style" tabindex="-1" data-tab="tab-style">Вид</button>
             </div>
 
             <!-- TAB: Puzzles -->
@@ -146,7 +149,7 @@
                     <div id="puzzleDescText" style="font-size: 14px; color: #888; text-align: center; min-height: 20px;"></div>
                 </div>
 
-                <button id="loadPuzzleBtn" style="padding: 12px; font-size: 16px; background-color: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Новая случайная задача</button>
+                <button id="loadPuzzleBtn" class="btn-primary" style="padding: 12px 18px; font-size: 16px; width: 100%;">Новая случайная задача</button>
                 <label class="puzzle-theme-label" for="puzzleThemeSelect">Тема для загрузки
                     <select id="puzzleThemeSelect">
                         <option value="">Любая доступная тема</option>
@@ -158,10 +161,10 @@
                         <option value="endgame">Эндшпиль</option>
                     </select>
                 </label>
-                <button id="loadMorePuzzlesBtn" class="puzzle-secondary-btn">Загрузить задачи по теме</button>
-                <button id="clearPuzzleDataBtn" class="puzzle-secondary-btn">Очистить локальные данные</button>
+                <button id="loadMorePuzzlesBtn" class="puzzle-secondary-btn btn-secondary">Загрузить задачи по теме</button>
+                <button id="clearPuzzleDataBtn" class="puzzle-secondary-btn btn-secondary">Очистить локальные данные</button>
                 <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite">Подготавливаем локальный каталог…</div>
-                <button id="exitPuzzleBtn" style="padding: 10px; font-size: 14px; background-color: transparent; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Выйти из режима задач</button>
+                <button id="exitPuzzleBtn" class="btn-secondary" style="width: 100%; font-size: 14px;">Выйти из режима задач</button>
             </div>
 
             <!-- TAB 1: Play -->
