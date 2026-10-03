@@ -61,8 +61,8 @@ $(document).ready(function() {
     $('#timerBase').val(storedSettings.timerBase);
     $('#timerInc').val(storedSettings.timerInc);
 
-    $('.color-btn').removeClass('active').css('border-color', 'transparent');
-    $(`.color-btn[data-color="${storedSettings.playerColor || 'white'}"]`).addClass('active').css('border-color', '#27ae60');
+    $('.color-btn').removeClass('active');
+    $(`.color-btn[data-color="${storedSettings.playerColor || 'white'}"]`).addClass('active');
     if (storedSettings.playerColor === 'black') {
         boardView.orientation('black');
         eventBus.emit('board:orientation-changed', { orientation: 'black' });

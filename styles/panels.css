@@ -1,0 +1,153 @@
+/* Sidebar panel contents: puzzle tab, play tab, editor tab and style tab. */
+
+/* Puzzles */
+.puzzle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.puzzle-header h3 {
+    margin: 0;
+}
+
+#puzzlesScore {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.puzzle-status-card {
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+#puzzleStatusText {
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#puzzleDescText {
+    min-height: 20px;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+#loadPuzzleBtn {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 16px;
+}
+
+#exitPuzzleBtn {
+    width: 100%;
+    font-size: 14px;
+}
+
+/* Play tab */
+.game-status-card {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    text-align: center;
+}
+
+#gameStatus {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.hint-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.hint-section select {
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.hint-section .toggle-label {
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.field-label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: bold;
+}
+
+.field-label--small {
+    font-size: 13px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.btn-success {
+    margin-top: 5px;
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 6px;
+    background-color: var(--color-success);
+}
+
+#colorSelection {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Editor tab */
+.btn-warning {
+    background-color: var(--color-warning);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+}
+
+.setup-fen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.setup-fen label {
+    font-weight: bold;
+}
+
+#fenInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+
+.button-row button {
+    flex: 1;
+}

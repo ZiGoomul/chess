@@ -53,16 +53,16 @@ input:checked + .slider:before {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background: var(--surface-subtle);
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: none;
-    margin-bottom: 20px;
+    padding: 10px 24px;
+    background: transparent;
+    margin-bottom: 4px;
 }
 
 .app-header h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .2px;
     color: var(--text-primary);
 }
 
@@ -195,11 +195,10 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 10px;
+    padding: 4px 0;
     background: transparent;
     border-radius: 6px;
-    min-height: 44px;
-    margin-left: 34px; /* Align with chessboard relative to eval bar */
+    min-height: 48px;
 }
 
 .player-info {
@@ -210,14 +209,13 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 }
 
 .player-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    background: var(--surface-subtle);
+    width: 40px;
+    height: 40px;
+    border-radius: 3px;
+    background: var(--btn-dark);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-color);
 }
 
 .player-avatar svg {
@@ -233,17 +231,14 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 }
 
 .player-name {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     color: var(--text-primary);
 }
 
 .player-rating {
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--surface-subtle);
-    padding: 2px 6px;
-    border-radius: 4px;
+    font-size: 13px;
+    color: #a7a6a2;
 }
 
 .material-row {
@@ -268,22 +263,21 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 /* Sidebar Tabs */
 .tabs-header {
     display: flex;
-    background: var(--surface-subtle);
-    border-bottom: 1px solid var(--border-color);
-    border-radius: 8px 8px 0 0;
+    background: var(--tabs-bg);
+    border-radius: 6px 6px 0 0;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin: 0 0 16px;
 }
 
 .tab-btn {
     flex: 1;
-    padding: 12px 14px;
+    padding: 14px 8px;
     background: transparent;
-    color: var(--text-secondary);
-    border: none !important;
+    color: #a7a6a2;
+    border: none;
     border-radius: 0;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     position: relative;
     box-shadow: none;
@@ -291,58 +285,46 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 }
 
 .tab-btn:hover {
-    background-color: var(--surface-hover);
+    background-color: #2b2926;
     color: var(--text-primary);
 }
 
 .tab-btn.active {
     background-color: var(--panel-bg);
-    color: var(--text-primary);
-}
-
-.tab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: var(--accent-color);
+    color: #fff;
 }
 
 
-@media (min-width: 761px) and (max-height: 850px) {
-  #tab-play > div:last-child {
-      gap: 6px !important;
-      padding-top: 12px !important;
-    }
-  #tab-play > div:last-child > div[style*="border-top"] {
-      margin: 8px 0 !important;
-    }
-}
-
-
-@media (max-width: 600px) {
-  .board-actions .flip-board-btn {
-      flex: 1;
-      padding: 10px 8px;
-    }
-  .flip-board-btn span {
-      font-size: 13px;
-    }
-  .tab-btn {
-      min-width: 0;
-      padding: 8px 5px !important;
-      font-size: 13px !important;
-    }
-}
 
 .color-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
 }
 .color-btn:hover {
     filter: brightness(1.1);
+}
+.color-btn.active {
+    border-color: var(--color-success);
+}
+.color-btn svg {
+    vertical-align: middle;
+}
+.color-btn-white {
+    background-color: #f1f1f1;
+    color: #333;
+}
+.color-btn-random {
+    background-color: #95a5a6;
+    color: white;
+}
+.color-btn-black {
+    background-color: #333;
+    color: white;
 }
 
 /* Game Over Overlay */
@@ -354,7 +336,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     height: 100%;
     background: rgba(18, 17, 15, 0.75);
     backdrop-filter: blur(4px);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 10;

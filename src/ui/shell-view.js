@@ -32,13 +32,11 @@ export function createShellView({ $, eventBus, store }) {
         });
 
         $('.tab-btn').on('click', function() {
-            $('.tab-btn').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1')
-                .css('border-bottom', '2px solid transparent').css('font-weight', 'normal');
-            $(this).addClass('active').attr('aria-selected', 'true').attr('tabindex', '0')
-                .css('border-bottom', '2px solid var(--accent-color)').css('font-weight', 'bold');
-            
-            $('.tab-content').hide().attr('aria-hidden', 'true');
-            $('#' + $(this).data('tab')).css('display', 'flex').attr('aria-hidden', 'false');
+            $('.tab-btn').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1');
+            $(this).addClass('active').attr('aria-selected', 'true').attr('tabindex', '0');
+
+            $('.tab-content').removeClass('is-active').attr('aria-hidden', 'true');
+            $('#' + $(this).data('tab')).addClass('is-active').attr('aria-hidden', 'false');
         });
 
         $('.tabs-header').on('keydown', '.tab-btn', function(event) {

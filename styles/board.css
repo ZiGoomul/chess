@@ -1,9 +1,9 @@
 /* Подсветка шаха королю (в стиле Chess.com / Lichess) */
-.square-55d63.in-check {
-    background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0.85) 0%, rgba(231, 76, 60, 0.6) 42%, rgba(192, 57, 43, 0.3) 70%, transparent 100%) !important;
-    box-shadow: inset 0 0 16px 5px rgba(231, 76, 60, 0.85) !important;
-    animation: king-check-pulse 1.6s ease-in-out infinite alternate !important;
-    z-index: 2 !important;
+#myBoard .square-55d63.in-check {
+    background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0.85) 0%, rgba(231, 76, 60, 0.6) 42%, rgba(192, 57, 43, 0.3) 70%, transparent 100%);
+    box-shadow: inset 0 0 16px 5px rgba(231, 76, 60, 0.85);
+    animation: king-check-pulse 1.6s ease-in-out infinite alternate;
+    z-index: 2;
 }
 
 @keyframes king-check-pulse {
@@ -17,9 +17,9 @@
     }
 }
 
-.hint-square {
-    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.8) !important;
-    background-color: rgba(52, 152, 219, 0.4) !important;
+#myBoard .square-55d63.hint-square {
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.8);
+    background-color: rgba(52, 152, 219, 0.4);
 }
 
 .white-1e1d7 {
@@ -33,26 +33,26 @@
 }
 
 .square-55d63 {
-    position: relative !important;
+    position: relative;
 }
 
 /* Выбранная фигура (в стиле Chess.com) */
 .square-55d63.selected-square {
-    background-color: #bbcb43 !important;
+    background-color: #bbcb43;
 }
 
 .square-55d63.white-1e1d7.selected-square {
-    background-color: #f5f682 !important;
+    background-color: #f5f682;
 }
 
 /* Подсветка последнего сделанного хода (в стиле Chess.com) */
 .square-55d63.last-move-highlight {
-    background-color: rgba(245, 246, 130, 0.65) !important;
+    background-color: rgba(245, 246, 130, 0.65);
     transition: background-color 0.15s ease;
 }
 
 .square-55d63.black-3c85d.last-move-highlight {
-    background-color: rgba(187, 203, 67, 0.65) !important;
+    background-color: rgba(187, 203, 67, 0.65);
     transition: background-color 0.15s ease;
 }
 
@@ -111,10 +111,10 @@
 }
 
 
-.attacked-by-white {
+#myBoard .square-55d63.attacked-by-white {
     position: relative;
-    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.7) !important;
-    background-color: rgba(52, 152, 219, 0.35) !important;
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.7);
+    background-color: rgba(52, 152, 219, 0.35);
 }
 
 .attacked-by-white::after {
@@ -133,10 +133,10 @@
     pointer-events: none;
 }
 
-.attacked-by-black {
+#myBoard .square-55d63.attacked-by-black {
     position: relative;
-    box-shadow: inset 0 0 10px 5px rgba(243, 156, 18, 0.7) !important;
-    background-color: rgba(243, 156, 18, 0.35) !important;
+    box-shadow: inset 0 0 10px 5px rgba(243, 156, 18, 0.7);
+    background-color: rgba(243, 156, 18, 0.35);
 }
 
 .attacked-by-black::after {
@@ -176,29 +176,55 @@
 }
 
 /* Цветовые темы доски */
-[data-board-theme="green"] .white-1e1d7 { background-color: #ebecd0; color: #779556; }
-[data-board-theme="green"] .black-3c85d { background-color: #779556; color: #ebecd0; }
+:where([data-board-theme="green"]) .white-1e1d7 { background-color: #ebecd0; color: #779556; }
+:where([data-board-theme="green"]) .black-3c85d { background-color: #779556; color: #ebecd0; }
 
-[data-board-theme="blue"] .white-1e1d7 { background-color: #dee3e6; color: #8ca2ad; }
-[data-board-theme="blue"] .black-3c85d { background-color: #8ca2ad; color: #dee3e6; }
+:where([data-board-theme="blue"]) .white-1e1d7 { background-color: #dee3e6; color: #8ca2ad; }
+:where([data-board-theme="blue"]) .black-3c85d { background-color: #8ca2ad; color: #dee3e6; }
 
-[data-board-theme="gray"] .white-1e1d7 { background-color: #e0e0e0; color: #888888; }
-[data-board-theme="gray"] .black-3c85d { background-color: #888888; color: #e0e0e0; }
+:where([data-board-theme="gray"]) .white-1e1d7 { background-color: #e0e0e0; color: #888888; }
+:where([data-board-theme="gray"]) .black-3c85d { background-color: #888888; color: #e0e0e0; }
 
-[data-board-theme="wood"] .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
-[data-board-theme="wood"] .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+:where([data-board-theme="wood"]) .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+:where([data-board-theme="wood"]) .black-3c85d { background-color: #b58863; color: #f0d9b5; }
 
 /* Полоса оценки (Eval Bar) */
 #evalBarContainer {
-    width: 24px;
-    border-radius: 4px;
+    flex: 0 0 20px;
+    position: relative;
+    border-radius: 2px;
     overflow: hidden;
-    background-color: #312e2b;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background-color: var(--eval-bg);
 }
 
 #evalBarWhite {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
     background-color: #ffffff;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#evalBarText {
+    position: absolute;
+    top: 10px;
+    z-index: 2;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #888;
+    transition: color 0.3s;
+}
+
+/* Доска: прямые углы, крупные координаты */
+#myBoard,
+#myBoard [class*="board-"] {
+    border-radius: 0;
+}
+
+#myBoard .notation-322f9 {
+    font-size: 13px;
+    font-weight: 700;
 }

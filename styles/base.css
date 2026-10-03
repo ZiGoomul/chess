@@ -14,24 +14,35 @@
     --clock-bg: #e2dfdc;
     --clock-active-border: #81b64c;
     --shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+    /* Chess.com palette shared by buttons, clocks and the sidebar */
+    --btn-dark: #3c3a37;
+    --btn-dark-hover: #484643;
+    --btn-dark-shadow: #2a2926;
+    --btn-green: #81b64c;
+    --btn-green-hover: #a3d160;
+    --btn-green-shadow: #45753c;
+    --btn-green-tint: #2f3a26;
+    --clock-dark: #1f1e1b;
+    --clock-text: #8b8987;
+    --tabs-bg: #211f1c;
+    --eval-bg: #403d39;
+    --color-success: #27ae60;
+    --color-warning: #e67e22;
+    --color-danger: #e74c3c;
 }
 
 [data-theme="dark"] {
-    --bg-color: #262421;
+    --bg-color: #2b2a27;
     --text-color: #e0e0e0;
     --text-primary: #ffffff;
     --text-secondary: #9e9a95;
-    --panel-bg: #312e2b;
-    --surface-subtle: #272522;
-    --surface-hover: #383531;
-    --border-color: #3d3935;
-    --accent-color: #81b64c;
-    --accent-hover: #a3d160;
-    --accent-active: #6c9e3d;
-    --accent-shadow: #588a2b;
-    --clock-bg: #211f1c;
-    --clock-active-border: #81b64c;
-    --shadow: 0 8px 24px rgba(0,0,0,0.4);
+    --panel-bg: #262522;
+    --surface-subtle: #302e2b;
+    --surface-hover: #3d3b38;
+    --border-color: #3a3835;
+    --clock-bg: #262522;
+    --shadow: none;
 }
 
 ::-webkit-scrollbar {
@@ -53,222 +64,12 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', -apple-system, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: block; /* Remove previous flex centering */
-}
-
-.container {
-    display: none; /* Hide old container if it exists */
 }
 
 h1 {
     margin-top: 0;
     color: var(--text-color);
 }
-
-.controls, .fen-controls {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-}
-
-
-
-
-
-
-
-#boardContainer {
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-    background: var(--panel-bg);
-    padding: 10px;
-    border-radius: 8px;
-}
-
-
-
-
-
-/* Tabs */
-
-
-@media (min-width: 900px) and (max-height: 850px) {
-  .main-layout {
-    max-width: 1080px !important;
-    grid-template-columns: minmax(0, min(46vw, calc(100vh - 230px))) minmax(160px, min(20vw, 230px)) minmax(220px, 1fr) !important;
-  }
-}
-
-
-  .main-layout > * {
-    box-sizing: border-box;
-    min-width: 0;
-  }
-
-@media (max-width: 1100px), (max-height: 850px) {
-  .main-layout {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(170px, 0.48fr) minmax(230px, 0.62fr) !important;
-    gap: 14px !important;
-  }
-
-  .board-column, .history-column, .sidebar-column {
-    width: auto !important;
-    min-width: 0 !important;
-    flex: none !important;
-  }
-}
-
-@media (min-width: 761px) and (max-height: 850px) {
-  .main-layout {
-    height: auto;
-    min-height: calc(100vh - 88px);
-    max-height: none;
-    overflow: visible;
-    align-items: flex-start !important;
-  }
-
-  .board-column, .sidebar-column {
-    height: auto !important;
-    min-height: 0 !important;
-  }
-
-  .board-column {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .sidebar-column {
-    overflow: visible;
-    padding: 8px !important;
-  }
-
-  .sidebar-column .tabs-header {
-    margin-bottom: 10px !important;
-  }
-
-  .sidebar-column .tab-content {
-    gap: 10px !important;
-  }
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  .history-column {
-    overflow: hidden;
-  }
-}
-
-@media (min-width: 900px) and (max-height: 850px) {
-  .main-layout {
-    max-width: 1080px !important;
-    grid-template-columns: minmax(0, min(46vw, calc(100vh - 230px))) minmax(160px, min(20vw, 230px)) minmax(220px, 1fr) !important;
-  }
-}
-
-@media (max-width: 760px) {
-  .main-layout {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 18px !important;
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .board-column, .history-column, .sidebar-column {
-    width: 100% !important;
-    min-width: 0 !important;
-    flex: none !important;
-  }
-
-  .player-badge {
-    margin-left: 0 !important;
-    padding: 4px 6px !important;
-  }
-
-  #evalBarContainer {
-    flex: 0 0 20px !important;
-    width: 20px !important;
-    min-width: 18px !important;
-    position: relative !important;
-    display: block !important;
-  }
-
-  #evalBarText {
-    font-size: 10px !important;
-  }
-
-  button,
-  .tab-btn {
-    min-height: 40px;
-  }
-
-  .history-column {
-    height: 220px !important;
-    overflow: hidden;
-  }
-
-  #moveHistoryList {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .sidebar-column {
-    height: auto;
-    overflow: visible;
-  }
-}
-
-@media (max-width: 600px) {
-  .app-header {
-    padding: 10px 14px !important;
-    margin-bottom: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .app-header h1 {
-    font-size: 20px !important;
-    line-height: 1.2;
-  }
-
-  .main-layout {
-    padding: 0 12px !important;
-    gap: 14px !important;
-  }
-
-  .player-details {
-    font-size: 13px !important;
-  }
-
-  .player-details .player-name {
-    font-size: 13px !important;
-  }
-
-  .chess-clock {
-    font-size: 17px !important;
-    min-width: 64px !important;
-    padding: 4px 8px !important;
-  }
-
-  .history-column {
-    height: 190px !important;
-  }
-
-  .sidebar-column {
-    padding: 14px !important;
-  }
-}
-

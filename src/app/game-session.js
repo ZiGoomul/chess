@@ -291,8 +291,8 @@ export function createGameSession({
     });
 
     $('.color-btn').on('click', function() {
-        $('.color-btn').removeClass('active').css('border-color', 'transparent');
-        $(this).addClass('active').css('border-color', '#27ae60');
+        $('.color-btn').removeClass('active');
+        $(this).addClass('active');
 
         const color = $(this).data('color');
         saveStoredSettings({ playerColor: color });

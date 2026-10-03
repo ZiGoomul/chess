@@ -143,9 +143,6 @@ export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentView
     incrementMs = settings.incrementSeconds * 1000;
     previousSettings = settings;
 
-    if (enabled) $('#timerSettingsRow').css('display', 'flex');
-    else $('#timerSettingsRow').hide();
-
     updateClockUI();
     if (hasActiveGame && enabled) startClock();
     return true;

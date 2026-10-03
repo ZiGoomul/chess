@@ -17,10 +17,10 @@
         </button>
     </header>
 
-    <div class="main-layout" style="display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; padding: 0 20px; align-items: flex-start; flex-wrap: wrap;">
+    <div class="main-layout">
         <!-- Left Column: Board -->
-        <div class="board-column" style="flex: 2; min-width: 320px; width: 100%;">
-            <div id="boardContainer" style="display: flex; flex-direction: column; width: 100%; box-shadow: none; background: transparent; padding: 0;">
+        <div class="board-column">
+            <div id="boardContainer">
                 <div class="player-badge top-player">
                     <div class="player-info">
                         <div class="player-avatar" aria-label="Бот" title="Бот">
@@ -35,17 +35,17 @@
                     <div id="topClock" class="chess-clock">05:00</div>
                 </div>
                 
-                <div style="display: flex; flex-direction: row; align-items: stretch; gap: 10px; width: 100%;">
+                <div class="board-row">
                     <!-- Eval Bar -->
-                    <div id="evalBarContainer" style="flex: 0 0 25px; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid var(--border-color);">
-                        <div id="evalBarWhite" style="position: absolute; bottom: 0; width: 100%; height: 50%;"></div>
-                        <div id="evalBarText" style="position: absolute; width: 100%; text-align: center; font-size: 11px; font-weight: bold; color: #888; z-index: 2; top: 10px; transition: color 0.3s;">0.0</div>
+                    <div id="evalBarContainer">
+                        <div id="evalBarWhite"></div>
+                        <div id="evalBarText">0.0</div>
                     </div>
                     
-                    <div style="position: relative; box-shadow: var(--shadow); border-radius: 4px; overflow: hidden; flex: 1;">
-                        <div id="myBoard" style="width: 100%"></div>
+                    <div class="board-stage">
+                        <div id="myBoard"></div>
                         
-                        <svg id="arrowOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;">
+                        <svg id="arrowOverlay">
                             <defs>
                             <marker id="arrowhead1" markerWidth="3" markerHeight="3" refX="2" refY="1.5" orient="auto">
                                 <path d="M0,0 L0,3 L3,1.5 z" fill="rgba(46, 204, 113, 0.8)" />
@@ -60,7 +60,7 @@
                         <g id="arrowsGroup"></g>
                     </svg>
 
-                    <div id="gameOverOverlay" class="game-over-overlay" style="display: none;">
+                    <div id="gameOverOverlay" class="game-over-overlay">
                         <div class="game-over-card">
                             <div class="game-over-icon" aria-hidden="true">
                                 <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2Z"></path></svg>
@@ -139,7 +139,7 @@
         </div>
 
         <!-- Right Column: Sidebar -->
-        <div class="sidebar-column" style="flex: 1; min-width: 300px; background: var(--panel-bg); border-radius: 8px; box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; min-height: 500px;">
+        <div class="sidebar-column">
             
             <div class="tabs-header" role="tablist" aria-label="Разделы приложения" aria-orientation="horizontal">
                 <button id="tab-play-button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-play" tabindex="0" data-tab="tab-play">Игра</button>
@@ -149,19 +149,19 @@
             </div>
 
             <!-- TAB: Puzzles -->
-            <div class="tab-content" id="tab-puzzles" role="tabpanel" aria-labelledby="tab-puzzles-button" aria-hidden="true" style="display: none; flex-direction: column; gap: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="margin: 0;">Решение задач</h3>
-                    <span id="puzzlesScore" style="font-weight: bold; color: var(--accent-color);">Решено: 0</span>
+            <div class="tab-content tab-content--roomy" id="tab-puzzles" role="tabpanel" aria-labelledby="tab-puzzles-button" aria-hidden="true">
+                <div class="puzzle-header">
+                    <h3>Решение задач</h3>
+                    <span id="puzzlesScore">Решено: 0</span>
                 </div>
                 <div id="puzzleCatalogCount" class="puzzle-catalog-count" aria-live="polite">Доступно: 0 · загружено: 0</div>
                 
-                <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <div id="puzzleStatusText" style="font-size: 16px; font-weight: bold; margin-bottom: 10px; text-align: center;">Нажмите "Новая задача", чтобы начать!</div>
-                    <div id="puzzleDescText" style="font-size: 14px; color: #888; text-align: center; min-height: 20px;"></div>
+                <div class="puzzle-status-card">
+                    <div id="puzzleStatusText">Нажмите "Новая задача", чтобы начать!</div>
+                    <div id="puzzleDescText"></div>
                 </div>
 
-                <button id="loadPuzzleBtn" class="btn-primary" style="padding: 12px 18px; font-size: 16px; width: 100%;">Новая случайная задача</button>
+                <button id="loadPuzzleBtn" class="btn-primary">Новая случайная задача</button>
                 <label class="puzzle-theme-label" for="puzzleThemeSelect">Тема для загрузки
                     <select id="puzzleThemeSelect">
                         <option value="">Любая доступная тема</option>
@@ -176,14 +176,14 @@
                 <button id="loadMorePuzzlesBtn" class="puzzle-secondary-btn btn-secondary">Загрузить задачи по теме</button>
                 <button id="clearPuzzleDataBtn" class="puzzle-secondary-btn btn-secondary">Очистить локальные данные</button>
                 <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite">Подготавливаем локальный каталог…</div>
-                <button id="exitPuzzleBtn" class="btn-secondary" style="width: 100%; font-size: 14px;">Выйти из режима задач</button>
+                <button id="exitPuzzleBtn" class="btn-secondary">Выйти из режима задач</button>
             </div>
 
             <!-- TAB 1: Play -->
-            <div class="tab-content" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false" style="display: flex; flex-direction: column; gap: 0;">
+            <div class="tab-content tab-content--flush is-active" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false">
                 <!-- Game status bar -->
-                <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
-                    <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true" style="font-weight: bold; font-size: 16px; color: var(--accent-color);"></span>
+                <div class="game-status-card">
+                    <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true"></span>
                 </div>
                 <section class="review-panel" aria-label="Разбор партии">
                     <div class="review-status" id="reviewStatus" role="status" aria-live="polite">Разбор появится после завершённой партии против бота.</div>
@@ -262,7 +262,7 @@
                     Другие контроли времени <span class="cc-custom-chevron">▾</span>
                 </button>
 
-                <div id="ccCustomTimePanel" class="cc-custom-panel" style="display: none;">
+                <div id="ccCustomTimePanel" class="cc-custom-panel">
                     <div class="cc-custom-inputs">
                         <div class="cc-custom-field">
                             <label for="timerBase">Минут</label>
@@ -275,10 +275,10 @@
                     </div>
                 </div>
 
-                <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 5px; display: flex; flex-direction: column; gap: 8px;">
-                    <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold; font-size: 13px;">
+                <div class="hint-section">
+                    <label class="field-label field-label--small">
                         Сила подсказки:
-                        <select id="hintLevel" style="padding: 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
+                        <select id="hintLevel">
                             <option value="1">Ур 1 (~800 ELO)</option>
                             <option value="5">Ур 5 (~1200 ELO)</option>
                             <option value="10" selected>Ур 10 (~1700 ELO)</option>
@@ -286,45 +286,42 @@
                             <option value="20">Ур 20 (~3000+ ELO)</option>
                         </select>
                     </label>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 13px;">
+                    <label class="toggle-label">
                         <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
                     </label>
-                    <button id="hintBtn" style="background-color: #27ae60; margin-top: 5px; padding: 10px; font-weight: bold; border-radius: 6px;">Подсказать лучший ход</button>
+                    <button id="hintBtn" class="btn-success">Подсказать лучший ход</button>
                 </div>
 
                 <!-- Color selection -->
-                <div id="colorSelection" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px;">
-                    <button type="button" class="color-btn active" data-color="white" style="flex: 1; padding: 10px; border-radius: 6px; background-color: #f1f1f1; color: #333; font-weight: bold; border: 2px solid #27ae60; cursor: pointer;">Белые</button>
-                    <button type="button" class="color-btn" data-color="random" title="Случайный цвет" aria-label="Случайный цвет" style="flex: 1; padding: 10px; border-radius: 6px; background-color: #95a5a6; color: white; font-weight: bold; border: 2px solid transparent; cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg></button>
-                    <button type="button" class="color-btn" data-color="black" style="flex: 1; padding: 10px; border-radius: 6px; background-color: #333; color: white; font-weight: bold; border: 2px solid transparent; cursor: pointer;">Черные</button>
+                <div id="colorSelection">
+                    <button type="button" class="color-btn color-btn-white active" data-color="white">Белые</button>
+                    <button type="button" class="color-btn color-btn-random" data-color="random" title="Случайный цвет" aria-label="Случайный цвет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg></button>
+                    <button type="button" class="color-btn color-btn-black" data-color="black">Черные</button>
                 </div>
 
                 <!-- Big green START button -->
-                <button id="ccStartGameBtn" class="cc-start-btn" style="margin-top: 15px;">Начать партию</button>
-
-                <!-- Hidden timer settings row for backward compat -->
-                <div id="timerSettingsRow" class="timer-settings" style="display: none !important;"></div>
+                <button id="ccStartGameBtn" class="cc-start-btn">Начать партию</button>
             </div>
 
             <!-- TAB 2: Setup -->
-            <div class="tab-content" id="tab-setup" role="tabpanel" aria-labelledby="tab-setup-button" aria-hidden="true" style="display: none; flex-direction: column; gap: 15px;">
-                <button id="startPositionBtn" style="background-color: #e67e22;">Начальная позиция</button>
-                <button id="clearBoardBtn" style="background-color: #e74c3c;">Очистить доску</button>
+            <div class="tab-content" id="tab-setup" role="tabpanel" aria-labelledby="tab-setup-button" aria-hidden="true">
+                <button id="startPositionBtn" class="btn-warning">Начальная позиция</button>
+                <button id="clearBoardBtn" class="btn-danger">Очистить доску</button>
 
-                <div style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <label style="font-weight: bold;">FEN позиция:</label>
-                    <input type="text" id="fenInput" aria-describedby="fenError" placeholder="Введите FEN" style="width: 100%; box-sizing: border-box;">
-                    <div id="fenError" class="fen-error" role="alert" aria-live="assertive" style="display: none;"></div>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="setFenBtn" style="flex: 1;">Установить</button>
-                        <button id="getFenBtn" style="flex: 1;">Получить</button>
+                <div class="setup-fen">
+                    <label for="fenInput">FEN позиция:</label>
+                    <input type="text" id="fenInput" aria-describedby="fenError" placeholder="Введите FEN">
+                    <div id="fenError" class="fen-error" role="alert" aria-live="assertive"></div>
+                    <div class="button-row">
+                        <button id="setFenBtn">Установить</button>
+                        <button id="getFenBtn">Получить</button>
                     </div>
                 </div>
             </div>
 
             <!-- TAB 3: Style -->
-            <div class="tab-content" id="tab-style" role="tabpanel" aria-labelledby="tab-style-button" aria-hidden="true" style="display: none; flex-direction: column; gap: 15px;">
-                <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold;">
+            <div class="tab-content" id="tab-style" role="tabpanel" aria-labelledby="tab-style-button" aria-hidden="true">
+                <label class="field-label">
                     Стиль фигур:
                     <select id="pieceThemeSelect">
                         <option value="chesscom_neo">Neo (Chess.com)</option>
@@ -338,7 +335,7 @@
                     </select>
                 </label>
 
-                <label style="display: flex; flex-direction: column; gap: 5px; font-weight: bold;">
+                <label class="field-label">
                     Цвет доски:
                     <select id="boardThemeSelect">
                         <option value="green">Зеленая (Chess.com)</option>
@@ -348,15 +345,15 @@
                     </select>
                 </label>
 
-                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <label class="toggle-label">
                     <div class="switch"><input type="checkbox" id="highlightMovesCb" checked><span class="slider"></span></div> Подсвечивать возможные ходы
                 </label>
 
-                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <label class="toggle-label">
                     <div class="switch"><input type="checkbox" id="highlightAttacksCb"><span class="slider"></span></div> Подсвечивать нападения
                 </label>
 
-                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <label class="toggle-label">
                     <div class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></div> Подсвечивать защиту
                 </label>
             </div>
