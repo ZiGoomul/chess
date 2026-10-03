@@ -70,6 +70,62 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
   outline-offset: 2px;
 }
 
+/* Player Badges */
+.player-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: transparent;
+    border-radius: 6px;
+    min-height: 44px;
+    margin-left: 34px; /* Align with chessboard relative to eval bar */
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.player-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    background: var(--surface-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 1px solid var(--border-color);
+}
+
+.player-details {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.player-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.player-rating {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--surface-subtle);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.material-row {
+    display: flex;
+    align-items: center;
+}
+
 .material-piece {
     width: 25px;
     height: 25px;

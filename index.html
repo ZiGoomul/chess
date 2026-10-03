@@ -17,8 +17,15 @@
         <!-- Left Column: Board -->
         <div class="board-column" style="flex: 2; min-width: 320px; width: 100%;">
             <div id="boardContainer" style="display: flex; flex-direction: column; width: 100%; box-shadow: none; background: transparent; padding: 0;">
-                <div style="min-height: 25px; display: flex; align-items: center; margin-bottom: 5px; margin-left: 35px;">
-                    <div id="topMaterial" class="material-row" style="flex: 1; display: flex; align-items: center;"></div>
+                <div class="player-badge top-player">
+                    <div class="player-info">
+                        <div class="player-avatar">🤖</div>
+                        <div class="player-details">
+                            <span class="player-name" id="topPlayerName">Бот</span>
+                            <span class="player-rating">1500</span>
+                        </div>
+                        <div id="topMaterial" class="material-row"></div>
+                    </div>
                     <div id="topClock" class="chess-clock">05:00</div>
                 </div>
                 
@@ -54,8 +61,15 @@
                     </div>
                 </div>
 
-                <div style="min-height: 25px; display: flex; align-items: center; margin-top: 5px; margin-left: 35px;">
-                    <div id="bottomMaterial" class="material-row" style="flex: 1; display: flex; align-items: center;"></div>
+                <div class="player-badge bottom-player">
+                    <div class="player-info">
+                        <div class="player-avatar">👤</div>
+                        <div class="player-details">
+                            <span class="player-name" id="bottomPlayerName">Вы</span>
+                            <span class="player-rating">1500</span>
+                        </div>
+                        <div id="bottomMaterial" class="material-row"></div>
+                    </div>
                     <div id="bottomClock" class="chess-clock">05:00</div>
                 </div>
             </div>
