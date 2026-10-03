@@ -1,5 +1,6 @@
 import { getLegalMovesForSquare, getSquareFromCoords } from '../domain/move-input.js';
 import { getKingSquareInCheck } from '../domain/check-state.js';
+import { Chess } from 'chess.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
@@ -209,21 +210,17 @@ export function createBoardView({ $, eventBus, store }) {
             parts[1] = otherColor;
             parts[3] = '-'; 
             
-            // To do this we need a Chess instance.
-            // Ideally we pass Chess constructor or import it.
-            if (window.Chess) {
-                var tempGame = new window.Chess();
-                if (tempGame.load(parts.join(' '))) {
-                    processMoves(tempGame.moves({verbose: true}));
-                }
+            var tempGame = new Chess();
+            if (tempGame.load(parts.join(' '))) {
+                processMoves(tempGame.moves({verbose: true}));
             }
         }
 
         var defenders = {};
-        if (showDefenses && window.Chess) {
+        if (showDefenses) {
             var boardState = position.board();
             var files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            var tempDefGame = new window.Chess();
+            var tempDefGame = new Chess();
             for (var r = 0; r < 8; r++) {
                 for (var c = 0; c < 8; c++) {
                     var piece = boardState[r][c];

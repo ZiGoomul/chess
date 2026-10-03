@@ -1,1 +1,2 @@
-import './app/game-orchestrator.js';
+import './vendor.js';
+await import('./app/game-orchestrator.js');
