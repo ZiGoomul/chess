@@ -85,8 +85,8 @@
 .move-text.active-move,
 .move-white.active,
 .move-black.active {
-  background-color: #484541 !important;
-  color: #ffffff !important;
+  background-color: #484541;
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -94,8 +94,8 @@
 body[data-theme="light"] .move-text.active-move,
 [data-theme="light"] .move-white.active,
 [data-theme="light"] .move-black.active {
-  background-color: #d8d4d0 !important;
-  color: var(--text-primary) !important;
+  background-color: #d8d4d0;
+  color: var(--text-primary);
 }
 
 /* History Navigation Controls */
