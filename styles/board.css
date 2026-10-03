@@ -23,13 +23,13 @@
 }
 
 .white-1e1d7 {
-    background-color: #ebecd0 !important;
-    color: #779556 !important;
+    background-color: #ebecd0;
+    color: #779556;
 }
 
 .black-3c85d {
-    background-color: #779556 !important;
-    color: #ebecd0 !important;
+    background-color: #779556;
+    color: #ebecd0;
 }
 
 .square-55d63 {
@@ -172,8 +172,8 @@
 }
 
 /* Цветовые темы доски */
-[data-board-theme="green"] .white-1e1d7 { background-color: #eeeed2; color: #769656; }
-[data-board-theme="green"] .black-3c85d { background-color: #769656; color: #eeeed2; }
+[data-board-theme="green"] .white-1e1d7 { background-color: #ebecd0; color: #779556; }
+[data-board-theme="green"] .black-3c85d { background-color: #779556; color: #ebecd0; }
 
 [data-board-theme="blue"] .white-1e1d7 { background-color: #dee3e6; color: #8ca2ad; }
 [data-board-theme="blue"] .black-3c85d { background-color: #8ca2ad; color: #dee3e6; }
@@ -198,5 +198,3 @@
     background-color: #ffffff;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-
