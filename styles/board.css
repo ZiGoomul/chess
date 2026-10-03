@@ -70,6 +70,10 @@
     justify-content: center;
 }
 
+.move-dest-marker::after {
+    content: '';
+}
+
 .move-dest-dot,
 .move-dest-marker::after {
     width: 28%;

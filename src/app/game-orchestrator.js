@@ -305,7 +305,8 @@ $(document).ready(function() {
             if (event.source !== state.selectedSquare) {
                 clearSelection();
             }
-            boardView.showMoveHints(event.source, null, game);
+            var dragIsEditor = !isPuzzleMode && botLevel === 0;
+            boardView.showMoveHints(event.source, getLegalMovesForSquare(event.source, game, dragIsEditor, Chess), game);
         }
     });
 
