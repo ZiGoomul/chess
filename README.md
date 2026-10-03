@@ -32,6 +32,10 @@ npm run preview
 New logic should go into TypeScript modules; move a file into the strict list once it is converted.
 `npm run lint` runs ESLint on JavaScript (TypeScript is covered by `tsc`).
 
+Tests (`npm test`) cover domain logic and, through jsdom, the app controllers (`tests/board-interaction.test.js`,
+`tests/game-session.test.js`, `tests/puzzle-controller.test.js`) with fake board, clock and bot from `tests/helpers/harness.js`.
+`tests/styles.test.js` guards the CSS conventions (no `!important`, no inline styles, theme tokens defined).
+
 ## Импорт задач Lichess
 
 Браузер загружает только небольшие подготовленные JSON-наборы из `public/puzzles/lichess/`. Полную CSV-базу Lichess нужно скачать и распаковать отдельно, затем преобразовать локально:
