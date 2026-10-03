@@ -1,3 +1,5 @@
+import { determineMoveSound } from '../domain/check-state.js';
+
 const SOUND_URLS = {
   move: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-self.mp3',
   capture: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3',
@@ -7,34 +9,88 @@ const SOUND_URLS = {
   gameStart: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-start.mp3'
 };
 
+let sharedAudioCtx = null;
+
+export function getAudioContext() {
+  if (typeof window === 'undefined') return null;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedAudioCtx) {
+    try {
+      sharedAudioCtx = new AudioCtx();
+    } catch {
+      return null;
+    }
+  }
+  if (sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume().catch(() => {});
+  }
+  return sharedAudioCtx;
+}
+
+export function playSyntheticCheckSound() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    // Dual-frequency slide: distinctive sharp check tap
+    osc.frequency.setValueAtTime(620, now);
+    osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.14);
+  } catch {
+    // Graceful fallback if audio context state fails
+  }
+}
+
 export function createAudio(game) {
-  const sounds = Object.fromEntries(
-    Object.entries(SOUND_URLS).map(([name, url]) => [name, new Audio(url)])
-  );
+  const sounds = (typeof window !== 'undefined' && typeof Audio !== 'undefined')
+    ? Object.fromEntries(
+        Object.entries(SOUND_URLS).map(([name, url]) => [name, new Audio(url)])
+      )
+    : {};
 
   function playSound(type) {
     const sound = sounds[type];
-    if (!sound) return;
+    if (!sound) {
+      if (type === 'check') playSyntheticCheckSound();
+      return;
+    }
 
-    sound.currentTime = 0;
-    sound.play().catch(() => {});
-  }
-
-  function playSoundForMove(move) {
-    if (!move) {
-      playSound('move');
-    } else if (game.in_checkmate() || game.in_draw()) {
-      playSound('gameEnd');
-    } else if (game.in_check()) {
-      playSound('check');
-    } else if (move.flags && (move.flags.includes('c') || move.flags.includes('e'))) {
-      playSound('capture');
-    } else if (move.flags && (move.flags.includes('k') || move.flags.includes('q'))) {
-      playSound('castle');
-    } else {
-      playSound('move');
+    try {
+      sound.currentTime = 0;
+      const playPromise = sound.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          if (type === 'check') {
+            playSyntheticCheckSound();
+          }
+        });
+      }
+    } catch {
+      if (type === 'check') {
+        playSyntheticCheckSound();
+      }
     }
   }
 
-  return { playSound, playSoundForMove };
+  function playSoundForMove(move, targetGame = null) {
+    const activeGame = targetGame || game;
+    const soundType = determineMoveSound(activeGame, move);
+    playSound(soundType);
+  }
+
+  return { playSound, playSoundForMove, playSyntheticCheckSound };
 }
