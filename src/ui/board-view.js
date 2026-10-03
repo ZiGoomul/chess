@@ -10,7 +10,6 @@ export function createBoardView({ $, eventBus, store }) {
     function clearArrows() {
         var group = document.getElementById('arrowsGroup');
         if (group) group.innerHTML = '';
-        $('#myBoard .square-55d63').removeClass('hint-square');
     }
 
     function getSquareCenter(square) {
@@ -35,11 +34,6 @@ export function createBoardView({ $, eventBus, store }) {
         var p1 = getSquareCenter(source);
         var p2 = getSquareCenter(target);
         if ((!p1.x && !p1.y) || (!p2.x && !p2.y)) return;
-
-        if (multipv === 1) {
-            $('#myBoard .square-' + source + ', #myBoard [data-square="' + source + '"]').addClass('hint-square');
-            $('#myBoard .square-' + target + ', #myBoard [data-square="' + target + '"]').addClass('hint-square');
-        }
 
         var piece = game ? game.get(source) : null;
         var isKnight = piece && piece.type === 'n';
