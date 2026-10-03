@@ -15,20 +15,20 @@ export function createMoveHistoryView({
 
     history.forEach((san, index) => {
       if (index % 2 === 0) {
-        row = $('<div style="display: flex; padding: 4px 8px; border-radius: 4px;"></div>');
-        if ((index / 2) % 2 === 1) row.css('background-color', 'rgba(128, 128, 128, 0.1)');
-        row.append($('<div style="width: 40px; color: #888;"></div>').text(`${Math.floor(index / 2) + 1}.`));
+        row = $('<div class="move-row"></div>');
+        row.append($('<div class="move-number"></div>').text(`${Math.floor(index / 2) + 1}.`));
       }
 
       const moveLabel = `Перейти к позиции после хода ${index + 1}: ${san}`;
-      const move = $('<div class="move-text" role="button" tabindex="0" style="flex: 1; cursor: pointer; padding: 0 4px; border-radius: 3px;"></div>')
+      const colorClass = index % 2 === 0 ? 'move-white' : 'move-black';
+      const move = $(`<div class="move-text ${colorClass}" role="button" tabindex="0"></div>`)
         .attr('data-ply', index)
         .attr('aria-label', moveLabel)
         .text(san);
       row.append(move);
 
       if (index % 2 === 1 || index === history.length - 1) {
-        if (index % 2 === 0) row.append($('<div style="flex: 1;"></div>'));
+        if (index % 2 === 0) row.append($('<div class="move-spacer"></div>'));
         list.append(row);
       }
     });

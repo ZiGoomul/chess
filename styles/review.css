@@ -63,12 +63,17 @@
 .move-text,
 .move-white,
 .move-black {
-  padding: 4px 8px !important;
-  border-radius: 4px !important;
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   color: var(--text-primary);
   transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.move-spacer {
+  flex: 1;
 }
 
 .move-text:hover,
