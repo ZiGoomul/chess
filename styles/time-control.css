@@ -285,7 +285,15 @@
 }
 
 .cc-pill-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-pill-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .cc-pill-text {
@@ -309,7 +317,15 @@
 }
 
 .cc-mode-icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-mode-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .cc-mode-select {
@@ -407,6 +423,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.cc-category-label svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-secondary);
 }
 
 .cc-info-icon {

@@ -959,19 +959,27 @@ $(document).ready(function() {
         return 'Классика';
     }
 
+    const SVG_ICONS = {
+        clock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+        lightning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+        infinity: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.178 8c5.096 0 5.096 8 0 8-2.688 0-4.364-2.502-6.178-5.322C10.186 7.858 8.51 5.356 5.822 5.356c-5.096 0-5.096 8 0 8 2.688 0 4.364-2.502 6.178-5.322"></path></svg>',
+        gear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>'
+    };
+
     function updateSelectedTimePill() {
         var base = Number($('#timerBase').val());
         var inc = Number($('#timerInc').val());
         var enabled = $('#timerEnableCb').is(':checked');
         var category = getTimeCategory(base);
-        var icon = '⏱';
-        if (category === 'Пуля') icon = '⚡';
-        else if (category === 'Блиц') icon = '⚡';
+        var iconSvg = SVG_ICONS.clock;
+        if (category === 'Пуля' || category === 'Блиц') {
+            iconSvg = SVG_ICONS.lightning;
+        }
 
         var text;
         if (!enabled) {
             text = 'Без часов';
-            icon = '♾️';
+            iconSvg = SVG_ICONS.infinity;
         } else if (inc > 0) {
             text = base + ' + ' + inc + ' (' + category + ')';
         } else {
@@ -979,7 +987,7 @@ $(document).ready(function() {
         }
 
         $('#selectedTimeText').text(text);
-        $('.cc-pill-icon').text(icon);
+        $('.cc-pill-icon').html(iconSvg);
     }
 
     function updateTimePresetSelection() {
@@ -1013,7 +1021,7 @@ $(document).ready(function() {
         if (base >= 1440) {
             var days = Math.round(base / 1440);
             $('#selectedTimeText').text(days + ' ' + (days === 1 ? 'день' : days < 5 ? 'дня' : 'дней') + ' (Заочная)');
-            $('.cc-pill-icon').text('⚙️');
+            $('.cc-pill-icon').html(SVG_ICONS.gear);
         }
     });
 
