@@ -693,7 +693,7 @@ $(document).ready(function() {
         recordPuzzleAttempt(true);
         solvedPuzzlesCount++;
         $('#puzzlesScore').text('Решено: ' + solvedPuzzlesCount);
-        $('#puzzleStatusText').text('ЗАДАЧА РЕШЕНА! 🎉');
+        $('#puzzleStatusText').text('ЗАДАЧА РЕШЕНА!');
         $('#puzzleStatusText').css('color', '#2ecc71');
         playSound('gameEnd');
     }

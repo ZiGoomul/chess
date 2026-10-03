@@ -83,6 +83,12 @@ input:checked + .slider:before {
     transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
 }
 
+.theme-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #themeToggleBtn:hover,
 .theme-toggle-btn:hover {
     background-color: var(--surface-hover);
@@ -211,8 +217,13 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
     border: 1px solid var(--border-color);
+}
+
+.player-avatar svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-secondary);
 }
 
 .player-details {
@@ -367,7 +378,14 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 }
 
 .game-over-icon {
-    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-over-icon svg {
+    width: 44px;
+    height: 44px;
 }
 
 .game-over-title {
