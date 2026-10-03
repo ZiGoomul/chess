@@ -137,28 +137,17 @@ export function createBoardView({ $, eventBus, store }) {
         $('#myBoard .move-dest-marker').remove();
     }
 
-    function showMoveHints(square, moves, positionGame) {
+    function showMoveHints(square, destinations) {
         removeHighlights();
-        var $square = $('#myBoard .square-' + square);
-        $square.addClass('selected-square');
+        $('#myBoard .square-' + square).addClass('selected-square');
 
         if (!$('#highlightMovesCb').is(':checked')) return;
 
-        // If moves aren't passed, we need a game instance to compute them. 
-        // We'll rely on the caller or emit an event to request moves if needed.
-        if (moves) {
-            var seenDest = {};
-            for (var i = 0; i < moves.length; i++) {
-                var dest = moves[i].to;
-                if (seenDest[dest]) continue;
-                seenDest[dest] = true;
-
-                var isCapture = Boolean(positionGame && positionGame.get(dest)) || Boolean(moves[i].flags && moves[i].flags.indexOf('e') !== -1);
-                var $destSq = $('#myBoard .square-' + dest);
-                $destSq.addClass('has-dest-marker');
-                $destSq.append('<div class="move-dest-marker' + (isCapture ? ' is-capture' : '') + '"></div>');
-            }
-        }
+        (destinations || []).forEach(function(dest) {
+            var $destSq = $('#myBoard .square-' + dest.square);
+            $destSq.addClass('has-dest-marker');
+            $destSq.append('<div class="move-dest-marker' + (dest.isCapture ? ' is-capture' : '') + '"></div>');
+        });
     }
 
     function highlightCheck(positionGame) {

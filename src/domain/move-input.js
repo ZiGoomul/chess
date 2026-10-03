@@ -122,3 +122,20 @@ export function getSquareFromCoords({ clientX, clientY, rect, orientation = 'whi
   const rank = isWhite ? (8 - row) : (row + 1);
   return `${file}${rank}`;
 }
+
+/**
+ * Collapses legal moves into the unique destination squares to mark on the board.
+ * Single source for every hint path (click, hover, drag), so they cannot drift apart.
+ */
+export function getMoveDestinations(moves, game) {
+  const seen = new Set();
+  const destinations = [];
+  for (const move of moves || []) {
+    if (seen.has(move.to)) continue;
+    seen.add(move.to);
+    const isEnPassant = Boolean(move.flags && move.flags.includes('e'));
+    const isCapture = Boolean(game && game.get(move.to)) || isEnPassant;
+    destinations.push({ square: move.to, isCapture });
+  }
+  return destinations;
+}

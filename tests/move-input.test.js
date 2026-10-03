@@ -125,3 +125,21 @@ test('getSquareFromCoords calculates correct board square from client coordinate
   assert.equal(getSquareFromCoords({ clientX: 50, clientY: 50, rect }), null);
 });
 
+
+test('getMoveDestinations lists unique squares and marks captures', async () => {
+  const { getMoveDestinations } = await import('../src/domain/move-input.js');
+  const open = new Chess();
+  const pawn = getMoveDestinations(open.moves({ square: 'e2', verbose: true }), open);
+  assert.deepEqual(pawn, [{ square: 'e3', isCapture: false }, { square: 'e4', isCapture: false }]);
+
+  const capture = new Chess('rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2');
+  const dests = getMoveDestinations(capture.moves({ square: 'e4', verbose: true }), capture);
+  assert.deepEqual(dests.find(d => d.square === 'd5'), { square: 'd5', isCapture: true });
+
+  const promo = new Chess('8/P7/8/8/8/8/8/k6K w - - 0 1');
+  assert.equal(getMoveDestinations(promo.moves({ square: 'a7', verbose: true }), promo).length, 1);
+
+  const enPassant = new Chess('rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3');
+  const ep = getMoveDestinations(enPassant.moves({ square: 'e5', verbose: true }), enPassant);
+  assert.equal(ep.find(d => d.square === 'f6').isCapture, true);
+});
