@@ -192,8 +192,36 @@ h1 {
     flex: none !important;
   }
 
+  .player-badge {
+    margin-left: 0 !important;
+    padding: 4px 6px !important;
+  }
+
+  #evalBarContainer {
+    flex: 0 0 20px !important;
+    width: 20px !important;
+    min-width: 18px !important;
+    position: relative !important;
+    display: block !important;
+  }
+
+  #evalBarText {
+    font-size: 10px !important;
+  }
+
+  button,
+  .tab-btn {
+    min-height: 40px;
+  }
+
   .history-column {
     height: 220px !important;
+    overflow: hidden;
+  }
+
+  #moveHistoryList {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .sidebar-column {
@@ -205,10 +233,15 @@ h1 {
 @media (max-width: 600px) {
   .app-header {
     padding: 10px 14px !important;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .app-header h1 {
     font-size: 20px !important;
+    line-height: 1.2;
   }
 
   .main-layout {
@@ -216,24 +249,26 @@ h1 {
     gap: 14px !important;
   }
 
-  .history-column {
-    height: 170px !important;
+  .player-details {
+    font-size: 13px !important;
   }
 
-  
+  .player-details .player-name {
+    font-size: 13px !important;
+  }
 
-  
+  .chess-clock {
+    font-size: 17px !important;
+    min-width: 64px !important;
+    padding: 4px 8px !important;
+  }
 
-  
+  .history-column {
+    height: 190px !important;
+  }
 
   .sidebar-column {
     padding: 14px !important;
   }
-
-  
-
-  
-
-  
 }
 

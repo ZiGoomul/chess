@@ -343,6 +343,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     height: 100%;
     background: rgba(18, 17, 15, 0.75);
     backdrop-filter: blur(4px);
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10;
@@ -360,6 +361,9 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     align-items: center;
     gap: 12px;
     min-width: 200px;
+    max-width: calc(100% - 32px);
+    box-sizing: border-box;
+    word-break: break-word;
 }
 
 .game-over-icon {
