@@ -2,7 +2,7 @@ import { botLevelToRating, findCriticalMoments } from './game-review.js';
 
 export const REVIEW_ENGINE_VERSION = 'stockfish-10.0.2/depth-10';
 
-export function createPostGameReviewCoordinator({ repository, reviewService, getPuzzleCatalog = () => null, onProgress = () => {}, onReport = () => {} }) {
+export function createPostGameReviewCoordinator({ repository, reviewService, getPuzzleCatalog = () => null, onProgress = (_progress) => {}, onReport = (_report, _record) => {} }) {
   async function recommend(record, moments) {
     const catalog = getPuzzleCatalog();
     if (!catalog) return null;
@@ -24,7 +24,7 @@ export function createPostGameReviewCoordinator({ repository, reviewService, get
     let report;
     if (result.status === 'complete') {
       const moments = findCriticalMoments({ record, evaluations: result.evaluations });
-      let recommendation = null;
+      let recommendation;
       try { recommendation = await recommend(record, moments); } catch { recommendation = null; }
       report = { ...base, status: 'complete', evaluations: result.evaluations, moments, recommendation, completedAt: Date.now() };
     } else {

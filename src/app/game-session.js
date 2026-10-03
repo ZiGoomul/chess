@@ -60,7 +60,7 @@ export function createGameSession({
         const historical = isHistoricalPosition(state);
         const displayedGame = getDisplayedGame(state, Chess);
         const moveColor = displayedGame.turn() === 'w' ? 'Белые' : 'Черные';
-        let status = '';
+        let status;
         let isGameOver = false;
         let overlayText = '';
 
@@ -114,7 +114,7 @@ export function createGameSession({
         }
         const editorColor = piece ? piece.charAt(0) : game.turn();
         let fens = store.getState().historyFENs.slice();
-        let editorMove = null;
+        let editorMove;
 
         if (game.turn() !== editorColor) {
             const fenParts = game.fen().split(' ');

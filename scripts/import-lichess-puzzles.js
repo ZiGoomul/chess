@@ -1,5 +1,5 @@
 import { createReadStream, promises as fs } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { parse } from 'csv-parse';
 import { Chess } from 'chess.js';
 

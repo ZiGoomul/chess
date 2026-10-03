@@ -1,10 +1,9 @@
-import { getLegalMovesForSquare, getSquareFromCoords } from '../domain/move-input.js';
+import { getSquareFromCoords } from '../domain/move-input.js';
 import { getKingSquareInCheck } from '../domain/check-state.js';
 import { Chess } from 'chess.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
-    var currentHints = {};
     var currentCheckGame = null;
     var currentLastMove = null;
 
@@ -97,14 +96,14 @@ export function createBoardView({ $, eventBus, store }) {
             if (dist < shorten) shorten = dist * 0.5;
             
             var ratio = (dist - shorten) / dist;
-            var finalX = p1.x + dx * ratio;
-            var finalY = p1.y + dy * ratio;
+            var lineEndX = p1.x + dx * ratio;
+            var lineEndY = p1.y + dy * ratio;
 
             svgElem = document.createElementNS("http://www.w3.org/2000/svg", "line");
             svgElem.setAttribute("x1", p1.x);
             svgElem.setAttribute("y1", p1.y);
-            svgElem.setAttribute("x2", finalX);
-            svgElem.setAttribute("y2", finalY);
+            svgElem.setAttribute("x2", lineEndX);
+            svgElem.setAttribute("y2", lineEndY);
             svgElem.setAttribute("stroke-linecap", "round");
         }
 
@@ -215,10 +214,11 @@ export function createBoardView({ $, eventBus, store }) {
                     var piece = boardState[r][c];
                     if (piece && piece.type !== 'k') { 
                         var sq = files[c] + (8 - r);
+                        /** @type {'w' | 'b'} */
                         var enemyColor = piece.color === 'w' ? 'b' : 'w';
                         
                         tempDefGame.load(fen);
-                        tempDefGame.put({ type: piece.type, color: enemyColor }, sq);
+                        tempDefGame.put({ type: piece.type, color: enemyColor }, /** @type {import('chess.js').Square} */ (sq));
                         var partsTemp = tempDefGame.fen().split(' ');
                         partsTemp[1] = piece.color;
                         partsTemp[3] = '-';

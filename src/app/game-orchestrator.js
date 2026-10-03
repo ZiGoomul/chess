@@ -46,9 +46,9 @@ $(document).ready(function() {
     const engineWorkers = createEngineWorkers();
     
     const boardView = createBoardView({ $, eventBus, store });
-    const shellView = createShellView({ $, eventBus, store });
-    const evalBarView = createEvalBarView({ $, eventBus });
-    const materialView = createMaterialView({ $, eventBus, Chess });
+    createShellView({ $, eventBus });
+    createEvalBarView({ $, eventBus });
+    createMaterialView({ $, eventBus, Chess });
 
     // Sync UI inputs with stored settings
     $('#botLevel').val(storedSettings.botLevel);
@@ -105,7 +105,7 @@ $(document).ready(function() {
     // Services that become available once IndexedDB has opened.
     const services = { repository: null, puzzleCatalog: null, gameCompletion: null, postGameReview: null };
 
-    const getBotLevel = () => parseInt($('#botLevel').val(), 10);
+    const getBotLevel = () => parseInt(String($('#botLevel').val()), 10);
     const clearSelection = () => {
         store.setState({ selectedSquare: null });
         boardView.removeHighlights();

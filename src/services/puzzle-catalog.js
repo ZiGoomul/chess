@@ -1,3 +1,11 @@
+/**
+ * @typedef {{ themes?: string[], minRating?: number, maxRating?: number, targetRating?: number, theme?: string }} PuzzleFilter
+ */
+
+/**
+ * @param {any} puzzle
+ * @param {PuzzleFilter} [filter]
+ */
 function matches(puzzle, { themes, minRating, maxRating } = {}) {
   return (!themes?.length || themes.every(theme => puzzle.themes?.includes(theme))) &&
     (minRating == null || puzzle.rating >= minRating) && (maxRating == null || puzzle.rating <= maxRating);
@@ -16,6 +24,7 @@ export function createPuzzleCatalog({ builtIns, repository, fetchImpl = fetch, m
       const imported = await repository.puzzles.list();
       return { total: new Set([...builtIns, ...imported].map(puzzle => puzzle.id)).size, imported: imported.length, builtIn: builtIns.length };
     },
+    /** @param {PuzzleFilter} [filter] */
     async loadNextBatch({ theme } = {}) {
       const manifestResponse = await fetchImpl(manifestUrl);
       if (!manifestResponse.ok) throw new Error(`Could not load puzzle manifest (${manifestResponse.status})`);
@@ -40,6 +49,7 @@ export function createPuzzleCatalog({ builtIns, repository, fetchImpl = fetch, m
       await repository.batches.put({ id: batch.id, catalogVersion: manifest.catalogVersion, loadedAt: Date.now() });
       return { added, updated, skipped, batchId: batch.id };
     },
+    /** @param {PuzzleFilter} [filter] */
     async getRecommendation({ themes, targetRating } = {}) {
       const puzzles = await list({ themes });
       const scored = await Promise.all(puzzles.map(async puzzle => ({ puzzle, attempts: await repository.attempts.listByPuzzleId(puzzle.id) })));

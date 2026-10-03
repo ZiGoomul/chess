@@ -9,7 +9,7 @@ function requestResult(request) {
 
 function transactionDone(transaction) {
   return new Promise((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
+    transaction.oncomplete = () => resolve(undefined);
     transaction.onerror = () => reject(transaction.error || new Error('IndexedDB transaction failed'));
     transaction.onabort = () => reject(transaction.error || new Error('IndexedDB transaction aborted'));
   });
@@ -43,6 +43,7 @@ export async function openLocalDatabase({ indexedDB = globalThis.indexedDB, data
   return {
     puzzles: {
       get: id => read('puzzles', store => store.get(id)),
+      /** @param {{ themes?: string[], minRating?: number, maxRating?: number }} [filter] */
       list: async ({ themes, minRating, maxRating } = {}) => {
         const all = await read('puzzles', store => store.getAll());
         return all.filter(puzzle =>

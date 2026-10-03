@@ -21,10 +21,16 @@ Vite prints the local URL after the development server starts.
 
 ```sh
 npm test
+npm run lint
 npm run typecheck
 npm run build
 npm run preview
 ```
+
+`npm run typecheck` runs two passes: `tsconfig.json` type-checks all JavaScript under `src/` (`checkJs`, non-strict), and
+`tsconfig.strict.json` checks the TypeScript modules in `src/core`, `src/domain` and `src/services/chess-engine.ts` with `strict`.
+New logic should go into TypeScript modules; move a file into the strict list once it is converted.
+`npm run lint` runs ESLint on JavaScript (TypeScript is covered by `tsc`).
 
 ## Импорт задач Lichess
 

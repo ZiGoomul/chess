@@ -1,6 +1,6 @@
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 
-export function createShellView({ $, eventBus, store }) {
+export function createShellView({ $, eventBus }) {
     function initShell() {
         const stored = loadStoredSettings();
 

@@ -20,8 +20,8 @@ export function createEvalBarView({ $, eventBus }) {
         // It's expected that the event emitter includes isWhiteTurn if it's relative to the side to move.
         const whiteTurn = isWhiteTurn !== undefined ? isWhiteTurn : true;
         
-        let whiteScore = 0;
-        let text = "";
+        let whiteScore;
+        let text;
 
         if (mate !== null && mate !== undefined) {
             let mateIn = parseInt(mate, 10);

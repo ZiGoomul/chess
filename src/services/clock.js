@@ -13,7 +13,7 @@ export function formatTime(ms) {
   return formatted;
 }
 
-export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentViewPly, getHistoryLength, playSound, onTimeout = () => {} }) {
+export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentViewPly, getHistoryLength, playSound, onTimeout = (_result) => {} }) {
   let enabled = false;
   let whiteMs = 0;
   let blackMs = 0;
