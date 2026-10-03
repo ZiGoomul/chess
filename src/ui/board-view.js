@@ -1,8 +1,11 @@
 import { getLegalMovesForSquare, getSquareFromCoords } from '../domain/move-input.js';
+import { getKingSquareInCheck } from '../domain/check-state.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
     var currentHints = {};
+    var currentCheckGame = null;
+    var currentLastMove = null;
 
     function clearArrows() {
         var group = document.getElementById('arrowsGroup');
@@ -113,6 +116,7 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function highlightLastMove(from, to) {
+        currentLastMove = (from && to) ? { from: from, to: to } : null;
         $('#myBoard .square-55d63').removeClass('last-move-highlight');
         if (from) {
             $('#myBoard [data-square="' + from + '"], #myBoard .square-' + from).addClass('last-move-highlight');
@@ -123,6 +127,7 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function clearLastMoveHighlight() {
+        currentLastMove = null;
         $('#myBoard .square-55d63').removeClass('last-move-highlight');
     }
 
@@ -156,25 +161,13 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function highlightCheck(positionGame) {
-        if (!positionGame) return;
+        currentCheckGame = positionGame || (store && store.getState ? store.getState().game : null);
         $('#myBoard .square-55d63').removeClass('in-check');
-        if (positionGame.in_check() || positionGame.in_checkmate()) {
-            var turn = positionGame.turn();
-            var boardState = positionGame.board();
-            var kingSquare = null;
-            var files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            for (var r = 0; r < 8; r++) {
-                for (var c = 0; c < 8; c++) {
-                    var piece = boardState[r][c];
-                    if (piece && piece.type === 'k' && piece.color === turn) {
-                        kingSquare = files[c] + (8 - r);
-                        break;
-                    }
-                }
-            }
-            if (kingSquare) {
-                $('#myBoard .square-' + kingSquare).addClass('in-check');
-            }
+        if (!currentCheckGame) return;
+
+        var kingSquare = getKingSquareInCheck(currentCheckGame);
+        if (kingSquare) {
+            $('#myBoard [data-square="' + kingSquare + '"], #myBoard .square-' + kingSquare).addClass('in-check');
         }
     }
 
@@ -348,6 +341,12 @@ export function createBoardView({ $, eventBus, store }) {
                 if (board && currentFen) {
                     board.position(currentFen, false);
                 }
+                if (currentLastMove) {
+                    highlightLastMove(currentLastMove.from, currentLastMove.to);
+                }
+                if (currentCheckGame) {
+                    highlightCheck(currentCheckGame);
+                }
                 eventBus.emit('board:snap-end');
             }
         };
@@ -406,6 +405,10 @@ export function createBoardView({ $, eventBus, store }) {
                  board.position(data.fen, useAnimation);
                  if (data.move && data.move.from && data.move.to) {
                      highlightLastMove(data.move.from, data.move.to);
+                 }
+                 var checkGame = data.game || currentCheckGame;
+                 if (checkGame) {
+                     highlightCheck(checkGame);
                  }
              }
         });

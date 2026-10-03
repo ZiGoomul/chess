@@ -147,6 +147,13 @@ $(document).ready(function() {
         }
     });
 
+    eventBus.on('game:ply-changed', (event) => {
+        var positionGame = event?.positionGame;
+        if (positionGame) {
+            boardView.highlightCheck(positionGame);
+        }
+    });
+
     function uciToSan(fen, uci) {
         if (!fen || !uci) return null;
         var move = applyUciMove(new Chess(fen), uci);
@@ -402,7 +409,7 @@ $(document).ready(function() {
         playSoundForMove(botMove);
         clock.addIncrement(botMove.color);
         clock.startClock();
-        eventBus.emit('game:move-made', { fen: game.fen(), move: botMove });
+        eventBus.emit('game:move-made', { fen: game.fen(), move: botMove, game: game });
         updateStatus();
     });
 
@@ -432,7 +439,7 @@ $(document).ready(function() {
         const state = store.getState();
         state.game.load(candidateGame.fen());
         store.setState({ historyFENs: [state.game.fen()], currentViewPly: 0 });
-        eventBus.emit('game:move-made', { fen: state.game.fen() });
+        eventBus.emit('game:move-made', { fen: state.game.fen(), game: state.game });
         updateStatus();
     });
 
@@ -452,7 +459,7 @@ $(document).ready(function() {
                 store.setState({ historyFENs: fens, currentViewPly: fens.length - 1 });
                 playSoundForMove(move);
                 moveHistoryView.updateMoveHistory();
-                eventBus.emit('game:move-made', { fen: game.fen(), move: move });
+                eventBus.emit('game:move-made', { fen: game.fen(), move: move, game: game });
                 
                 currentPuzzleStep++;
                 if (currentPuzzleStep >= currentPuzzle.moves.length) {
@@ -507,7 +514,7 @@ $(document).ready(function() {
                     store.setState({ historyFENs: fens, currentViewPly: fens.length - 1 });
                     playSoundForMove(editorMove);
                     updateStatus();
-                    eventBus.emit('game:move-made', { fen: game.fen(), move: editorMove });
+                    eventBus.emit('game:move-made', { fen: game.fen(), move: editorMove, game: game });
                     return true;
                 }
             }
@@ -541,7 +548,7 @@ $(document).ready(function() {
         clock.addIncrement(move.color);
         clock.startClock();
         updateStatus();
-        eventBus.emit('game:move-made', { fen: game.fen(), move: move });
+        eventBus.emit('game:move-made', { fen: game.fen(), move: move, game: game });
 
         return true;
     }
@@ -669,7 +676,7 @@ $(document).ready(function() {
         store.setState({ historyFENs: fens, currentViewPly: fens.length - 1 });
         
         moveHistoryView.updateMoveHistory();
-        eventBus.emit('game:move-made', { fen: game.fen(), move: moveObj });
+        eventBus.emit('game:move-made', { fen: game.fen(), move: moveObj, game: game });
         
         currentPuzzleStep++;
         
@@ -802,7 +809,8 @@ $(document).ready(function() {
         playSound('gameStart');
         clock.applySettings();
         updateStatus();
-        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
+        boardView.highlightCheck(game);
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game });
     });
 
     $('#clearBoardBtn').on('click', function() {
@@ -816,7 +824,8 @@ $(document).ready(function() {
         playSound('gameStart');
         clock.applySettings();
         updateStatus();
-        eventBus.emit('game:move-made', { fen: game.fen(), animate: false });
+        boardView.highlightCheck(game);
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game });
     });
 
     $('#botLevel').on('change', function() {
