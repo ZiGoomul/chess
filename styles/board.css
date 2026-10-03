@@ -22,30 +22,39 @@
     background-color: rgba(52, 152, 219, 0.4) !important;
 }
 
+.white-1e1d7 {
+    background-color: #ebecd0 !important;
+    color: #779556 !important;
+}
+
+.black-3c85d {
+    background-color: #779556 !important;
+    color: #ebecd0 !important;
+}
+
 .square-55d63 {
     position: relative !important;
 }
 
 /* Выбранная фигура (в стиле Chess.com) */
 .square-55d63.selected-square {
-    background-color: #cdd26a !important;
+    background-color: #bbcb43 !important;
 }
 
-.square-55d63.black-3c85d.selected-square {
-    background-color: #aaa23a !important;
+.square-55d63.white-1e1d7.selected-square {
+    background-color: #f5f682 !important;
 }
 
 /* Подсветка последнего сделанного хода (в стиле Chess.com) */
 .square-55d63.last-move-highlight {
-    background-color: rgba(245, 246, 130, 0.6) !important;
+    background-color: rgba(245, 246, 130, 0.65) !important;
     transition: background-color 0.15s ease;
 }
 
 .square-55d63.black-3c85d.last-move-highlight {
-    background-color: rgba(187, 203, 43, 0.6) !important;
+    background-color: rgba(187, 203, 67, 0.65) !important;
     transition: background-color 0.15s ease;
 }
-
 
 /* Точки и кольца взятия для возможных ходов (в стиле Chess.com) */
 .move-dest-marker {
@@ -61,27 +70,32 @@
     justify-content: center;
 }
 
+.move-dest-dot,
 .move-dest-marker::after {
-    content: '';
     width: 28%;
     height: 28%;
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.24);
+    background-color: rgba(0, 0, 0, 0.22);
+    pointer-events: none;
 }
 
+.move-dest-ring,
 .move-dest-marker.is-capture::after {
-    width: 82%;
-    height: 82%;
+    width: 86%;
+    height: 86%;
     border-radius: 50%;
+    border: 4px solid rgba(0, 0, 0, 0.25);
     background-color: transparent;
-    border: 5px solid rgba(0, 0, 0, 0.24);
+    pointer-events: none;
     box-sizing: border-box;
 }
 
+[data-theme="dark"] .move-dest-dot,
 [data-theme="dark"] .move-dest-marker::after {
     background-color: rgba(0, 0, 0, 0.32);
 }
 
+[data-theme="dark"] .move-dest-ring,
 [data-theme="dark"] .move-dest-marker.is-capture::after {
     background-color: transparent;
     border-color: rgba(0, 0, 0, 0.32);
@@ -169,4 +183,20 @@
 
 [data-board-theme="wood"] .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
 [data-board-theme="wood"] .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+
+/* Полоса оценки (Eval Bar) */
+#evalBarContainer {
+    width: 24px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #312e2b;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#evalBarWhite {
+    background-color: #ffffff;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 
