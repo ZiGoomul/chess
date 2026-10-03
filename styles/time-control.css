@@ -3,7 +3,7 @@
     font-family: ui-monospace, "SF Mono", Monaco, Consolas, monospace;
     font-size: 26px;
     font-weight: 600;
-    background: var(--clock-dark);
+    background: var(--clock-face);
     color: var(--clock-text);
     padding: 6px 12px;
     border-radius: 4px;
@@ -13,8 +13,8 @@
 }
 
 .chess-clock.active {
-    background: #fff;
-    color: #262421;
+    background: var(--clock-active-bg);
+    color: var(--clock-active-text);
 }
 
 .chess-clock.danger {
@@ -212,10 +212,10 @@
     padding: 10px 18px;
     border-radius: 6px;
     border: 2px solid transparent;
-    background: var(--btn-dark);
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-text);
     font-weight: 700;
-    box-shadow: 0 4px 0 var(--btn-dark-shadow);
+    box-shadow: 0 4px 0 var(--btn-shadow);
     margin-bottom: 8px;
     cursor: default;
 }
@@ -246,10 +246,10 @@
     padding: 8px 16px;
     border-radius: 6px;
     border: 2px solid transparent;
-    background: var(--btn-dark);
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-text);
     font-weight: 700;
-    box-shadow: 0 4px 0 var(--btn-dark-shadow);
+    box-shadow: 0 4px 0 var(--btn-shadow);
     margin-bottom: 10px;
     position: relative;
     justify-content: center;
@@ -357,7 +357,7 @@
 
 .cc-category-label {
     font-size: 13px;
-    color: #c3c2c0;
+    color: var(--label-muted);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -386,29 +386,29 @@
     padding: 8px 4px;
     border-radius: 6px;
     border: 2px solid transparent;
-    background: var(--btn-dark);
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-text);
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.15s;
-    box-shadow: 0 4px 0 var(--btn-dark-shadow);
+    box-shadow: 0 4px 0 var(--btn-shadow);
     text-align: center;
 }
 
 .cc-selected-pill:hover {
-    background: var(--btn-dark-hover);
+    background: var(--btn-bg-hover);
 }
 
 .cc-time-btn:hover {
     border-color: var(--btn-green);
-    color: #fff;
-    background: var(--btn-dark-hover);
+    color: var(--btn-text);
+    background: var(--btn-bg-hover);
 }
 
 .cc-time-btn.cc-time-btn-selected {
     border-color: var(--btn-green);
-    color: #fff;
+    color: var(--btn-text);
     background: var(--btn-green-tint);
 }
 
@@ -420,20 +420,20 @@
     gap: 6px;
     width: 100%;
     padding: 8px;
-    background: var(--btn-dark);
+    background: var(--btn-bg);
     border: 2px solid transparent;
     border-radius: 6px;
-    color: #fff;
+    color: var(--btn-text);
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 10px;
-    box-shadow: 0 4px 0 var(--btn-dark-shadow);
+    box-shadow: 0 4px 0 var(--btn-shadow);
 }
 
 .cc-custom-toggle:hover {
-    color: #fff;
-    background: var(--btn-dark);
+    color: var(--btn-text);
+    background: var(--btn-bg);
     border-color: var(--border-color);
 }
 

@@ -15,17 +15,24 @@
     --clock-active-border: #81b64c;
     --shadow: 0 4px 16px rgba(0,0,0,0.08);
 
-    /* Chess.com palette shared by buttons, clocks and the sidebar */
-    --btn-dark: #3c3a37;
-    --btn-dark-hover: #484643;
-    --btn-dark-shadow: #2a2926;
+    /* Chess.com-style controls: light-theme values, dark values below */
+    --btn-bg: #e6e3df;
+    --btn-bg-hover: #dbd8d3;
+    --btn-shadow: #c5c1bb;
+    --btn-text: #262421;
     --btn-green: #81b64c;
     --btn-green-hover: #a3d160;
     --btn-green-shadow: #45753c;
-    --btn-green-tint: #2f3a26;
-    --clock-dark: #1f1e1b;
-    --clock-text: #8b8987;
-    --tabs-bg: #211f1c;
+    --btn-green-tint: #e2efd2;
+    --clock-face: #e6e3df;
+    --clock-text: #686460;
+    --clock-active-bg: #262421;
+    --clock-active-text: #ffffff;
+    --tabs-bg: #e6e3df;
+    --tab-hover-bg: #dbd8d3;
+    --tab-text: #686460;
+    --tab-active-text: #262421;
+    --label-muted: #686460;
     --eval-bg: #403d39;
     --color-success: #27ae60;
     --color-warning: #e67e22;
@@ -43,6 +50,21 @@
     --border-color: #3a3835;
     --clock-bg: #262522;
     --shadow: none;
+
+    --btn-bg: #3c3a37;
+    --btn-bg-hover: #484643;
+    --btn-shadow: #2a2926;
+    --btn-text: #ffffff;
+    --btn-green-tint: #2f3a26;
+    --clock-face: #1f1e1b;
+    --clock-text: #8b8987;
+    --clock-active-bg: #ffffff;
+    --clock-active-text: #262421;
+    --tabs-bg: #211f1c;
+    --tab-hover-bg: #2b2926;
+    --tab-text: #a7a6a2;
+    --tab-active-text: #ffffff;
+    --label-muted: #c3c2c0;
 }
 
 ::-webkit-scrollbar {

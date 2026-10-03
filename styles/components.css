@@ -212,7 +212,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     width: 40px;
     height: 40px;
     border-radius: 3px;
-    background: var(--btn-dark);
+    background: var(--btn-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -238,7 +238,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 
 .player-rating {
     font-size: 13px;
-    color: #a7a6a2;
+    color: var(--text-secondary);
 }
 
 .material-row {
@@ -273,7 +273,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     flex: 1;
     padding: 14px 8px;
     background: transparent;
-    color: #a7a6a2;
+    color: var(--tab-text);
     border: none;
     border-radius: 0;
     font-weight: 600;
@@ -285,13 +285,13 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
 }
 
 .tab-btn:hover {
-    background-color: #2b2926;
+    background-color: var(--tab-hover-bg);
     color: var(--text-primary);
 }
 
 .tab-btn.active {
     background-color: var(--panel-bg);
-    color: #fff;
+    color: var(--tab-active-text);
 }
 
 
