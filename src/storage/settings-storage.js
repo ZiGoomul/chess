@@ -2,7 +2,7 @@ const SETTINGS_KEY = 'chess_studies_settings_v1';
 
 export const DEFAULT_SETTINGS = {
     theme: 'dark',
-    boardTheme: 'wood',
+    boardTheme: 'green',
     pieceTheme: 'chesscom_neo',
     botLevel: 10,
     hintLevel: 10,
