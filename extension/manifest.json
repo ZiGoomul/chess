@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Chess Highlighter for chess.com",
+  "version": "1.0.0",
+  "description": "Подсвечивает нападения и защиту фигур на доске chess.com (анализ и игра с ботом).",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Chess Highlighter",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.chess.com/*", "https://chess.com/*"],
+      "js": ["src/attack-map.js", "src/chesscom-board.js", "src/content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

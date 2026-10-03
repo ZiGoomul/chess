@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Chess Highlighter</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <h1>Chess Highlighter</h1>
+    <label class="toggle">
+        <input type="checkbox" id="highlightAttacks"> Подсвечивать нападения
+    </label>
+    <label class="toggle">
+        <input type="checkbox" id="highlightDefenses"> Подсвечивать защиту
+    </label>
+    <p id="status" class="status"></p>
+    <p class="note">
+        Работает в анализе, в завершённых партиях и в игре с ботом.
+        В живых партиях и рейтинговых задачах подсветка отключена —
+        это нарушение Fair Play chess.com.
+    </p>
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+body {
+    width: 260px;
+    margin: 0;
+    padding: 12px 14px;
+    font: 13px/1.4 system-ui, sans-serif;
+    color: #222;
+    background: #fff;
+}
+
+h1 {
+    font-size: 15px;
+    margin: 0 0 10px;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+    cursor: pointer;
+}
+
+.status {
+    margin: 10px 0 0;
+    font-weight: 600;
+}
+
+.status.off { color: #c0392b; }
+.status.on { color: #27ae60; }
+
+.note {
+    margin: 8px 0 0;
+    color: #666;
+    font-size: 12px;
+}

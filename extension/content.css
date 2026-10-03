@@ -1,0 +1,49 @@
+/* Цвета совпадают с подсветкой в веб-приложении (style.css). */
+.csh-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.csh-badges {
+    z-index: 100;
+}
+
+.csh-square {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    pointer-events: none;
+}
+
+.csh-attacked-by-white {
+    box-shadow: inset 0 0 10px 5px rgba(52, 152, 219, 0.7);
+    background-color: rgba(52, 152, 219, 0.35);
+}
+
+.csh-attacked-by-black {
+    box-shadow: inset 0 0 10px 5px rgba(243, 156, 18, 0.7);
+    background-color: rgba(243, 156, 18, 0.35);
+}
+
+.csh-badge {
+    position: absolute;
+    color: #fff;
+    font: 700 11px/1 system-ui, sans-serif;
+    padding: 3px 5px;
+    border-radius: 4px;
+}
+
+.csh-attack-badge {
+    top: 4px;
+    right: 4px;
+}
+
+.csh-attacked-by-white-badge .csh-attack-badge { background: rgba(52, 152, 219, 0.95); }
+.csh-attacked-by-black-badge .csh-attack-badge { background: rgba(243, 156, 18, 0.95); }
+
+.csh-defense-badge {
+    bottom: 4px;
+    left: 4px;
+    background: rgba(46, 204, 113, 0.95);
+}
