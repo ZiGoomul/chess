@@ -21,6 +21,7 @@ import { createGameReviewService } from '../services/game-review.js';
 import { createPostGameReviewCoordinator } from '../services/post-game-review.js';
 import { createMoveHistoryView } from '../ui/move-history.js';
 import { createPostGameReviewView } from '../ui/post-game-review.js';
+import { createReviewAnnotations } from '../ui/review-annotations.js';
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 import { createPuzzleController } from './puzzle-controller.js';
 import { createGameSession } from './game-session.js';
@@ -132,6 +133,12 @@ $(document).ready(function() {
         onTimeout: (result) => { session.completeCurrentGame(result.winnerColor === 'w' ? '1-0' : '0-1', 'timeout'); }
     });
 
+    const reviewAnnotations = createReviewAnnotations({
+        Chess, boardView, eventBus, getHistoryFENs: () => store.getState().historyFENs
+    });
+    const showReviewAnnotations = () => reviewAnnotations.showForViewPly(store.getState().currentViewPly);
+    eventBus.on('board:resized', showReviewAnnotations);
+
     const moveHistoryView = createMoveHistoryView({
         $: $,
         game: store.getState().game,
@@ -146,7 +153,10 @@ $(document).ready(function() {
         onPositionChange: () => {
             clearSelection();
             session.updateStatus(false);
-        }
+            showReviewAnnotations();
+        },
+        getMoveClass: (ply) => reviewAnnotations.classForPly(ply),
+        onHistoryChange: showReviewAnnotations
     });
 
     eventBus.on('game:ply-changed', (event) => {
@@ -175,6 +185,10 @@ $(document).ready(function() {
         onSelectMoment: session.showReviewMoment,
         onPlayFromMoment: session.playFromReviewMoment,
         onPlayBestMove: session.playBestMoveFromMoment,
+        onSummary: (record, summary, report) => {
+            reviewAnnotations.set(record, summary, report.evaluations || []);
+            moveHistoryView.updateMoveHistory();
+        },
         onCancel: () => { services.postGameReview?.cancel(); },
         onRetry: (gameId) => {
             services.postGameReview?.retry(gameId).catch(() => { reviewView.showError('Не удалось повторить разбор.'); });

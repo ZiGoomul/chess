@@ -312,12 +312,53 @@
   color: #ffffff;
 }
 
-.review-class--best .review-class-icon { background: #81b64c; }
-.review-class--excellent .review-class-icon { background: #5c8bb0; }
-.review-class--good .review-class-icon { background: #95b776; }
-.review-class--inaccuracy .review-class-icon { background: #e0a526; }
-.review-class--mistake .review-class-icon { background: #e58f2a; }
-.review-class--blunder .review-class-icon { background: #ca3431; }
+
+/* Move class colours, shared by the history badges, board badge and review table */
+.move-class--best { background: #81b64c; }
+.move-class--excellent { background: #5c8bb0; }
+.move-class--good { background: #95b776; }
+.move-class--inaccuracy { background: #e0a526; }
+.move-class--mistake { background: #e58f2a; }
+.move-class--blunder { background: #ca3431; }
+
+.move-class-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 3px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  vertical-align: 1px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+}
+
+/* Badge in the corner of the reviewed move's square */
+#myBoard .board-move-class {
+  position: absolute;
+  top: -8%;
+  right: -8%;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  height: 38%;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  pointer-events: none;
+}
 
 .review-moments {
   display: flex;

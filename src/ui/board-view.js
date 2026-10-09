@@ -1,6 +1,7 @@
 import { getSquareFromCoords } from '../domain/move-input.js';
 import { getKingSquareInCheck } from '../domain/check-state.js';
 import { Chess } from 'chess.js';
+import { MOVE_CLASS_LABELS } from './move-classes.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
@@ -118,6 +119,21 @@ export function createBoardView({ $, eventBus, store }) {
         if (to) {
             $('#myBoard [data-square="' + to + '"], #myBoard .square-' + to).addClass('last-move-highlight');
         }
+    }
+
+    function clearMoveClass() {
+        $('#myBoard .board-move-class').remove();
+    }
+
+    // Review badge in the corner of a square (★, ?!, ?? …)
+    function showMoveClass(square, cls) {
+        clearMoveClass();
+        var label = MOVE_CLASS_LABELS[cls];
+        var squareEl = $('#myBoard [data-square="' + square + '"]');
+        if (!label || !squareEl.length) return;
+        squareEl.first().append(
+            $('<span class="board-move-class" aria-hidden="true"></span>').addClass('move-class--' + cls).attr('title', label.label).text(label.icon)
+        );
     }
 
     function clearLastMoveHighlight() {
@@ -468,6 +484,8 @@ export function createBoardView({ $, eventBus, store }) {
         removeHighlights: removeHighlights,
         highlightLastMove: highlightLastMove,
         clearLastMoveHighlight: clearLastMoveHighlight,
+        showMoveClass: showMoveClass,
+        clearMoveClass: clearMoveClass,
         highlightCheck: highlightCheck,
         highlightAttackedPieces: highlightAttackedPieces
     };

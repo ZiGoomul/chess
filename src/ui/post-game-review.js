@@ -1,13 +1,6 @@
 import { MOVE_CLASSES, summarizeReview, winPercent } from '../services/game-review.js';
+import { MOVE_CLASS_LABELS } from './move-classes.js';
 
-const CLASS_LABELS = {
-  best: { label: 'Лучший', icon: '★' },
-  excellent: { label: 'Отличный', icon: '!' },
-  good: { label: 'Хороший', icon: '✓' },
-  inaccuracy: { label: 'Неточность', icon: '?!' },
-  mistake: { label: 'Ошибка', icon: '?' },
-  blunder: { label: 'Зевок', icon: '??' }
-};
 
 function formatPawns(cp) {
   if (Math.abs(cp) >= 1500) return cp > 0 ? 'мат' : '−мат';
@@ -42,7 +35,7 @@ function formatAccuracy(value) {
   return value == null ? '–' : value.toFixed(1);
 }
 
-export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle, onPlayFromMoment, onPlayBestMove }) {
+export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle, onPlayFromMoment, onPlayBestMove, onSummary = (_record, _summary, _report) => {} }) {
   const status = $('#reviewStatus');
   const list = $('#reviewMoments');
   const cancelBtn = $('#reviewCancelBtn');
@@ -64,13 +57,14 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     const rows = $('#reviewClassRows').empty();
     MOVE_CLASSES.forEach(name => {
       const row = $('<tr></tr>').addClass(`review-class review-class--${name}`);
-      row.append($('<th scope="row"></th>').text(CLASS_LABELS[name].label));
+      row.append($('<th scope="row"></th>').text(MOVE_CLASS_LABELS[name].label));
       row.append($('<td></td>').text(result.counts[you][name]));
-      row.append($('<td><span class="review-class-icon" aria-hidden="true"></span></td>').find('span').text(CLASS_LABELS[name].icon).end());
+      row.append($('<td><span class="review-class-icon" aria-hidden="true"></span></td>').find('span').addClass(`move-class--${name}`).text(MOVE_CLASS_LABELS[name].icon).end());
       row.append($('<td></td>').text(result.counts[bot][name]));
       rows.append(row);
     });
     summary.prop('hidden', false);
+    onSummary(record, result, report);
   }
 
   cancelBtn.on('click', () => onCancel());

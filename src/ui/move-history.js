@@ -1,3 +1,5 @@
+import { MOVE_CLASS_LABELS } from './move-classes.js';
+
 export function createMoveHistoryView({
   $,
   game,
@@ -6,7 +8,9 @@ export function createMoveHistoryView({
   getCurrentViewPly,
   setCurrentViewPly,
   clearArrows,
-  onPositionChange
+  onPositionChange,
+  getMoveClass = (_ply) => null,
+  onHistoryChange = () => {}
 }) {
   function updateMoveHistory() {
     const history = game.history();
@@ -19,12 +23,20 @@ export function createMoveHistoryView({
         row.append($('<div class="move-number"></div>').text(`${Math.floor(index / 2) + 1}.`));
       }
 
-      const moveLabel = `Перейти к позиции после хода ${index + 1}: ${san}`;
+      const moveClass = getMoveClass(index);
+      const classInfo = moveClass ? MOVE_CLASS_LABELS[moveClass] : null;
+      const moveLabel = `Перейти к позиции после хода ${index + 1}: ${san}${classInfo ? ` (${classInfo.label})` : ''}`;
       const colorClass = index % 2 === 0 ? 'move-white' : 'move-black';
       const move = $(`<div class="move-text ${colorClass}" role="button" tabindex="0"></div>`)
         .attr('data-ply', index)
         .attr('aria-label', moveLabel)
         .text(san);
+      if (classInfo) {
+        move.append($('<span class="move-class-badge" aria-hidden="true"></span>')
+          .addClass(`move-class--${moveClass}`)
+          .attr('title', classInfo.label)
+          .text(classInfo.icon));
+      }
       row.append(move);
 
       if (index % 2 === 1 || index === history.length - 1) {
@@ -38,6 +50,7 @@ export function createMoveHistoryView({
     if (list.length && getCurrentViewPly() === historyFENs.length - 1) {
       list.scrollTop(list[0].scrollHeight);
     }
+    onHistoryChange();
   }
 
   function updateActiveMove() {
