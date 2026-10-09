@@ -92,3 +92,40 @@ test('finishes a terminal position that reports depth 0 without bestmove', async
   assert.equal(report.status, 'complete');
   assert.deepEqual(report.evaluations[1].evaluation, { type: 'mate', value: 0, pv: null });
 });
+
+import { classifyMove, moveAccuracy, summarizeReview } from '../src/services/game-review.js';
+
+test('classifies moves by centipawn loss, engine choice and allowed mates', () => {
+  assert.equal(classifyMove({ lossCp: 200, isBest: true }), 'best');
+  assert.equal(classifyMove({ lossCp: 5 }), 'best');
+  assert.equal(classifyMove({ lossCp: 25 }), 'excellent');
+  assert.equal(classifyMove({ lossCp: 60 }), 'good');
+  assert.equal(classifyMove({ lossCp: 120 }), 'inaccuracy');
+  assert.equal(classifyMove({ lossCp: 250 }), 'mistake');
+  assert.equal(classifyMove({ lossCp: 450 }), 'blunder');
+  assert.equal(classifyMove({ lossCp: 0, allowedMate: true }), 'blunder');
+});
+
+test('summarizes a review into classes, accuracy per side and an evaluation curve', () => {
+  const record = {
+    fens: [W, B, W],
+    moves: [{ san: 'e4', from: 'e2', to: 'e4' }, { san: 'Qh4', from: 'd8', to: 'h4' }]
+  };
+  // Scores are from the side to move: +30 for White, then −30 for Black (still +30 for White), then +400.
+  const evaluations = [{ evaluation: cp(30) }, { evaluation: cp(-30) }, { evaluation: cp(400) }];
+  const summary = summarizeReview({ record, evaluations });
+
+  assert.deepEqual(summary.curve, [30, 30, 400]);
+  assert.deepEqual(summary.moves.map(move => move.cls), ['best', 'blunder']);
+  assert.equal(summary.counts.w.best, 1);
+  assert.equal(summary.counts.b.blunder, 1);
+  assert.ok(summary.accuracy.w > 99.9);
+  assert.ok(summary.accuracy.b < 50);
+  assert.equal(moveAccuracy(0) > 99.9, true);
+});
+
+test('summary skips plies without evaluations and reports no accuracy for a side with no moves', () => {
+  const summary = summarizeReview({ record: { fens: [W, B], moves: [{ san: 'e4' }] }, evaluations: [{ evaluation: cp(10) }] });
+  assert.deepEqual(summary.moves, []);
+  assert.equal(summary.accuracy.w, null);
+});

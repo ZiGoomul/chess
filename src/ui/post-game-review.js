@@ -1,3 +1,14 @@
+import { MOVE_CLASSES, summarizeReview, winPercent } from '../services/game-review.js';
+
+const CLASS_LABELS = {
+  best: { label: 'Лучший', icon: '★' },
+  excellent: { label: 'Отличный', icon: '!' },
+  good: { label: 'Хороший', icon: '✓' },
+  inaccuracy: { label: 'Неточность', icon: '?!' },
+  mistake: { label: 'Ошибка', icon: '?' },
+  blunder: { label: 'Зевок', icon: '??' }
+};
+
 function formatPawns(cp) {
   if (Math.abs(cp) >= 1500) return cp > 0 ? 'мат' : '−мат';
   const pawns = (cp / 100).toFixed(1);
@@ -14,6 +25,23 @@ export function describeMoment(moment, bestMoveSan) {
   return `${prefix} ${moment.san || '?'} (${loss}; ${formatPawns(moment.beforeCp)} → ${formatPawns(moment.afterCp)}).${best}`;
 }
 
+// Area under White's winning chances, ply by ply, in a 400×80 box.
+export function evalGraphPath(curve) {
+  if (!curve.length) return '';
+  let last = 0;
+  const step = curve.length > 1 ? 400 / (curve.length - 1) : 400;
+  const points = curve.map((cp, index) => {
+    if (cp != null) last = cp;
+    const y = 80 - winPercent(last) * 0.8;
+    return `L${(index * step).toFixed(1)} ${y.toFixed(1)}`;
+  });
+  return `M0 80 ${points.join(' ')} L400 80 Z`;
+}
+
+function formatAccuracy(value) {
+  return value == null ? '–' : value.toFixed(1);
+}
+
 export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle, onPlayFromMoment, onPlayBestMove }) {
   const status = $('#reviewStatus');
   const list = $('#reviewMoments');
@@ -22,12 +50,34 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
   const puzzleBtn = $('#reviewPuzzleBtn');
   const playFromBtn = $('#reviewPlayFromBtn');
   const playBestMoveBtn = $('#reviewPlayBestMoveBtn');
+  const summary = $('#reviewSummary');
   let gameId = null;
+
+  function showSummary(report, record) {
+    const result = summarizeReview({ record, evaluations: report.evaluations || [] });
+    if (!result.moves.length) return;
+    const you = record.humanColor === 'b' ? 'b' : 'w';
+    const bot = you === 'w' ? 'b' : 'w';
+    $('#reviewEvalArea').attr('d', evalGraphPath(result.curve));
+    $('#reviewAccuracyYou').text(formatAccuracy(result.accuracy[you]));
+    $('#reviewAccuracyBot').text(formatAccuracy(result.accuracy[bot]));
+    const rows = $('#reviewClassRows').empty();
+    MOVE_CLASSES.forEach(name => {
+      const row = $('<tr></tr>').addClass(`review-class review-class--${name}`);
+      row.append($('<th scope="row"></th>').text(CLASS_LABELS[name].label));
+      row.append($('<td></td>').text(result.counts[you][name]));
+      row.append($('<td><span class="review-class-icon" aria-hidden="true"></span></td>').find('span').text(CLASS_LABELS[name].icon).end());
+      row.append($('<td></td>').text(result.counts[bot][name]));
+      rows.append(row);
+    });
+    summary.prop('hidden', false);
+  }
 
   cancelBtn.on('click', () => onCancel());
   retryBtn.on('click', () => gameId && onRetry(gameId));
 
   function reset() {
+    summary.prop('hidden', true);
     list.empty().prop('hidden', true);
     cancelBtn.prop('hidden', true);
     retryBtn.prop('hidden', true);
@@ -57,6 +107,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
         retryBtn.prop('hidden', false);
         return;
       }
+      showSummary(report, record);
       const moments = report.moments || [];
       if (moments.length > 0) {
         $('#newGameDetails').prop('open', false);

@@ -219,6 +219,30 @@
                 </div>
                 <section class="review-panel" aria-label="Разбор партии">
                     <div class="review-status" id="reviewStatus" role="status" aria-live="polite">Разбор появится после завершённой партии против бота.</div>
+                    <div id="reviewSummary" class="review-summary" hidden>
+                        <svg id="reviewEvalGraph" class="review-graph" viewBox="0 0 400 80" preserveAspectRatio="none" role="img" aria-label="График оценки по ходам">
+                            <path id="reviewEvalArea" class="review-graph-area" d=""></path>
+                            <line class="review-graph-mid" x1="0" y1="40" x2="400" y2="40"></line>
+                        </svg>
+                        <div class="review-accuracy">
+                            <div class="review-accuracy-side">
+                                <span>Вы</span>
+                                <strong id="reviewAccuracyYou" class="review-accuracy-score review-accuracy-score--you">–</strong>
+                            </div>
+                            <span class="review-accuracy-caption">Точность</span>
+                            <div class="review-accuracy-side">
+                                <span>Бот</span>
+                                <strong id="reviewAccuracyBot" class="review-accuracy-score">–</strong>
+                            </div>
+                        </div>
+                        <table class="review-classes">
+                            <caption class="visually-hidden">Ходы по качеству</caption>
+                            <thead>
+                                <tr><th scope="col">Ход</th><th scope="col">Вы</th><th scope="col"><span class="visually-hidden">Значок</span></th><th scope="col">Бот</th></tr>
+                            </thead>
+                            <tbody id="reviewClassRows"></tbody>
+                        </table>
+                    </div>
                     <ol id="reviewMoments" class="review-moments" hidden></ol>
                     <div class="review-actions">
                         <button type="button" id="reviewCancelBtn" class="puzzle-secondary-btn" hidden>Отменить разбор</button>

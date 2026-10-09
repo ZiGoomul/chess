@@ -67,6 +67,64 @@ export function findCriticalMoments({ record, evaluations, thresholdCp = REVIEW_
   return moments.sort((a, b) => b.lossCp - a.lossCp).slice(0, limit);
 }
 
+// Move classes from best to worst, with the centipawn loss each one tolerates.
+export const MOVE_CLASSES = ['best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder'];
+const CLASS_LIMITS_CP = { best: 10, excellent: 30, good: REVIEW_THRESHOLD_CP, inaccuracy: 150, mistake: 300 };
+
+// White's winning chances (0–100) for a white-perspective score; the curve Lichess uses for accuracy.
+export function winPercent(cp) {
+  return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cp)) - 1);
+}
+
+export function moveAccuracy(winDrop) {
+  const accuracy = 103.1668 * Math.exp(-0.04354 * Math.max(0, winDrop)) - 3.1669;
+  return Math.max(0, Math.min(100, accuracy));
+}
+
+export function classifyMove({ lossCp, isBest = false, allowedMate = false }) {
+  if (isBest) return 'best';
+  if (allowedMate) return 'blunder';
+  return MOVE_CLASSES.find(name => name !== 'blunder' && lossCp <= CLASS_LIMITS_CP[name]) || 'blunder';
+}
+
+/**
+ * Per-move classes, accuracy per side and the white-perspective evaluation curve
+ * for a finished review. Plies without an evaluation on either side are skipped.
+ */
+export function summarizeReview({ record, evaluations }) {
+  const fens = record.fens || [];
+  const moves = record.moves || [];
+  const emptyCounts = () => Object.fromEntries(MOVE_CLASSES.map(name => [name, 0]));
+  const counts = { w: emptyCounts(), b: emptyCounts() };
+  const accuracies = { w: [], b: [] };
+  const classified = [];
+  const curve = fens.map((fen, index) => toWhitePerspective(evaluations[index]?.evaluation, fen));
+
+  for (let index = 0; index < moves.length && index + 1 < fens.length; index++) {
+    const before = evaluations[index]?.evaluation;
+    const after = evaluations[index + 1]?.evaluation;
+    const beforeScore = curve[index];
+    const afterScore = curve[index + 1];
+    if (beforeScore == null || afterScore == null) continue;
+    const mover = fens[index].split(' ')[1];
+    const sign = mover === 'w' ? 1 : -1;
+    const lossCp = Math.max(0, sign * (beforeScore - afterScore));
+    const move = moves[index];
+    const uci = move.from && move.to ? `${move.from}${move.to}${move.promotion || ''}` : null;
+    const cls = classifyMove({
+      lossCp,
+      isBest: Boolean(uci && before?.pv === uci),
+      allowedMate: classifySupportedMotif({ before, after })?.kind === 'allowed-mate'
+    });
+    counts[mover][cls]++;
+    accuracies[mover].push(moveAccuracy(sign * (winPercent(beforeScore) - winPercent(afterScore))));
+    classified.push({ ply: index, mover, san: move.san || null, lossCp, cls });
+  }
+
+  const mean = values => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  return { moves: classified, counts, accuracy: { w: mean(accuracies.w), b: mean(accuracies.b) }, curve };
+}
+
 export function botLevelToRating(level) {
   return BOT_LEVEL_RATINGS[level] || 1500;
 }

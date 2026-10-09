@@ -73,3 +73,37 @@ test('post-game review view allows selecting a moment and playing from it or pla
 
   h.close();
 });
+
+import { evalGraphPath } from '../src/ui/post-game-review.js';
+
+test('evaluation graph path fills from the bottom and carries over missing scores', () => {
+  assert.equal(evalGraphPath([]), '');
+  assert.equal(evalGraphPath([0, null]), 'M0 80 L0.0 40.0 L400.0 40.0 L400 80 Z');
+});
+
+test('completed review shows accuracy and move classes for the human and the bot', () => {
+  const h = createHarness();
+  const view = createPostGameReviewView({
+    $: h.$, toSan: () => null, onSelectMoment() {}, onCancel() {}, onRetry() {}, onSolvePuzzle() {}
+  });
+  const record = {
+    id: 'game-2',
+    humanColor: 'w',
+    fens: ['x w - - 0 1', 'x b - - 0 1', 'x w - - 0 2'],
+    moves: [{ san: 'e4', from: 'e2', to: 'e4' }, { san: 'Qh4', from: 'd8', to: 'h4' }]
+  };
+  const evaluations = [
+    { evaluation: { type: 'cp', value: 30, pv: 'e2e4' } },
+    { evaluation: { type: 'cp', value: -30, pv: 'e7e5' } },
+    { evaluation: { type: 'cp', value: 400, pv: 'd1h5' } }
+  ];
+
+  view.showReport({ gameId: 'game-2', status: 'complete', evaluations, moments: [] }, record, null);
+
+  assert.equal(h.$('#reviewSummary').prop('hidden'), false);
+  assert.equal(h.$('#reviewAccuracyYou').text(), '100.0');
+  assert.equal(h.$('#reviewClassRows tr').length, 6);
+  assert.deepEqual(h.$('#reviewClassRows tr.review-class--best td').map((_, cell) => h.$(cell).text()).get(), ['1', '★', '0']);
+  assert.deepEqual(h.$('#reviewClassRows tr.review-class--blunder td').map((_, cell) => h.$(cell).text()).get(), ['0', '??', '1']);
+  assert.match(h.$('#reviewEvalArea').attr('d'), /^M0 80 /);
+});
