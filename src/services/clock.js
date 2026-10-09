@@ -102,8 +102,9 @@ export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentView
   }
 
   function applySettings(confirmRestart = false) {
+    const timerCb = $('#timerEnableCb');
     const settings = {
-      enabled: $('#timerEnableCb').is(':checked'),
+      enabled: timerCb.length ? timerCb.is(':checked') : true,
       baseMinutes: parseInt($('#timerBase').val(), 10),
       incrementSeconds: parseInt($('#timerInc').val(), 10)
     };

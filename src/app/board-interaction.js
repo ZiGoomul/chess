@@ -3,7 +3,7 @@
  * and the legal-move hints that go with them.
  */
 import { resolveSquareClick, getLegalMovesForSquare, getMoveDestinations } from '../domain/move-input.js';
-import { getDisplayedGame, isEditorMode } from '../domain/position.js';
+import { getDisplayedGame, isEditorMode, isHistoricalPosition } from '../domain/position.js';
 
 const CLICK_DEBOUNCE_MS = 120;
 
@@ -37,6 +37,7 @@ export function createBoardInteraction({
 
         const state = store.getState();
         const positionGame = getDisplayedGame(state, Chess);
+        const historical = isHistoricalPosition(state);
         const resolution = resolveSquareClick({
             selectedSquare: state.selectedSquare,
             clickedSquare: square,
@@ -45,8 +46,8 @@ export function createBoardInteraction({
             isPuzzleMode: puzzle.isActive(),
             isPuzzleCompleted: puzzle.isCompleted(),
             isThinking: state.isThinking,
-            isGameOver: state.game.game_over(),
-            isTimedOut: clock.timedOut,
+            isGameOver: historical ? positionGame.game_over() : state.game.game_over(),
+            isTimedOut: historical ? false : clock.timedOut,
             ChessCtor: Chess
         });
 
@@ -68,24 +69,27 @@ export function createBoardInteraction({
 
     eventBus.on('board:drag-start', (event) => {
         const state = store.getState();
-        const game = state.game;
         if (state.isThinking || puzzle.isCompleted()) { event.cancel = true; return; }
 
         const editor = isEditor();
-        if (!editor && isWrongColor(game, event.piece)) { event.cancel = true; return; }
-        if (!puzzle.isActive() && !editor && clock.timedOut) { event.cancel = true; return; }
+        const historical = isHistoricalPosition(state);
+        const positionGame = getDisplayedGame(state, Chess);
+
+        if (!editor && isWrongColor(positionGame, event.piece)) { event.cancel = true; return; }
+        if (!puzzle.isActive() && !editor && !historical && clock.timedOut) { event.cancel = true; return; }
 
         // Dragging from a past position continues the game from there, which can change whose turn it is.
         session.truncateToViewedPly();
 
+        const liveGame = store.getState().game;
         if (getBotLevel() > 0) {
-            if (game.game_over() || (!puzzle.isActive() && clock.timedOut)) { event.cancel = true; return; }
-            if (event.source === 'spare' || isWrongColor(game, event.piece)) { event.cancel = true; return; }
+            if (liveGame.game_over() || (!puzzle.isActive() && !historical && clock.timedOut)) { event.cancel = true; return; }
+            if (event.source === 'spare' || isWrongColor(liveGame, event.piece)) { event.cancel = true; return; }
         }
 
         if (event.source !== 'spare') {
             if (event.source !== state.selectedSquare) clearSelection();
-            showHints(event.source, game);
+            showHints(event.source, liveGame);
         }
     });
 

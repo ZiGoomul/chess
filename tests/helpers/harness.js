@@ -11,6 +11,12 @@ const PAGE = `<!doctype html><body>
   <div id="gameStatus"></div>
   <div id="gameOverOverlay"><div id="gameOverText"></div></div>
   <div id="reviewStatus"></div>
+  <ol id="reviewMoments" hidden></ol>
+  <button id="reviewCancelBtn" hidden></button>
+  <button id="reviewRetryBtn" hidden></button>
+  <button id="reviewPlayBestMoveBtn" hidden></button>
+  <button id="reviewPlayFromBtn" hidden></button>
+  <button id="reviewPuzzleBtn" hidden></button>
   <div id="puzzleStatusText"></div><div id="puzzleDescText"></div><span id="puzzlesScore"></span>
   <button id="startPositionBtn"></button>
 </body>`;
@@ -54,7 +60,10 @@ export function createHarness({ botLevel = 10 } = {}) {
   const store = createGameStore({ game: new Chess() });
   const boardView = createFakeBoardView();
   const clock = createFakeClock();
-  const moveHistoryView = { updateMoveHistory() {}, goToPly() {} };
+  const moveHistoryView = {
+    updateMoveHistory() {},
+    goToPly: (ply) => { store.setState({ currentViewPly: ply }); }
+  };
   const botCoordinator = { cancelBotSearch() {}, makeBotMove() {} };
   const analysisCoordinator = { autoHintIfNeeded() {}, drawHintArrows() {}, requestHint() {} };
   const services = { repository: null, puzzleCatalog: null, gameCompletion: null, postGameReview: null };

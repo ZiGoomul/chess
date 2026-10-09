@@ -38,6 +38,11 @@ export function createControls({
         clearSelection();
         botCoordinator.cancelBotSearch();
         const level = parseInt($(this).val(), 10);
+        if (level === 0) {
+            $('body').addClass('is-editor-mode');
+        } else if (!$('.tab-btn[data-tab="tab-setup"]').hasClass('active')) {
+            $('body').removeClass('is-editor-mode');
+        }
         updateSettings({ botLevel: level });
         saveStoredSettings({ botLevel: level });
         eventBus.emit('settings:changed', { botLevel: level });
@@ -82,16 +87,53 @@ export function createControls({
         moveHistoryView.goToPly(parseInt($(this).data('ply'), 10) + 1);
     });
 
-    function syncHistoryHeight() {
+    function syncColumnsHeight() {
         const historyEl = $('.history-column');
+        const sidebarEl = $('.sidebar-column');
+        const bottomPlayerEl = $('.bottom-player:visible');
         const boardEl = $('#myBoard .board-b72b1');
-        if (!historyEl.length || !boardEl.length) return;
-        historyEl.css({ height: '', marginTop: '' });
-        const historyTop = historyEl.offset().top;
-        const boardBottom = boardEl.offset().top + boardEl.outerHeight();
-        if (historyTop > boardBottom) return;
-        historyEl.css({ height: boardBottom - historyTop, marginTop: 0 });
+
+        if (window.innerWidth <= 760) {
+            historyEl.css({ height: '', marginTop: '' });
+            sidebarEl.css({ height: '', maxHeight: '', minHeight: '' });
+            return;
+        }
+
+        const anchorEl = bottomPlayerEl.length ? bottomPlayerEl : (boardEl.length ? boardEl : $('#myBoard'));
+        if (!anchorEl.length) return;
+
+        const anchorBottom = anchorEl.offset().top + anchorEl.outerHeight();
+
+        if (historyEl.length) {
+            historyEl.css({ height: '', marginTop: '' });
+            const historyTop = historyEl.offset().top;
+            if (historyTop < anchorBottom) {
+                historyEl.css({ height: anchorBottom - historyTop, marginTop: 0 });
+            }
+        }
+
+        if (sidebarEl.length) {
+            sidebarEl.css({ height: '', maxHeight: '', minHeight: '' });
+            const sidebarTop = sidebarEl.offset().top;
+            if (sidebarTop < anchorBottom) {
+                const targetHeight = anchorBottom - sidebarTop;
+                sidebarEl.css({ minHeight: targetHeight });
+            }
+        }
     }
-    syncHistoryHeight();
-    $(window).resize(syncHistoryHeight);
+
+    syncColumnsHeight();
+    $(window).resize(syncColumnsHeight);
+    eventBus.on('board:resized', syncColumnsHeight);
+    $('.tab-btn').on('click', function() {
+        setTimeout(syncColumnsHeight, 50);
+    });
+
+    if (typeof ResizeObserver !== 'undefined') {
+        const boardCol = document.querySelector('.board-column');
+        if (boardCol) {
+            const observer = new ResizeObserver(syncColumnsHeight);
+            observer.observe(boardCol);
+        }
+    }
 }

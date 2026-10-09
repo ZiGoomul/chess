@@ -1,13 +1,15 @@
 /* Timer Classes */
 .chess-clock {
-    font-family: ui-monospace, "SF Mono", Monaco, Consolas, monospace;
+    flex-shrink: 0;
     font-size: 26px;
-    font-weight: 600;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
     background: var(--clock-face);
     color: var(--clock-text);
     padding: 6px 12px;
     border-radius: 4px;
-    min-width: 110px;
+    min-width: 104px;
+    box-sizing: border-box;
     text-align: right;
     transition: all 0.2s ease;
 }
@@ -43,8 +45,9 @@
 .time-control-dialog {
   background: var(--panel-bg);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  font-family: var(--font-ui);
+  border: none;
+  border-radius: 10px;
   padding: 24px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   max-width: 480px;
@@ -71,7 +74,7 @@
 .time-control-header h2 {
   margin: 0;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
 }
 
@@ -79,10 +82,12 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
   cursor: pointer;
-  padding: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   box-shadow: none;
   transition: color 0.2s;
 }
@@ -96,19 +101,33 @@
   margin-bottom: 16px;
 }
 
-.time-control-group h3 {
+.time-control-group h3,
+.time-control-custom h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 8px 0;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 800;
 }
+
+/* Category dots: bullet, blitz, rapid (groups follow the header) */
+.time-control-group h3::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.time-control-group:nth-child(2) h3::before { background: #e6912c; }
+.time-control-group:nth-child(3) h3::before { background: #f1c40f; }
 
 .time-control-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .time-control-option {
@@ -116,19 +135,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px 8px;
+  min-height: 60px;
+  background: var(--btn-bg);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 8px 6px;
   text-align: center;
-  color: var(--text-primary);
-  box-shadow: 0 2px 0 var(--border-color);
+  color: var(--btn-text);
+  box-shadow: 0 3px 0 var(--btn-shadow);
   cursor: pointer;
   transition: transform 0.1s, border-color 0.2s, background-color 0.2s;
 }
 
 .time-control-option:hover {
-  background: var(--surface-hover);
+  background: var(--btn-bg-hover);
   border-color: var(--accent-color);
 }
 
@@ -139,7 +159,8 @@
 
 .time-control-option strong {
   display: block;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 800;
   margin-bottom: 2px;
   color: var(--text-primary);
 }
@@ -161,12 +182,6 @@
 
 .time-control-custom h3 {
   grid-column: 1 / -1;
-  margin: 0 0 8px 0;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  font-weight: 600;
 }
 
 .time-control-custom label {
@@ -175,17 +190,20 @@
   gap: 6px;
   font-size: 12px;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .time-control-custom input {
   min-width: 0;
-  padding: 6px 10px;
+  min-height: 44px;
+  padding: 0 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: var(--surface-subtle);
+  background: var(--input-bg);
   color: var(--text-primary);
-  font-size: 14px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
   box-sizing: border-box;
 }
 
@@ -383,6 +401,7 @@
 }
 
 .cc-time-btn {
+    min-height: 44px;
     padding: 8px 4px;
     border-radius: 6px;
     border: 2px solid transparent;
@@ -472,10 +491,11 @@
 }
 
 .cc-custom-field input {
-  padding: 8px;
+  min-height: 44px;
+  padding: 0 12px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  background: var(--bg-color);
+  background: var(--input-bg);
   color: var(--text-color);
   font-size: 14px;
   width: 100%;
@@ -490,11 +510,11 @@
     border: none;
     background: var(--btn-green);
     color: #fff;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     cursor: pointer;
     transition: background 0.2s;
-    margin-top: 15px;
+    margin-top: 12px;
     margin-bottom: 8px;
     box-shadow: 0 5px 0 var(--btn-green-shadow);
     text-shadow: 0 1px 2px rgba(0,0,0,.25);

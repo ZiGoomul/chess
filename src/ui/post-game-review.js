@@ -14,12 +14,14 @@ export function describeMoment(moment, bestMoveSan) {
   return `${prefix} ${moment.san || '?'} (${loss}; ${formatPawns(moment.beforeCp)} → ${formatPawns(moment.afterCp)}).${best}`;
 }
 
-export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle }) {
+export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle, onPlayFromMoment, onPlayBestMove }) {
   const status = $('#reviewStatus');
   const list = $('#reviewMoments');
   const cancelBtn = $('#reviewCancelBtn');
   const retryBtn = $('#reviewRetryBtn');
   const puzzleBtn = $('#reviewPuzzleBtn');
+  const playFromBtn = $('#reviewPlayFromBtn');
+  const playBestMoveBtn = $('#reviewPlayBestMoveBtn');
   let gameId = null;
 
   cancelBtn.on('click', () => onCancel());
@@ -30,6 +32,15 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     cancelBtn.prop('hidden', true);
     retryBtn.prop('hidden', true);
     puzzleBtn.prop('hidden', true).off('click');
+    playFromBtn.prop('hidden', true).off('click');
+    playBestMoveBtn.prop('hidden', true).off('click');
+    $('#newGameDetails').prop('open', true);
+  }
+
+  function hideMomentActions() {
+    playFromBtn.prop('hidden', true).off('click');
+    playBestMoveBtn.prop('hidden', true).off('click');
+    list.find('.review-moment-btn').removeClass('is-active');
   }
 
   return {
@@ -47,14 +58,49 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
         return;
       }
       const moments = report.moments || [];
+      if (moments.length > 0) {
+        $('#newGameDetails').prop('open', false);
+      }
       status.text(moments.length
         ? `Разбор готов. Ключевые моменты (${moments.length}):`
         : 'Разбор готов: серьёзных ошибок не найдено.');
       moments.forEach(moment => {
         const item = $('<li><button type="button" class="review-moment-btn"></button></li>');
-        item.find('button')
-          .text(describeMoment(moment, toSan(record.fens[moment.ply], moment.bestMove)))
-          .on('click', () => onSelectMoment(record, moment));
+        const btn = item.find('button');
+        const bestSan = toSan(record.fens[moment.ply], moment.bestMove);
+        btn
+          .text(describeMoment(moment, bestSan))
+          .on('click', () => {
+            list.find('.review-moment-btn').removeClass('is-active');
+            btn.addClass('is-active');
+            onSelectMoment(record, moment);
+
+            if (onPlayBestMove && moment.bestMove) {
+              playBestMoveBtn
+                .text(bestSan ? `Сыграть лучший ход (${bestSan})` : 'Сыграть лучший ход')
+                .prop('hidden', false)
+                .off('click')
+                .on('click', () => {
+                  hideMomentActions();
+                  onPlayBestMove(record, moment);
+                });
+            } else {
+              playBestMoveBtn.prop('hidden', true).off('click');
+            }
+
+            if (onPlayFromMoment) {
+              playFromBtn
+                .text('Доиграть с этой позиции')
+                .prop('hidden', false)
+                .off('click')
+                .on('click', () => {
+                  hideMomentActions();
+                  onPlayFromMoment(record, moment);
+                });
+            } else {
+              playFromBtn.prop('hidden', true).off('click');
+            }
+          });
         list.append(item);
       });
       list.prop('hidden', moments.length === 0);
@@ -72,6 +118,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     showError(message) {
       reset();
       status.text(message);
-    }
+    },
+    hideMomentActions
   };
 }

@@ -52,6 +52,9 @@ $(document).ready(function() {
 
     // Sync UI inputs with stored settings
     $('#botLevel').val(storedSettings.botLevel);
+    if (storedSettings.botLevel === 0) {
+        $('body').addClass('is-editor-mode');
+    }
     $('#hintLevel').val(storedSettings.hintLevel);
     $('#autoHintCb').prop('checked', storedSettings.autoHint);
     $('#highlightMovesCb').prop('checked', storedSettings.highlightMoves);
@@ -170,6 +173,8 @@ $(document).ready(function() {
         $: $,
         toSan: uciToSan,
         onSelectMoment: session.showReviewMoment,
+        onPlayFromMoment: session.playFromReviewMoment,
+        onPlayBestMove: session.playBestMoveFromMoment,
         onCancel: () => { services.postGameReview?.cancel(); },
         onRetry: (gameId) => {
             services.postGameReview?.retry(gameId).catch(() => { reviewView.showError('Не удалось повторить разбор.'); });

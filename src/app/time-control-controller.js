@@ -21,8 +21,9 @@ export function createTimeControlController({ $, Chess, store, clock, puzzle, sa
     }
 
     function updateSelectedTimePill() {
+        const timerCb = $('#timerEnableCb');
         showLabel(describeTimeControl({
-            enabled: $('#timerEnableCb').is(':checked'),
+            enabled: timerCb.length ? timerCb.is(':checked') : true,
             baseMinutes: Number($('#timerBase').val()),
             incrementSeconds: Number($('#timerInc').val())
         }));
@@ -43,8 +44,9 @@ export function createTimeControlController({ $, Chess, store, clock, puzzle, sa
     }
 
     function persist(overrides = {}) {
+        const timerCb = $('#timerEnableCb');
         saveStoredSettings({
-            timerEnabled: $('#timerEnableCb').is(':checked'),
+            timerEnabled: timerCb.length ? timerCb.is(':checked') : true,
             timerBase: Number($('#timerBase').val()),
             timerInc: Number($('#timerInc').val()),
             ...overrides

@@ -32,11 +32,27 @@ export function createShellView({ $, eventBus }) {
         });
 
         $('.tab-btn').on('click', function() {
+            var tabName = $(this).data('tab');
             $('.tab-btn').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1');
             $(this).addClass('active').attr('aria-selected', 'true').attr('tabindex', '0');
 
             $('.tab-content').removeClass('is-active').attr('aria-hidden', 'true');
-            $('#' + $(this).data('tab')).addClass('is-active').attr('aria-hidden', 'false');
+            $('#' + tabName).addClass('is-active').attr('aria-hidden', 'false');
+
+            $('.app-nav-btn').removeClass('active').removeAttr('aria-current');
+            $('.app-nav-btn[data-nav-tab="' + tabName + '"]').addClass('active').attr('aria-current', 'page');
+
+            if (tabName === 'tab-setup') {
+                $('body').addClass('is-editor-mode');
+                $('#botLevel').val('0').trigger('change');
+            } else if ($('#botLevel').val() !== '0') {
+                $('body').removeClass('is-editor-mode');
+            }
+        });
+
+        // Left rail mirrors the sidebar tabs
+        $('.app-nav-btn').on('click', function() {
+            $('.tab-btn[data-tab="' + $(this).data('nav-tab') + '"]').trigger('click');
         });
 
         $('.tabs-header').on('keydown', '.tab-btn', function(event) {

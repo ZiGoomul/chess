@@ -37,34 +37,53 @@
     --color-success: #27ae60;
     --color-warning: #e67e22;
     --color-danger: #e74c3c;
+
+    /* Shared look: font, left rail, inputs, active move, board shadow */
+    --font-ui: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --rail-bg: #e6e3df;
+    --rail-text: #4b4847;
+    --rail-active-bg: #d8d4cf;
+    --input-bg: #ffffff;
+    --active-move-bg: #d8d4d0;
+    --active-move-edge: #b9b5b0;
+    --board-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+    --player-avatar-me: #81b64c;
 }
 
 [data-theme="dark"] {
-    --bg-color: #2b2a27;
-    --text-color: #e0e0e0;
+    --bg-color: #302e2b;
+    --text-color: #e8e6e3;
     --text-primary: #ffffff;
-    --text-secondary: #9e9a95;
-    --panel-bg: #262522;
-    --surface-subtle: #302e2b;
-    --surface-hover: #3d3b38;
-    --border-color: #3a3835;
-    --clock-bg: #262522;
+    --text-secondary: #989795;
+    --panel-bg: #262421;
+    --surface-subtle: #2b2926;
+    --surface-hover: #3a3734;
+    --border-color: #3a3734;
+    --clock-bg: #262421;
     --shadow: none;
 
-    --btn-bg: #3c3a37;
-    --btn-bg-hover: #484643;
-    --btn-shadow: #2a2926;
+    --btn-bg: #3a3734;
+    --btn-bg-hover: #4a4744;
+    --btn-shadow: #1f1d1a;
     --btn-text: #ffffff;
     --btn-green-tint: #2f3a26;
-    --clock-face: #1f1e1b;
+    --clock-face: #262421;
     --clock-text: #8b8987;
     --clock-active-bg: #ffffff;
     --clock-active-text: #262421;
     --tabs-bg: #211f1c;
     --tab-hover-bg: #2b2926;
-    --tab-text: #a7a6a2;
+    --tab-text: #989795;
     --tab-active-text: #ffffff;
-    --label-muted: #c3c2c0;
+    --label-muted: #c3c2c1;
+
+    --rail-bg: #262421;
+    --rail-text: #c3c2c1;
+    --rail-active-bg: #3a3734;
+    --input-bg: #1b1a18;
+    --active-move-bg: #4b4847;
+    --active-move-edge: #6b6966;
+    --board-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 ::-webkit-scrollbar {
@@ -86,7 +105,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
-    font-family: 'Segoe UI', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-ui);
     margin: 0;
     padding: 0;
 }

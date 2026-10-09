@@ -90,3 +90,45 @@ test('a FEN request replaces the position and rejects invalid input', () => {
   assert.equal(h.$('#fenError').text(), 'Некорректная позиция FEN.');
   h.close();
 });
+
+test('playFromReviewMoment truncates the game to the moment position and updates status', () => {
+  const { h, session } = setup();
+  playMoves(h, ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nf6']);
+  const fens = state(h).historyFENs.slice();
+  const record = {
+    humanColor: 'w',
+    botLevel: 10,
+    fens,
+    moves: [{ from: 'e2', to: 'e4' }, { from: 'e7', to: 'e5' }, { from: 'g1', to: 'f3' }, { from: 'b8', to: 'c6' }, { from: 'f1', to: 'c4' }, { from: 'g8', to: 'f6' }]
+  };
+  const moment = { ply: 2, bestMove: 'd2d4' }; // position before 2. Nf3
+
+  session.playFromReviewMoment(record, moment);
+
+  assert.equal(state(h).historyFENs.length, 3);
+  assert.equal(state(h).currentViewPly, 2);
+  assert.equal(state(h).game.history().join(' '), 'e4 e5');
+  assert.match(h.$('#gameStatus').text(), /Ход: Белые/);
+  h.close();
+});
+
+test('playBestMoveFromMoment plays the suggested best move and triggers bot move', () => {
+  const { h, session } = setup();
+  playMoves(h, ['e4', 'e5', 'Nf3', 'Nc6']);
+  const fens = state(h).historyFENs.slice();
+  const record = {
+    humanColor: 'w',
+    botLevel: 10,
+    fens,
+    moves: [{ from: 'e2', to: 'e4' }, { from: 'e7', to: 'e5' }, { from: 'g1', to: 'f3' }, { from: 'b8', to: 'c6' }]
+  };
+  const moment = { ply: 2, bestMove: 'd2d4' }; // best move at ply 2 is d4
+
+  session.playBestMoveFromMoment(record, moment);
+
+  assert.equal(state(h).game.history().join(' '), 'e4 e5 d4');
+  assert.equal(state(h).currentViewPly, 3);
+  assert.equal(state(h).historyFENs.length, 4);
+  h.close();
+});
+

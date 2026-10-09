@@ -4,14 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Шахматные этюды</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&amp;display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="app-header">
-        <h1>Шахматные этюды</h1>
+        <h1 class="app-logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 1 2 5.2V9h2v2h-1.6l1.4 6H8.2l1.4-6H8V9h2V7.2A3 3 0 0 1 12 2Zm-6 17h12v3H6z"/></svg>
+            <span>Шахматные этюды</span>
+        </h1>
+        <nav class="app-nav" aria-label="Разделы">
+            <button type="button" class="app-nav-btn active" data-nav-tab="tab-play">
+                <svg class="app-nav-icon app-nav-icon--play" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M9 17h6l1-6H8zM12 3v4M10 5h4"/></svg>
+                Игра
+            </button>
+            <button type="button" class="app-nav-btn" data-nav-tab="tab-puzzles">
+                <svg class="app-nav-icon app-nav-icon--puzzles" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v3a3 3 0 1 1 0 6v3H9v-3a3 3 0 1 0 0-6z"/><path d="M5 21h14"/></svg>
+                Задачи
+            </button>
+            <button type="button" class="app-nav-btn" data-nav-tab="tab-setup">
+                <svg class="app-nav-icon app-nav-icon--setup" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>
+                Редактор
+            </button>
+            <button type="button" class="app-nav-btn" data-nav-tab="tab-style">
+                <svg class="app-nav-icon app-nav-icon--style" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
+                Вид
+            </button>
+        </nav>
         <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Переключить тему">
             <span class="theme-toggle-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>
             </span>
             <span class="theme-toggle-label">Тема</span>
         </button>
@@ -131,10 +155,18 @@
             <h3 id="moveHistoryTitle">История ходов</h3>
             <div id="moveHistoryList" role="list" aria-label="Ходы партии"></div>
             <div class="history-controls">
-                <button id="navFirstBtn" class="nav-btn" aria-label="К начальной позиции" title="К начальной позиции">|◀</button>
-                <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">◀</button>
-                <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">▶</button>
-                <button id="navLastBtn" class="nav-btn" aria-label="К последней позиции" title="К последней позиции">▶|</button>
+                <button id="navFirstBtn" class="nav-btn" aria-label="К начальной позиции" title="К начальной позиции">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                </button>
+                <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon></svg>
+                </button>
+                <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon></svg>
+                </button>
+                <button id="navLastBtn" class="nav-btn" aria-label="К последней позиции" title="К последней позиции">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                </button>
             </div>
         </div>
 
@@ -191,116 +223,118 @@
                     <div class="review-actions">
                         <button type="button" id="reviewCancelBtn" class="puzzle-secondary-btn" hidden>Отменить разбор</button>
                         <button type="button" id="reviewRetryBtn" class="puzzle-secondary-btn" hidden>Повторить разбор</button>
+                        <button type="button" id="reviewPlayBestMoveBtn" class="review-play-btn" hidden>Сыграть лучший ход</button>
+                        <button type="button" id="reviewPlayFromBtn" class="puzzle-secondary-btn" hidden>Доиграть с этой позиции</button>
                         <button type="button" id="reviewPuzzleBtn" class="review-puzzle-btn" hidden></button>
                     </div>
                 </section>
 
-                <!-- Chess.com-style time control selector pill -->
-                <div id="selectedTimeControlPill" class="cc-selected-pill">
-                    <span class="cc-pill-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
-                    <span id="selectedTimeText" class="cc-pill-text">10 + 0 (Рапид)</span>
-                </div>
+                <!-- Collapsible New Game Setup Accordion -->
+                <details id="newGameDetails" class="cc-new-game-accordion" open>
+                    <summary class="cc-new-game-summary">
+                        <span>Настройки новой партии</span>
+                        <span class="cc-summary-chevron">▾</span>
+                    </summary>
+                    <div class="cc-new-game-body">
+                        <!-- Chess.com-style time control selector pill -->
+                        <div id="selectedTimeControlPill" class="cc-selected-pill">
+                            <span class="cc-pill-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+                            <span id="selectedTimeText" class="cc-pill-text">10 + 0 (Рапид)</span>
+                        </div>
 
-                <!-- Game mode selector -->
-                <div class="cc-mode-selector">
-                    <span class="cc-mode-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3c0 .88.38 1.67 1 2.22V8a5 5 0 0 0-4 4.9V14h12v-1.1A5 5 0 0 0 14 8v-.78A3 3 0 0 0 15 5a3 3 0 0 0-3-3Zm-6 14v2h12v-2H6Zm-1 4v2h14v-2H5Z"/></svg></span>
-                    <select id="botLevel" class="cc-mode-select">
-                        <option value="0">Редактор позиций</option>
-                        <option value="1">Бот: Ур 1 (~800)</option>
-                        <option value="5">Бот: Ур 5 (~1200)</option>
-                        <option value="10">Бот: Ур 10 (~1700)</option>
-                        <option value="15">Бот: Ур 15 (~2200)</option>
-                        <option value="20">Бот: Ур 20 (~3000+)</option>
-                    </select>
-                    <span class="cc-mode-chevron">▾</span>
-                </div>
+                        <!-- Game mode selector -->
+                        <div class="cc-mode-selector">
+                            <span class="cc-mode-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3c0 .88.38 1.67 1 2.22V8a5 5 0 0 0-4 4.9V14h12v-1.1A5 5 0 0 0 14 8v-.78A3 3 0 0 0 15 5a3 3 0 0 0-3-3Zm-6 14v2h12v-2H6Zm-1 4v2h14v-2H5Z"/></svg></span>
+                            <select id="botLevel" class="cc-mode-select">
+                                <option value="0">Редактор позиций</option>
+                                <option value="1">Бот: Ур 1 (~800)</option>
+                                <option value="5">Бот: Ур 5 (~1200)</option>
+                                <option value="10">Бот: Ур 10 (~1700)</option>
+                                <option value="15">Бот: Ур 15 (~2200)</option>
+                                <option value="20">Бот: Ур 20 (~3000+)</option>
+                            </select>
+                            <span class="cc-mode-chevron">▾</span>
+                        </div>
 
-                <!-- Timer toggle -->
-                <div class="cc-rated-row">
-                    <span>На время</span>
-                    <label class="cc-toggle">
-                        <input type="checkbox" id="timerEnableCb" checked>
-                        <span class="cc-toggle-track"></span>
-                    </label>
-                </div>
+                        <!-- Color selection -->
+                        <div id="colorSelection">
+                            <button type="button" class="color-btn color-btn-white active" data-color="white">Белые</button>
+                            <button type="button" class="color-btn color-btn-random" data-color="random" title="Случайный цвет" aria-label="Случайный цвет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg></button>
+                            <button type="button" class="color-btn color-btn-black" data-color="black">Черные</button>
+                        </div>
 
-                <!-- Time control categories -->
-                <div class="cc-time-categories">
-                    <!-- Пуля -->
-                    <div class="cc-time-category">
-                        <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Пуля</span>
-                        <div class="cc-category-options">
-                            <button type="button" class="cc-time-btn" data-base="1" data-inc="0">1 мин.</button>
-                            <button type="button" class="cc-time-btn" data-base="1" data-inc="1">1 + 1</button>
-                            <button type="button" class="cc-time-btn" data-base="2" data-inc="1">2 + 1</button>
+                        <!-- Big green START button -->
+                        <button id="ccStartGameBtn" class="cc-start-btn">Начать партию</button>
+
+                        <!-- Time control categories -->
+                        <div class="cc-time-categories">
+                            <!-- Пуля -->
+                            <div class="cc-time-category">
+                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Пуля</span>
+                                <div class="cc-category-options">
+                                    <button type="button" class="cc-time-btn" data-base="1" data-inc="0">1 мин.</button>
+                                    <button type="button" class="cc-time-btn" data-base="1" data-inc="1">1 + 1</button>
+                                    <button type="button" class="cc-time-btn" data-base="2" data-inc="1">2 + 1</button>
+                                </div>
+                            </div>
+
+                            <!-- Блиц -->
+                            <div class="cc-time-category">
+                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Блиц</span>
+                                <div class="cc-category-options">
+                                    <button type="button" class="cc-time-btn" data-base="3" data-inc="0">3 мин.</button>
+                                    <button type="button" class="cc-time-btn" data-base="3" data-inc="2">3 + 2</button>
+                                    <button type="button" class="cc-time-btn" data-base="5" data-inc="0">5 мин.</button>
+                                </div>
+                            </div>
+
+                            <!-- Рапид -->
+                            <div class="cc-time-category">
+                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Рапид</span>
+                                <div class="cc-category-options">
+                                    <button type="button" class="cc-time-btn" data-base="10" data-inc="0">10 мин.</button>
+                                    <button type="button" class="cc-time-btn cc-time-btn-selected" data-base="10" data-inc="5">10 + 5</button>
+                                    <button type="button" class="cc-time-btn" data-base="15" data-inc="10">15 + 10</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom time controls expander -->
+                        <button type="button" id="ccCustomTimeToggle" class="cc-custom-toggle">
+                            Другие контроли времени <span class="cc-custom-chevron">▾</span>
+                        </button>
+
+                        <div id="ccCustomTimePanel" class="cc-custom-panel">
+                            <div class="cc-custom-inputs">
+                                <div class="cc-custom-field">
+                                    <label for="timerBase">Минут</label>
+                                    <input id="timerBase" type="number" min="1" max="180" value="10">
+                                </div>
+                                <div class="cc-custom-field">
+                                    <label for="timerInc">Добавление (сек)</label>
+                                    <input id="timerInc" type="number" min="0" max="60" value="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hint-section">
+                            <label class="field-label field-label--small">
+                                Сила подсказки:
+                                <select id="hintLevel">
+                                    <option value="1">Ур 1 (~800 ELO)</option>
+                                    <option value="5">Ур 5 (~1200 ELO)</option>
+                                    <option value="10" selected>Ур 10 (~1700 ELO)</option>
+                                    <option value="15">Ур 15 (~2200 ELO)</option>
+                                    <option value="20">Ур 20 (~3000+ ELO)</option>
+                                </select>
+                            </label>
+                            <label class="toggle-label">
+                                <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
+                            </label>
+                            <button id="hintBtn" class="btn-success">Подсказать лучший ход</button>
                         </div>
                     </div>
-
-                    <!-- Блиц -->
-                    <div class="cc-time-category">
-                        <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Блиц</span>
-                        <div class="cc-category-options">
-                            <button type="button" class="cc-time-btn" data-base="3" data-inc="0">3 мин.</button>
-                            <button type="button" class="cc-time-btn" data-base="3" data-inc="2">3 + 2</button>
-                            <button type="button" class="cc-time-btn" data-base="5" data-inc="0">5 мин.</button>
-                        </div>
-                    </div>
-
-                    <!-- Рапид -->
-                    <div class="cc-time-category">
-                        <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Рапид</span>
-                        <div class="cc-category-options">
-                            <button type="button" class="cc-time-btn" data-base="10" data-inc="0">10 мин.</button>
-                            <button type="button" class="cc-time-btn cc-time-btn-selected" data-base="10" data-inc="5">10 + 5</button>
-                            <button type="button" class="cc-time-btn" data-base="15" data-inc="10">15 + 10</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Custom time controls expander -->
-                <button type="button" id="ccCustomTimeToggle" class="cc-custom-toggle">
-                    Другие контроли времени <span class="cc-custom-chevron">▾</span>
-                </button>
-
-                <div id="ccCustomTimePanel" class="cc-custom-panel">
-                    <div class="cc-custom-inputs">
-                        <div class="cc-custom-field">
-                            <label for="timerBase">Минут</label>
-                            <input id="timerBase" type="number" min="1" max="180" value="10">
-                        </div>
-                        <div class="cc-custom-field">
-                            <label for="timerInc">Добавление (сек)</label>
-                            <input id="timerInc" type="number" min="0" max="60" value="5">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hint-section">
-                    <label class="field-label field-label--small">
-                        Сила подсказки:
-                        <select id="hintLevel">
-                            <option value="1">Ур 1 (~800 ELO)</option>
-                            <option value="5">Ур 5 (~1200 ELO)</option>
-                            <option value="10" selected>Ур 10 (~1700 ELO)</option>
-                            <option value="15">Ур 15 (~2200 ELO)</option>
-                            <option value="20">Ур 20 (~3000+ ELO)</option>
-                        </select>
-                    </label>
-                    <label class="toggle-label">
-                        <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
-                    </label>
-                    <button id="hintBtn" class="btn-success">Подсказать лучший ход</button>
-                </div>
-
-                <!-- Color selection -->
-                <div id="colorSelection">
-                    <button type="button" class="color-btn color-btn-white active" data-color="white">Белые</button>
-                    <button type="button" class="color-btn color-btn-random" data-color="random" title="Случайный цвет" aria-label="Случайный цвет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg></button>
-                    <button type="button" class="color-btn color-btn-black" data-color="black">Черные</button>
-                </div>
-
-                <!-- Big green START button -->
-                <button id="ccStartGameBtn" class="cc-start-btn">Начать партию</button>
+                </details>
             </div>
 
             <!-- TAB 2: Setup -->

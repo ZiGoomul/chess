@@ -4,6 +4,7 @@
  */
 import { getDisplayedGame, isHistoricalPosition } from '../domain/position.js';
 import { retainCastlingRights } from '../domain/castling-rights.js';
+import { parseUciMove } from '../services/puzzle-runner.js';
 
 export function createGameSession({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
@@ -25,7 +26,15 @@ export function createGameSession({
             game.undo();
             fens.pop();
         }
-        store.setState({ historyFENs: fens });
+        store.setState({ historyFENs: fens, currentViewPly: fens.length - 1, isThinking: false, selectedSquare: null });
+        gameCompletionReset();
+        clock.applySettings();
+        $('#gameOverOverlay').hide().data('dismissed', true);
+        boardView.clearArrows();
+        botCoordinator.cancelBotSearch();
+        if (typeof boardView.position === 'function') {
+            boardView.position(game.fen(), false);
+        }
         moveHistoryView.updateMoveHistory();
         updateStatus();
     }
@@ -152,7 +161,8 @@ export function createGameSession({
         boardView.removeHighlights();
 
         const startingFen = game.fen();
-        const move = game.move({ from: source, to: target, promotion: 'q' });
+        const promotion = (typeof piece === 'string' && piece.length === 1) ? piece.toLowerCase() : 'q';
+        const move = game.move({ from: source, to: target, promotion });
         if (move === null) return false;
 
         beginCurrentGame(startingFen);
@@ -208,6 +218,12 @@ export function createGameSession({
         record.moves.forEach(move => game.move({ from: move.from, to: move.to, promotion: move.promotion }));
         store.setState({ historyFENs: record.fens.slice(), currentViewPly: record.fens.length - 1 });
 
+        if (record.botLevel != null) {
+            $('#botLevel').val(record.botLevel);
+            store.setState({ settings: { ...store.getState().settings, botLevel: record.botLevel } });
+            botCoordinator.updateStockfishLevel(record.botLevel);
+        }
+
         boardView.orientation(record.humanColor === 'b' ? 'black' : 'white');
         $('#gameOverOverlay').data('dismissed', true);
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
@@ -219,9 +235,33 @@ export function createGameSession({
         const sameGame = state.historyFENs.length === record.fens.length &&
             state.historyFENs[state.historyFENs.length - 1] === record.fens[record.fens.length - 1];
         if (!sameGame) restoreSavedGame(record);
+        store.setState({ currentViewPly: moment.ply });
         moveHistoryView.goToPly(moment.ply);
         if (moment.bestMove) {
-            eventBus.emit('engine:hints-updated', { hints: { 1: moment.bestMove }, game: store.getState().game });
+            const displayedGame = getDisplayedGame(store.getState(), Chess);
+            eventBus.emit('engine:hints-updated', { hints: { 1: moment.bestMove }, game: displayedGame });
+        }
+    }
+
+    function playFromReviewMoment(record, moment) {
+        if (puzzle.isActive()) puzzle.exit();
+        const state = store.getState();
+        const sameGame = state.historyFENs.length === record.fens.length &&
+            state.historyFENs[state.historyFENs.length - 1] === record.fens[record.fens.length - 1];
+        if (!sameGame) restoreSavedGame(record);
+        store.setState({ currentViewPly: moment.ply });
+        moveHistoryView.goToPly(moment.ply);
+        truncateToViewedPly();
+        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+    }
+
+    function playBestMoveFromMoment(record, moment) {
+        playFromReviewMoment(record, moment);
+        if (moment.bestMove) {
+            const parsed = parseUciMove(moment.bestMove);
+            if (parsed) {
+                makeMove(parsed.from, parsed.to, parsed.promotion);
+            }
         }
     }
 
@@ -302,6 +342,7 @@ export function createGameSession({
     $('#ccStartGameBtn').on('click', function() {
         if (puzzle.isActive()) puzzle.exit();
         else $('#startPositionBtn').trigger('click');
+        $('#newGameDetails').prop('open', false);
         clock.applySettings(true);
         clock.startClock();
 
@@ -322,6 +363,7 @@ export function createGameSession({
 
     return {
         makeMove, applyEditedPosition, updateStatus, completeCurrentGame,
-        showReviewMoment, restoreSavedGame, truncateToViewedPly
+        showReviewMoment, restoreSavedGame, truncateToViewedPly,
+        playFromReviewMoment, playBestMoveFromMoment
     };
 }

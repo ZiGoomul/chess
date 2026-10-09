@@ -108,3 +108,38 @@ test('editor mode lets either colour be picked up', () => {
   assert.deepEqual(squares(h.boardView.calls.showMoveHints.at(-1)), ['e5', 'e6']);
   h.close();
 });
+
+test('clicking to move from a historical position is allowed even after game over and timeout', async () => {
+  const { h, makeMoveCalls } = setup();
+  // Play Scholar's mate so game.game_over() is true
+  playMoves(h, ['e4', 'e5', 'Qh5', 'Nc6', 'Bc4', 'Nf6', 'Qxf7#']);
+  assert.equal(h.store.getState().game.game_over(), true);
+  h.clock.timedOut = true;
+
+  // Navigate back to ply 4 (position before 3. Bc4)
+  h.store.setState({ currentViewPly: 4 });
+
+  h.eventBus.emit('board:square-clicked', { square: 'f1' });
+  assert.equal(h.store.getState().selectedSquare, 'f1');
+
+  await new Promise(resolve => setTimeout(resolve, 150)); // click debounce
+  h.eventBus.emit('board:square-clicked', { square: 'c4' });
+
+  assert.deepEqual(makeMoveCalls, [['f1', 'c4']]);
+  h.close();
+});
+
+test('dragging from a historical position is allowed when clock is timed out', () => {
+  const { h, getTruncations } = setup();
+  playMoves(h, ['e4', 'e5', 'Nf3', 'Nc6']);
+  h.clock.timedOut = true;
+  h.store.setState({ currentViewPly: 2 });
+
+  const event = { source: 'd2', piece: 'wP', cancel: false };
+  h.eventBus.emit('board:drag-start', event);
+
+  assert.equal(event.cancel, false);
+  assert.equal(getTruncations(), 1);
+  h.close();
+});
+
