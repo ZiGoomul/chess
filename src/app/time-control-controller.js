@@ -1,7 +1,7 @@
 /**
- * Time-control UI: preset buttons, the new-game dialog, custom inputs and the selected-control pill.
+ * Time-control UI: the time-control dialog (presets, custom, untimed) and the selected-control field.
  */
-import { describeTimeControl, describeCorrespondence } from '../domain/time-control.js';
+import { describeTimeControl } from '../domain/time-control.js';
 
 const ICON_ATTRS = 'width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
 
@@ -12,9 +12,7 @@ const SVG_ICONS = {
     gear: `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`
 };
 
-const CORRESPONDENCE_MINUTES = 1440;
-
-export function createTimeControlController({ $, Chess, store, clock, puzzle, saveStoredSettings }) {
+export function createTimeControlController({ $, clock, saveStoredSettings }) {
     function showLabel({ text, icon }) {
         $('#selectedTimeText').text(text);
         $('.cc-pill-icon').html(SVG_ICONS[icon]);
@@ -29,18 +27,10 @@ export function createTimeControlController({ $, Chess, store, clock, puzzle, sa
         }));
     }
 
-    function updateTimePresetSelection() {
-        const baseMinutes = Number($('#timerBase').val());
-        const incrementSeconds = Number($('#timerInc').val());
-        $('.cc-time-btn').each(function() {
-            const selected = Number($(this).data('base')) === baseMinutes && Number($(this).data('inc')) === incrementSeconds;
-            $(this).toggleClass('cc-time-btn-selected', selected);
-        });
-    }
-
     function refresh() {
-        updateTimePresetSelection();
         updateSelectedTimePill();
+        const enabled = $('#timerEnableCb').is(':checked');
+        $('#gameTimeChip').text(enabled ? `${$('#timerBase').val()} + ${$('#timerInc').val()}` : 'Без часов');
     }
 
     function persist(overrides = {}) {
@@ -53,64 +43,30 @@ export function createTimeControlController({ $, Chess, store, clock, puzzle, sa
         });
     }
 
-    function startNewGameWithTime(enabled, baseMinutes, incrementSeconds) {
-        const game = store.getState().game;
-        const isNonInitialPosition = game.history().length > 0 || game.fen() !== new Chess().fen();
-        if (isNonInitialPosition && !window.confirm('Начать новую партию? Текущая позиция будет сброшена.')) return;
-
+    // The dialog only picks the control; the game starts from the play panel.
+    function selectTimeControl(enabled, baseMinutes, incrementSeconds) {
         $('#timerEnableCb').prop('checked', enabled);
         $('#timerBase').val(baseMinutes);
         $('#timerInc').val(incrementSeconds);
-        if (puzzle.isActive()) puzzle.exit();
-        else $('#startPositionBtn').trigger('click');
         $('#timeControlDialog')[0].close();
-        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        clock.applySettings();
         refresh();
+        persist();
     }
 
     $('.time-control-option').on('click', function() {
-        startNewGameWithTime(true, Number($(this).data('base')), Number($(this).data('inc')));
+        selectTimeControl(true, Number($(this).data('base')), Number($(this).data('inc')));
     });
 
     $('#startCustomTimeBtn').on('click', function() {
         const baseInput = $('#customTimerBase')[0];
         const incrementInput = $('#customTimerInc')[0];
         if (!baseInput.reportValidity() || !incrementInput.reportValidity()) return;
-        startNewGameWithTime(true, Number(baseInput.value), Number(incrementInput.value));
+        selectTimeControl(true, Number(baseInput.value), Number(incrementInput.value));
     });
 
     $('#startUntimedGameBtn').on('click', function() {
-        startNewGameWithTime(false, Number($('#timerBase').val()), Number($('#timerInc').val()));
-    });
-
-    $('#timerEnableCb, #timerBase, #timerInc').on('change', function() {
-        clock.applySettings(true);
-        refresh();
-        persist();
-    });
-
-    $('.cc-time-btn').on('click', function() {
-        const base = Number($(this).data('base'));
-        const inc = Number($(this).data('inc'));
-        const isCorrespondence = base >= CORRESPONDENCE_MINUTES;
-        $('#timerEnableCb').prop('checked', !isCorrespondence);
-        $('#timerBase').val(isCorrespondence ? 10 : base);
-        $('#timerInc').val(inc);
-        clock.applySettings(true);
-        refresh();
-        persist({ timerInc: inc });
-
-        if (isCorrespondence) showLabel(describeCorrespondence(base));
-    });
-
-    $('#ccCustomTimeToggle').on('click', function() {
-        $(this).toggleClass('cc-expanded');
-        $('#ccCustomTimePanel').slideToggle(150);
-    });
-
-    $('#ccAdvancedSettingsToggle').on('click', function() {
-        $(this).toggleClass('cc-expanded');
-        $('#ccAdvancedSettings').slideToggle(150);
+        selectTimeControl(false, Number($('#timerBase').val()), Number($('#timerInc').val()));
     });
 
     return { refresh };

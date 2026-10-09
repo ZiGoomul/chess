@@ -132,3 +132,25 @@ test('playBestMoveFromMoment plays the suggested best move and triggers bot move
   h.close();
 });
 
+
+test('the play panel moves from setup to the game on the first move and to the result on mate', () => {
+  const { h, session } = setup();
+  const phase = () => h.$('#tab-play').attr('data-phase');
+  state(h).game.load('6k1/5ppp/8/n7/8/8/8/4R1K1 w - - 0 1');
+  h.store.setState({ historyFENs: [state(h).game.fen()], currentViewPly: 0 });
+  assert.equal(phase(), 'setup');
+
+  session.makeMove('e1', 'e2');
+  assert.equal(phase(), 'game');
+
+  h.eventBus.emit('bot:move-ready', { bestmove: 'a5b3' });
+  session.makeMove('e2', 'e8');
+  assert.equal(phase(), 'review');
+  assert.equal(h.$('#gameResultTitle').text(), 'Победа · мат');
+
+  // Going back to the setup form is not undone by later status updates of the same final position
+  session.setPanelPhase('setup');
+  session.updateStatus();
+  assert.equal(phase(), 'setup');
+  h.close();
+});

@@ -230,7 +230,7 @@ $(document).ready(function() {
     const interaction = createBoardInteraction({
         $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
     });
-    const timeControl = createTimeControlController({ $, Chess, store, clock, puzzle, saveStoredSettings });
+    const timeControl = createTimeControlController({ $, clock, saveStoredSettings });
     createControls({
         $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
         interaction, session, clearSelection, saveStoredSettings

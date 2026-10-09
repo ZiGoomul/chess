@@ -145,7 +145,7 @@ export function createPuzzleController({
         active = false;
         current = null;
         store.setState({ mode: 'free' });
-        setStatus('Нажмите "Новая задача", чтобы начать!');
+        setStatus('Нажмите «Следующая задача», чтобы начать');
         $('#puzzleDescText').text('');
         $('#startPositionBtn').click();
     }

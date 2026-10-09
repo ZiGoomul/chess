@@ -1,121 +1,475 @@
-/* Sidebar panel contents: puzzle tab, play tab, editor tab and style tab. */
+/* Sidebar panel contents: shared panel controls, play tab phases, puzzles, editor and style tabs. */
+
+/* Shared panel controls */
+.panel-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.panel-subtitle {
+    margin: 4px 0 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.panel-subtitle[hidden] {
+    display: none;
+}
+
+.panel-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.panel-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--label-muted);
+}
+
+.panel-select {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 8px;
+    background: var(--btn-bg);
+    box-shadow: 0 3px 0 var(--btn-shadow);
+    color: var(--btn-text);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.panel-select:hover {
+    background: var(--btn-bg-hover);
+}
+
+.panel-select--time {
+    min-height: 60px;
+}
+
+.panel-select--time .cc-pill-icon {
+    color: var(--accent-color);
+}
+
+/* Native select styled as a panel field, with a drawn chevron */
+.panel-select-wrap {
+    position: relative;
+    display: block;
+}
+
+select.panel-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 44px;
+}
+
+.panel-select-chevron {
+    flex-shrink: 0;
+    color: var(--label-muted);
+}
+
+.panel-select-wrap .panel-select-chevron {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.panel-chip {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--btn-bg);
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.panel-chip--success {
+    padding: 6px 12px;
+    border-radius: 16px;
+    background: var(--btn-green-tint);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.panel-card-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: auto;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--surface-subtle);
+    box-shadow: none;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.panel-card-link:hover {
+    background: var(--surface-hover);
+}
+
+.panel-card-link[hidden] {
+    display: none;
+}
+
+.panel-card-link-text {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 2px;
+    font-size: 15px;
+}
+
+.panel-card-link-text span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-muted);
+}
+
+/* Quiet text button with an icon */
+.panel-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--text-color);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.panel-link-btn:hover {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.panel-link-btn--danger,
+.panel-link-btn--danger:hover {
+    color: var(--color-danger);
+}
+
+.panel-link-btn--accent {
+    justify-content: center;
+    color: var(--accent-color);
+}
+
+.panel-link-btn--accent:hover {
+    color: var(--accent-hover);
+}
+
+.panel-link-btn[hidden] {
+    display: none;
+}
+
+/* Icon-over-label action buttons under the move list */
+.action-btn {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 6px 4px;
+    border: none;
+    border-radius: 8px;
+    background: var(--btn-bg);
+    box-shadow: 0 3px 0 var(--btn-shadow);
+    color: var(--btn-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--btn-bg-hover);
+}
+
+.action-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--btn-shadow);
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* Play tab: one phase visible at a time (data-phase on #tab-play) */
+#tab-play {
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+}
+
+.play-setup,
+.play-status,
+.play-body,
+.play-actions,
+.play-status-live,
+.play-status-result {
+    display: none;
+}
+
+#tab-play[data-phase="setup"] .play-setup {
+    display: flex;
+}
+
+#tab-play[data-phase="game"] .play-status,
+#tab-play[data-phase="review"] .play-status,
+#tab-play[data-phase="game"] .play-body,
+#tab-play[data-phase="review"] .play-body {
+    display: flex;
+}
+
+#tab-play[data-phase="game"] .play-status-live,
+#tab-play[data-phase="review"] .play-status-result,
+#tab-play[data-phase="game"] .play-actions--live,
+#tab-play[data-phase="review"] .play-actions--review {
+    display: flex;
+}
+
+.play-setup {
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 20px 20px;
+    overflow-y: auto;
+}
+
+#colorSelection {
+    display: flex;
+    gap: 8px;
+}
+
+#colorSelection .color-btn-random {
+    flex: 0 0 56px;
+}
+
+.play-status {
+    flex-shrink: 0;
+    flex-direction: column;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.play-status-live {
+    align-items: center;
+    gap: 10px;
+}
+
+.play-status-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+#gameStatus {
+    flex-grow: 1;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.play-status-result {
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.play-result-meta {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--label-muted);
+}
+
+.play-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+}
+
+/* Live game: the move list fills the panel and scrolls on its own */
+#tab-play[data-phase="game"] .play-body {
+    overflow: hidden;
+}
+
+#tab-play[data-phase="game"] .review-panel {
+    display: none;
+}
+
+#tab-play[data-phase="game"] .history-column {
+    flex: 1 1 auto;
+}
+
+/* Finished game: review first, then the annotated moves; the whole body scrolls */
+#tab-play[data-phase="review"] .play-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#tab-play[data-phase="review"] .history-column {
+    flex: none;
+    overflow: visible;
+}
+
+#tab-play[data-phase="review"] #moveHistoryList {
+    flex: none;
+    overflow: visible;
+}
+
+#tab-play[data-phase="review"] .history-controls {
+    position: sticky;
+    bottom: 0;
+}
+
+.play-actions {
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 14px 16px 18px;
+}
+
+.play-actions--review {
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid var(--border-color);
+}
 
 /* Puzzles */
 .puzzle-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.puzzle-header h3 {
-    margin: 0;
-}
-
-#puzzlesScore {
-    font-weight: bold;
-    color: var(--accent-color);
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .puzzle-status-card {
-    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+    border-radius: 10px;
     background: var(--surface-subtle);
-    border-radius: 8px;
 }
 
 #puzzleStatusText {
-    margin-bottom: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
 }
 
 #puzzleDescText {
     min-height: 20px;
     font-size: 14px;
-    color: var(--text-secondary);
-    text-align: center;
+    font-weight: 600;
+    color: var(--label-muted);
 }
 
-#loadPuzzleBtn {
-    width: 100%;
-    padding: 12px 18px;
-    font-size: 16px;
+.puzzle-catalog {
+    margin-top: auto;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-color);
+}
+
+.puzzle-catalog-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-color);
+    list-style: none;
+    cursor: pointer;
+}
+
+.puzzle-catalog-summary::-webkit-details-marker {
+    display: none;
+}
+
+.puzzle-catalog-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--label-muted);
+}
+
+.puzzle-catalog-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.puzzle-catalog-status {
+    min-height: 1.25em;
+    padding: 4px;
+    font-size: 13px;
+    color: var(--label-muted);
 }
 
 #exitPuzzleBtn {
     width: 100%;
-    font-size: 14px;
+    min-height: 48px;
 }
 
-/* Play tab */
-.game-status-card {
-    margin-bottom: 12px;
-    padding: 10px;
-    background: var(--surface-subtle);
-    border-radius: 8px;
-    text-align: center;
-}
-
-#gameStatus {
-    font-size: 16px;
-    font-weight: bold;
-    color: var(--accent-color);
-}
-
-.hint-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 5px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color);
-}
-
-.hint-section select {
-    padding: 6px;
-    border-radius: 4px;
-}
-
-.hint-section .toggle-label {
-    margin-top: 5px;
-    font-size: 13px;
-}
-
+/* Style and editor tabs */
 .field-label {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    font-weight: bold;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-color);
 }
 
-.field-label--small {
-    font-size: 13px;
+.field-label select {
+    min-height: 44px;
 }
 
 .toggle-label {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    min-height: 32px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.btn-success {
-    margin-top: 5px;
-    padding: 10px;
-    font-weight: bold;
-    border-radius: 6px;
-    background-color: var(--color-success);
-}
-
-#colorSelection {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-/* Editor tab */
 .btn-warning {
     background-color: var(--color-warning);
 }
@@ -134,11 +488,12 @@
 }
 
 .setup-fen label {
-    font-weight: bold;
+    font-weight: 700;
 }
 
 #fenInput {
     width: 100%;
+    min-height: 44px;
     box-sizing: border-box;
 }
 
@@ -151,54 +506,7 @@
     flex: 1;
 }
 
-/* Collapsible New Game Accordion */
-.cc-new-game-accordion {
-    border: none;
-    border-radius: 8px;
-    background: var(--surface-subtle);
-    overflow: hidden;
-    margin-top: 6px;
-}
-
-.cc-new-game-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 44px;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
-    cursor: pointer;
-    user-select: none;
-    list-style: none;
-}
-
-.cc-new-game-summary::-webkit-details-marker {
+/* The status line above already names the panel during a game */
+#tab-play[data-phase="game"] #moveHistoryTitle {
     display: none;
 }
-
-.cc-new-game-summary:hover {
-    background: var(--surface-hover);
-}
-
-.cc-new-game-accordion[open] .cc-summary-chevron {
-    transform: rotate(180deg);
-}
-
-.cc-summary-chevron {
-    transition: transform 0.2s ease;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.cc-new-game-body {
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border-top: 1px solid var(--border-color);
-    background: var(--panel-bg);
-}
-

@@ -10,6 +10,28 @@ export function createGameSession({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
     services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
 }) {
+    // The play panel shows the new-game form, the live game or the finished game.
+    let lastResultKey = null;
+    function setPanelPhase(phase) {
+        $('#tab-play').attr('data-phase', phase);
+    }
+
+    const END_REASONS = { checkmate: 'мат', draw: 'ничья', timeout: 'время вышло' };
+
+    function showGameResult(result, endReason) {
+        const fens = store.getState().historyFENs;
+        const key = `${fens.length}:${fens[fens.length - 1]}`;
+        if (key === lastResultKey) return;
+        lastResultKey = key;
+        const human = boardView.orientation() === 'black' ? 'b' : 'w';
+        const winner = result === '1-0' ? 'w' : result === '0-1' ? 'b' : null;
+        const outcome = winner === null ? 'Ничья' : winner === human ? 'Победа' : 'Поражение';
+        const reason = END_REASONS[endReason];
+        $('#gameResultTitle').text(reason && reason !== 'ничья' ? `${outcome} · ${reason}` : outcome);
+        $('#gameResultMeta').text(`Вы против: ${$('#botLevel option:selected').text()} · ${$('#selectedTimeText').text()}`);
+        setPanelPhase('review');
+    }
+
     function pushPosition(game) {
         const fens = store.getState().historyFENs.slice();
         fens.push(game.fen());
@@ -51,6 +73,7 @@ export function createGameSession({
     }
 
     function completeCurrentGame(result, endReason) {
+        if (!puzzle.isActive() && getBotLevel() > 0) showGameResult(result, endReason);
         const completion = services.gameCompletion;
         if (!completion || !completion.currentGameId || puzzle.isActive()) return;
         const game = store.getState().game;
@@ -166,6 +189,7 @@ export function createGameSession({
         if (move === null) return false;
 
         beginCurrentGame(startingFen);
+        if ($('#tab-play').attr('data-phase') === 'setup') setPanelPhase('game');
         pushPosition(game);
         playSoundForMove(move);
         clock.addIncrement(move.color);
@@ -227,6 +251,7 @@ export function createGameSession({
         boardView.orientation(record.humanColor === 'b' ? 'black' : 'white');
         $('#gameOverOverlay').data('dismissed', true);
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        setPanelPhase('review');
         updateStatus();
     }
 
@@ -342,7 +367,8 @@ export function createGameSession({
     $('#ccStartGameBtn').on('click', function() {
         if (puzzle.isActive()) puzzle.exit();
         else $('#startPositionBtn').trigger('click');
-        $('#newGameDetails').prop('open', false);
+        lastResultKey = null;
+        setPanelPhase('game');
         clock.applySettings(true);
         clock.startClock();
 
@@ -357,13 +383,22 @@ export function createGameSession({
         }, 300);
     });
 
+    $('.new-game-setup-btn').on('click', function() {
+        setPanelPhase('setup');
+        $('#ccStartGameBtn').trigger('focus');
+    });
+
+    $('#openLastReviewBtn').on('click', function() {
+        setPanelPhase('review');
+    });
+
     $('#closeOverlayBtn').on('click', function() {
         $('#gameOverOverlay').hide().data('dismissed', true);
     });
 
     return {
         makeMove, applyEditedPosition, updateStatus, completeCurrentGame,
-        showReviewMoment, restoreSavedGame, truncateToViewedPly,
+        showReviewMoment, restoreSavedGame, truncateToViewedPly, setPanelPhase,
         playFromReviewMoment, playBestMoveFromMoment
     };
 }

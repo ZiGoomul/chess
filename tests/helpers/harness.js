@@ -13,7 +13,11 @@ const PAGE = `<!doctype html><body>
   <div id="reviewStatus"></div>
   <div id="reviewSummary" hidden><svg><path id="reviewEvalArea"></path></svg>
     <strong id="reviewAccuracyYou"></strong><strong id="reviewAccuracyBot"></strong>
-    <table><tbody id="reviewClassRows"></tbody></table></div>
+    <ul id="reviewClassChips"></ul></div>
+  <h3 id="reviewMomentsTitle" hidden></h3>
+  <button id="openLastReviewBtn" hidden></button>
+  <div id="tab-play" data-phase="setup"></div>
+  <h2 id="gameResultTitle"></h2><p id="gameResultMeta"></p>
   <ol id="reviewMoments" hidden></ol>
   <button id="reviewCancelBtn" hidden></button>
   <button id="reviewRetryBtn" hidden></button>

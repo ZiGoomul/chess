@@ -1,4 +1,4 @@
-import { MOVE_CLASSES, summarizeReview, winPercent } from '../services/game-review.js';
+import { MOVE_CLASSES, classifyMove, summarizeReview, winPercent } from '../services/game-review.js';
 import { MOVE_CLASS_LABELS } from './move-classes.js';
 
 
@@ -6,6 +6,19 @@ function formatPawns(cp) {
   if (Math.abs(cp) >= 1500) return cp > 0 ? 'мат' : '−мат';
   const pawns = (cp / 100).toFixed(1);
   return cp > 0 ? `+${pawns}` : pawns.replace('-', '−');
+}
+
+function momentMove(moment) {
+  const moveNumber = Math.floor(moment.ply / 2) + 1;
+  return `${moveNumber}${moment.ply % 2 === 0 ? '.' : '…'} ${moment.san || '?'}`;
+}
+
+// Second line of a key-moment card: the better move and how the evaluation changed.
+export function describeMomentDetail(moment, bestMoveSan) {
+  const change = moment.motif?.kind === 'missed-mate' ? 'упущен мат'
+    : moment.motif?.kind === 'allowed-mate' ? 'допущен мат'
+      : `оценка ${formatPawns(moment.beforeCp)} → ${formatPawns(moment.afterCp)}`;
+  return bestMoveSan ? `Лучше ${bestMoveSan} · ${change}` : change;
 }
 
 export function describeMoment(moment, bestMoveSan) {
@@ -54,14 +67,12 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     $('#reviewEvalArea').attr('d', evalGraphPath(result.curve));
     $('#reviewAccuracyYou').text(formatAccuracy(result.accuracy[you]));
     $('#reviewAccuracyBot').text(formatAccuracy(result.accuracy[bot]));
-    const rows = $('#reviewClassRows').empty();
+    const chips = $('#reviewClassChips').empty();
     MOVE_CLASSES.forEach(name => {
-      const row = $('<tr></tr>').addClass(`review-class review-class--${name}`);
-      row.append($('<th scope="row"></th>').text(MOVE_CLASS_LABELS[name].label));
-      row.append($('<td></td>').text(result.counts[you][name]));
-      row.append($('<td><span class="review-class-icon" aria-hidden="true"></span></td>').find('span').addClass(`move-class--${name}`).text(MOVE_CLASS_LABELS[name].icon).end());
-      row.append($('<td></td>').text(result.counts[bot][name]));
-      rows.append(row);
+      const chip = $('<li class="review-class-chip"></li>').addClass(`review-class--${name}`);
+      chip.append($('<span class="review-class-icon" aria-hidden="true"></span>').addClass(`move-class--${name}`).text(MOVE_CLASS_LABELS[name].icon));
+      chip.append($('<span class="review-class-text"></span>').text(`${MOVE_CLASS_LABELS[name].label} · ${result.counts[you][name]}`));
+      chips.append(chip);
     });
     summary.prop('hidden', false);
     onSummary(record, result, report);
@@ -72,13 +83,13 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
 
   function reset() {
     summary.prop('hidden', true);
+    $('#reviewMomentsTitle').prop('hidden', true);
     list.empty().prop('hidden', true);
     cancelBtn.prop('hidden', true);
     retryBtn.prop('hidden', true);
     puzzleBtn.prop('hidden', true).off('click');
     playFromBtn.prop('hidden', true).off('click');
     playBestMoveBtn.prop('hidden', true).off('click');
-    $('#newGameDetails').prop('open', true);
   }
 
   function hideMomentActions() {
@@ -102,19 +113,22 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
         return;
       }
       showSummary(report, record);
+      $('#openLastReviewBtn').prop('hidden', false);
       const moments = report.moments || [];
-      if (moments.length > 0) {
-        $('#newGameDetails').prop('open', false);
-      }
-      status.text(moments.length
-        ? `Разбор готов. Ключевые моменты (${moments.length}):`
-        : 'Разбор готов: серьёзных ошибок не найдено.');
+      status.text(moments.length ? '' : 'Серьёзных ошибок не найдено.');
+      $('#reviewMomentsTitle').prop('hidden', moments.length === 0);
       moments.forEach(moment => {
         const item = $('<li><button type="button" class="review-moment-btn"></button></li>');
         const btn = item.find('button');
         const bestSan = toSan(record.fens[moment.ply], moment.bestMove);
+        const cls = classifyMove({ lossCp: moment.lossCp, allowedMate: moment.motif?.kind === 'allowed-mate' });
+        const text = $('<span class="review-moment-text"></span>')
+          .append($('<strong></strong>').text(momentMove(moment)))
+          .append($('<span></span>').text(describeMomentDetail(moment, bestSan)));
         btn
-          .text(describeMoment(moment, bestSan))
+          .attr('aria-label', describeMoment(moment, bestSan))
+          .append($('<span class="review-moment-badge" aria-hidden="true"></span>').addClass(`move-class--${cls}`).text(MOVE_CLASS_LABELS[cls].icon))
+          .append(text)
           .on('click', () => {
             list.find('.review-moment-btn').removeClass('is-active');
             btn.addClass('is-active');
@@ -122,7 +136,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
 
             if (onPlayBestMove && moment.bestMove) {
               playBestMoveBtn
-                .text(bestSan ? `Сыграть лучший ход (${bestSan})` : 'Сыграть лучший ход')
+                .text(bestSan ? `Сыграть ${bestSan}` : 'Сыграть лучший ход')
                 .prop('hidden', false)
                 .off('click')
                 .on('click', () => {
@@ -135,7 +149,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
 
             if (onPlayFromMoment) {
               playFromBtn
-                .text('Доиграть с этой позиции')
+                .text('Доиграть отсюда')
                 .prop('hidden', false)
                 .off('click')
                 .on('click', () => {

@@ -42,7 +42,9 @@ test('post-game review view allows selecting a moment and playing from it or pla
 
   view.showReport(report, record, null);
 
-  assert.match(h.$('#reviewStatus').text(), /^Разбор готов\. Ключевые моменты \(1\):/);
+  assert.equal(h.$('#reviewMomentsTitle').prop('hidden'), false);
+  assert.equal(h.$('#openLastReviewBtn').prop('hidden'), false);
+  assert.match(h.$('#reviewMoments li button').text(), /^\?!1… e5Лучше Nf3 · оценка \+0\.3 → −0\.9$/);
   assert.equal(h.$('#reviewMoments li').length, 1);
   assert.equal(h.$('#reviewPlayFromBtn').prop('hidden'), true);
   assert.equal(h.$('#reviewPlayBestMoveBtn').prop('hidden'), true);
@@ -53,9 +55,9 @@ test('post-game review view allows selecting a moment and playing from it or pla
   assert.equal(selectCalls.length, 1);
   assert.equal(selectCalls[0].moment.ply, 1);
   assert.equal(h.$('#reviewPlayFromBtn').prop('hidden'), false);
-  assert.equal(h.$('#reviewPlayFromBtn').text(), 'Доиграть с этой позиции');
+  assert.equal(h.$('#reviewPlayFromBtn').text(), 'Доиграть отсюда');
   assert.equal(h.$('#reviewPlayBestMoveBtn').prop('hidden'), false);
-  assert.match(h.$('#reviewPlayBestMoveBtn').text(), /Сыграть лучший ход \(Nf3\)/);
+  assert.equal(h.$('#reviewPlayBestMoveBtn').text(), 'Сыграть Nf3');
 
   // Click "Доиграть с этой позиции"
   h.$('#reviewPlayFromBtn').trigger('click');
@@ -102,8 +104,8 @@ test('completed review shows accuracy and move classes for the human and the bot
 
   assert.equal(h.$('#reviewSummary').prop('hidden'), false);
   assert.equal(h.$('#reviewAccuracyYou').text(), '100.0');
-  assert.equal(h.$('#reviewClassRows tr').length, 6);
-  assert.deepEqual(h.$('#reviewClassRows tr.review-class--best td').map((_, cell) => h.$(cell).text()).get(), ['1', '★', '0']);
-  assert.deepEqual(h.$('#reviewClassRows tr.review-class--blunder td').map((_, cell) => h.$(cell).text()).get(), ['0', '??', '1']);
+  assert.equal(h.$('#reviewClassChips li').length, 6);
+  assert.equal(h.$('#reviewClassChips .review-class--best').text(), '★Лучший · 1');
+  assert.equal(h.$('#reviewClassChips .review-class--blunder').text(), '??Зевок · 0');
   assert.match(h.$('#reviewEvalArea').attr('d'), /^M0 80 /);
 });

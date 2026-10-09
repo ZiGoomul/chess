@@ -70,7 +70,7 @@ body {
     z-index: 5;
 }
 
-/* Right panel: tabs, move history, active tab panel. Its height follows the board column (controls.js). */
+/* Right panel: the active section chosen in the left rail. Its height follows the board column (controls.js). */
 .sidebar-column {
     display: flex;
     flex-direction: column;
@@ -83,26 +83,14 @@ body {
     box-sizing: border-box;
 }
 
-/* Move history grows during a game; the tab panel below shrinks and scrolls */
-.sidebar-column .history-column {
-    flex: 1 1 200px;
-    min-height: 200px;
-}
-
-.sidebar-column:has(#tab-setup.is-active) .history-column,
-.sidebar-column:has(#tab-style.is-active) .history-column {
-    display: none;
-}
-
 /* Sidebar tab panels: only the active one is shown */
 .tab-content {
     display: none;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-height: 0;
     flex-direction: column;
-    gap: 15px;
-    padding: 16px;
-    border-top: 1px solid var(--border-color);
+    gap: 18px;
+    padding: 24px 20px 20px;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -111,21 +99,6 @@ body {
 
 .tab-content.is-active {
     display: flex;
-}
-
-/* Without the move history the tab panel takes the whole column */
-#tab-setup.is-active,
-#tab-style.is-active {
-    flex-grow: 1;
-    border-top: none;
-}
-
-.tab-content--roomy {
-    gap: 20px;
-}
-
-.tab-content--flush {
-    gap: 0;
 }
 
 /* Medium screens: the rail collapses to icons */
@@ -168,9 +141,6 @@ body {
         padding: 12px;
     }
 
-    .sidebar-column .history-column {
-        min-height: 160px;
-    }
 }
 
 /* Phones and narrow windows: one column, rail becomes a top bar */
@@ -193,12 +163,24 @@ body {
         padding: 0;
     }
 
-    .app-logo span {
-        display: inline;
+    .app-header {
+        gap: 8px;
     }
 
-    .app-nav {
+    .app-logo span {
         display: none;
+    }
+
+    .app-nav-list {
+        flex-direction: row;
+        gap: 2px;
+    }
+
+    .app-nav-btn {
+        justify-content: center;
+        width: 52px;
+        padding: 0;
+        font-size: 0;
     }
 
     #themeToggleBtn,
@@ -225,8 +207,7 @@ body {
         font-size: 10px;
     }
 
-    button,
-    .tab-btn {
+    button {
         min-height: 40px;
     }
 
@@ -236,9 +217,9 @@ body {
         overflow: visible;
     }
 
-    .sidebar-column .history-column {
+    #tab-play[data-phase="game"] .history-column {
         flex: none;
-        height: 220px;
+        height: 240px;
     }
 
     #moveHistoryList {
@@ -268,13 +249,4 @@ body {
         padding: 4px 8px;
     }
 
-    .sidebar-column .history-column {
-        height: 190px;
-    }
-
-    .tab-btn {
-        min-width: 0;
-        padding: 8px 5px;
-        font-size: 13px;
-    }
 }

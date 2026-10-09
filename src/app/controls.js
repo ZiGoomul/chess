@@ -13,12 +13,12 @@ export function createControls({
     }
 
     $('#hintBtn').on('click', function() {
-        $(this).text('Анализ...').prop('disabled', true);
+        $(this).prop('disabled', true).find('.action-btn-label').text('Анализ…');
         analysisCoordinator.requestHint();
     });
 
     eventBus.on('engine:hint-completed', function() {
-        $('#hintBtn').text('Подсказать лучший ход').prop('disabled', false);
+        $('#hintBtn').prop('disabled', false).find('.action-btn-label').text('Подсказка');
     });
 
     $('#highlightAttacksCb, #highlightDefensesCb').on('change', function() {

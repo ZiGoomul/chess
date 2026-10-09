@@ -16,22 +16,24 @@
             <span>Шахматные этюды</span>
         </h1>
         <nav class="app-nav" aria-label="Разделы">
-            <button type="button" class="app-nav-btn active" data-nav-tab="tab-play">
-                <svg class="app-nav-icon app-nav-icon--play" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M9 17h6l1-6H8zM12 3v4M10 5h4"/></svg>
-                Игра
-            </button>
-            <button type="button" class="app-nav-btn" data-nav-tab="tab-puzzles">
-                <svg class="app-nav-icon app-nav-icon--puzzles" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v3a3 3 0 1 1 0 6v3H9v-3a3 3 0 1 0 0-6z"/><path d="M5 21h14"/></svg>
-                Задачи
-            </button>
-            <button type="button" class="app-nav-btn" data-nav-tab="tab-setup">
-                <svg class="app-nav-icon app-nav-icon--setup" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>
-                Редактор
-            </button>
-            <button type="button" class="app-nav-btn" data-nav-tab="tab-style">
-                <svg class="app-nav-icon app-nav-icon--style" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
-                Вид
-            </button>
+            <div class="app-nav-list" role="tablist" aria-label="Разделы приложения" aria-orientation="vertical">
+                <button type="button" id="tab-play-button" class="app-nav-btn tab-btn active" role="tab" aria-selected="true" aria-controls="tab-play" tabindex="0" data-tab="tab-play">
+                    <svg class="app-nav-icon app-nav-icon--play" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M9 17h6l1-6H8zM12 3v4M10 5h4"/></svg>
+                    Игра
+                </button>
+                <button type="button" id="tab-puzzles-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-puzzles" tabindex="-1" data-tab="tab-puzzles">
+                    <svg class="app-nav-icon app-nav-icon--puzzles" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v3a3 3 0 1 1 0 6v3H9v-3a3 3 0 1 0 0-6z"/><path d="M5 21h14"/></svg>
+                    Задачи
+                </button>
+                <button type="button" id="tab-setup-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-setup" tabindex="-1" data-tab="tab-setup">
+                    <svg class="app-nav-icon app-nav-icon--setup" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>
+                    Редактор
+                </button>
+                <button type="button" id="tab-style-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-style" tabindex="-1" data-tab="tab-style">
+                    <svg class="app-nav-icon app-nav-icon--style" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
+                    Вид
+                </button>
+            </div>
         </nav>
         <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Переключить тему">
             <span class="theme-toggle-icon">
@@ -114,7 +116,7 @@
             </div>
             <dialog id="timeControlDialog" class="time-control-dialog" aria-labelledby="timeControlTitle">
                 <div class="time-control-header">
-                    <h2 id="timeControlTitle">Новая партия</h2>
+                    <h2 id="timeControlTitle">Контроль времени</h2>
                     <button id="closeTimeControlBtn" class="dialog-close-btn" aria-label="Закрыть">×</button>
                 </div>
                 <div class="time-control-group">
@@ -144,225 +146,205 @@
                     <h3>Свой контроль</h3>
                     <label>Минуты <input id="customTimerBase" type="number" min="1" max="180" value="5" required></label>
                     <label>Добавление, сек <input id="customTimerInc" type="number" min="0" max="60" value="0" required></label>
-                    <button id="startCustomTimeBtn" class="custom-time-start-btn btn-primary">Начать партию</button>
+                    <button id="startCustomTimeBtn" class="custom-time-start-btn btn-primary">Выбрать</button>
                 </div>
                 <button id="startUntimedGameBtn" class="untimed-game-btn btn-secondary">Без часов</button>
             </dialog>
         </div>
 
-        <!-- Right Column: Sidebar (tabs, move history, tab panels) -->
+        <!-- Right Column: Sidebar. Sections are switched from the left rail. -->
         <div class="sidebar-column">
-            
-            <div class="tabs-header" role="tablist" aria-label="Разделы приложения" aria-orientation="horizontal">
-                <button id="tab-play-button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-play" tabindex="0" data-tab="tab-play">Игра</button>
-                <button id="tab-puzzles-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-puzzles" tabindex="-1" data-tab="tab-puzzles">Задачи</button>
-                <button id="tab-setup-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-setup" tabindex="-1" data-tab="tab-setup">Ред</button>
-                <button id="tab-style-button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-style" tabindex="-1" data-tab="tab-style">Вид</button>
-            </div>
-
-            <!-- Move History: shown under the tabs for play and puzzles -->
-            <div class="history-column" aria-labelledby="moveHistoryTitle">
-                <h3 id="moveHistoryTitle">История ходов</h3>
-                <div id="moveHistoryList" role="list" aria-label="Ходы партии"></div>
-                <div class="history-controls">
-                    <button id="navFirstBtn" class="nav-btn" aria-label="К начальной позиции" title="К начальной позиции">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-                    </button>
-                    <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon></svg>
-                    </button>
-                    <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon></svg>
-                    </button>
-                    <button id="navLastBtn" class="nav-btn" aria-label="К последней позиции" title="К последней позиции">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-                    </button>
-                </div>
-            </div>
 
             <!-- TAB: Puzzles -->
             <div class="tab-content tab-content--roomy" id="tab-puzzles" role="tabpanel" aria-labelledby="tab-puzzles-button" aria-hidden="true">
                 <div class="puzzle-header">
-                    <h3>Решение задач</h3>
-                    <span id="puzzlesScore">Решено: 0</span>
+                    <h2 class="panel-title">Задачи</h2>
+                    <span id="puzzlesScore" class="panel-chip panel-chip--success">Решено: 0</span>
                 </div>
-                <div id="puzzleCatalogCount" class="puzzle-catalog-count" aria-live="polite">Доступно: 0 · загружено: 0</div>
-                
+
                 <div class="puzzle-status-card">
-                    <div id="puzzleStatusText">Нажмите "Новая задача", чтобы начать!</div>
+                    <div id="puzzleStatusText">Нажмите «Следующая задача», чтобы начать</div>
                     <div id="puzzleDescText"></div>
                 </div>
 
-                <button id="loadPuzzleBtn" class="btn-primary">Новая случайная задача</button>
-                <label class="puzzle-theme-label" for="puzzleThemeSelect">Тема для загрузки
-                    <select id="puzzleThemeSelect">
-                        <option value="">Любая доступная тема</option>
-                        <option value="mate">Матовые атаки</option>
-                        <option value="fork">Вилки</option>
-                        <option value="pin">Связки</option>
-                        <option value="skewer">Сквозные удары</option>
-                        <option value="opening">Дебют</option>
-                        <option value="endgame">Эндшпиль</option>
-                    </select>
+                <button id="loadPuzzleBtn" class="cc-start-btn">Следующая задача</button>
+                <label class="panel-field" for="puzzleThemeSelect">
+                    <span class="panel-label">Тема</span>
+                    <span class="panel-select-wrap">
+                        <select id="puzzleThemeSelect" class="panel-select">
+                            <option value="">Любая тема</option>
+                            <option value="mate">Матовые атаки</option>
+                            <option value="fork">Вилки</option>
+                            <option value="pin">Связки</option>
+                            <option value="skewer">Сквозные удары</option>
+                            <option value="opening">Дебют</option>
+                            <option value="endgame">Эндшпиль</option>
+                        </select>
+                        <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
                 </label>
-                <button id="loadMorePuzzlesBtn" class="puzzle-secondary-btn btn-secondary">Загрузить задачи по теме</button>
-                <button id="clearPuzzleDataBtn" class="puzzle-secondary-btn btn-secondary">Очистить локальные данные</button>
-                <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite">Подготавливаем локальный каталог…</div>
+
+                <details class="puzzle-catalog">
+                    <summary class="puzzle-catalog-summary">
+                        <span>Каталог задач</span>
+                        <span id="puzzleCatalogCount" class="puzzle-catalog-count" aria-live="polite">Доступно: 0 · загружено: 0</span>
+                    </summary>
+                    <div class="puzzle-catalog-body">
+                        <button id="loadMorePuzzlesBtn" type="button" class="panel-link-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></svg>
+                            Загрузить задачи по теме
+                        </button>
+                        <button id="clearPuzzleDataBtn" type="button" class="panel-link-btn panel-link-btn--danger">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                            Очистить локальные данные
+                        </button>
+                        <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite">Подготавливаем локальный каталог…</div>
+                    </div>
+                </details>
                 <button id="exitPuzzleBtn" class="btn-secondary">Выйти из режима задач</button>
             </div>
 
-            <!-- TAB 1: Play -->
-            <div class="tab-content tab-content--flush is-active" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false">
-                <!-- Game status bar -->
-                <div class="game-status-card">
-                    <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true"></span>
-                </div>
-                <section class="review-panel" aria-label="Разбор партии">
-                    <div class="review-status" id="reviewStatus" role="status" aria-live="polite">Разбор появится после завершённой партии против бота.</div>
-                    <div id="reviewSummary" class="review-summary" hidden>
-                        <svg id="reviewEvalGraph" class="review-graph" viewBox="0 0 400 80" preserveAspectRatio="none" role="img" aria-label="График оценки по ходам">
-                            <path id="reviewEvalArea" class="review-graph-area" d=""></path>
-                            <line class="review-graph-mid" x1="0" y1="40" x2="400" y2="40"></line>
-                        </svg>
-                        <div class="review-accuracy">
-                            <div class="review-accuracy-side">
-                                <span>Вы</span>
-                                <strong id="reviewAccuracyYou" class="review-accuracy-score review-accuracy-score--you">–</strong>
-                            </div>
-                            <span class="review-accuracy-caption">Точность</span>
-                            <div class="review-accuracy-side">
-                                <span>Бот</span>
-                                <strong id="reviewAccuracyBot" class="review-accuracy-score">–</strong>
-                            </div>
+            <!-- TAB: Play. data-phase: setup (new game form), game (live), review (finished game) -->
+            <div class="tab-content tab-content--flush is-active" id="tab-play" role="tabpanel" aria-labelledby="tab-play-button" aria-hidden="false" data-phase="setup">
+
+                <section class="play-setup" aria-labelledby="playSetupTitle">
+                    <h2 id="playSetupTitle" class="panel-title">Новая партия</h2>
+
+                    <div class="panel-field">
+                        <span class="panel-label" id="timeControlFieldLabel">Контроль времени</span>
+                        <button type="button" id="selectedTimeControlPill" class="panel-select panel-select--time" aria-describedby="timeControlFieldLabel">
+                            <span class="cc-pill-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+                            <span id="selectedTimeText" class="cc-pill-text">10 + 5 (Рапид)</span>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                        </button>
+                        <input type="hidden" id="timerBase" value="10">
+                        <input type="hidden" id="timerInc" value="5">
+                        <input type="checkbox" id="timerEnableCb" checked hidden>
+                    </div>
+
+                    <label class="panel-field" for="botLevel">
+                        <span class="panel-label">Соперник</span>
+                        <span class="panel-select-wrap">
+                            <select id="botLevel" class="panel-select">
+                                <option value="0">Редактор позиций</option>
+                                <option value="1">Бот · уровень 1 (~800)</option>
+                                <option value="5">Бот · уровень 5 (~1200)</option>
+                                <option value="10">Бот · уровень 10 (~1700)</option>
+                                <option value="15">Бот · уровень 15 (~2200)</option>
+                                <option value="20">Бот · уровень 20 (~3000+)</option>
+                            </select>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                    </label>
+
+                    <div class="panel-field">
+                        <span class="panel-label" id="colorFieldLabel">Играть за</span>
+                        <div id="colorSelection" role="group" aria-labelledby="colorFieldLabel">
+                            <button type="button" class="color-btn color-btn-white active" data-color="white">Белые</button>
+                            <button type="button" class="color-btn color-btn-random" data-color="random" title="Случайный цвет" aria-label="Случайный цвет"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+                            <button type="button" class="color-btn color-btn-black" data-color="black">Чёрные</button>
                         </div>
-                        <table class="review-classes">
-                            <caption class="visually-hidden">Ходы по качеству</caption>
-                            <thead>
-                                <tr><th scope="col">Ход</th><th scope="col">Вы</th><th scope="col"><span class="visually-hidden">Значок</span></th><th scope="col">Бот</th></tr>
-                            </thead>
-                            <tbody id="reviewClassRows"></tbody>
-                        </table>
                     </div>
-                    <ol id="reviewMoments" class="review-moments" hidden></ol>
-                    <div class="review-actions">
-                        <button type="button" id="reviewCancelBtn" class="puzzle-secondary-btn" hidden>Отменить разбор</button>
-                        <button type="button" id="reviewRetryBtn" class="puzzle-secondary-btn" hidden>Повторить разбор</button>
-                        <button type="button" id="reviewPlayBestMoveBtn" class="review-play-btn" hidden>Сыграть лучший ход</button>
-                        <button type="button" id="reviewPlayFromBtn" class="puzzle-secondary-btn" hidden>Доиграть с этой позиции</button>
-                        <button type="button" id="reviewPuzzleBtn" class="review-puzzle-btn" hidden></button>
-                    </div>
+
+                    <button id="ccStartGameBtn" class="cc-start-btn">Играть</button>
+
+                    <button type="button" id="openLastReviewBtn" class="panel-card-link" hidden>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5d9bd6" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+                        <span class="panel-card-link-text">
+                            <strong>Разбор последней партии</strong>
+                            <span>Точность и ключевые ошибки</span>
+                        </span>
+                        <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                    </button>
                 </section>
 
-                <!-- Collapsible New Game Setup Accordion -->
-                <details id="newGameDetails" class="cc-new-game-accordion" open>
-                    <summary class="cc-new-game-summary">
-                        <span>Настройки новой партии</span>
-                        <span class="cc-summary-chevron">▾</span>
-                    </summary>
-                    <div class="cc-new-game-body">
-                        <!-- Chess.com-style time control selector pill -->
-                        <div id="selectedTimeControlPill" class="cc-selected-pill">
-                            <span class="cc-pill-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
-                            <span id="selectedTimeText" class="cc-pill-text">10 + 0 (Рапид)</span>
-                        </div>
+                <div class="play-status">
+                    <div class="play-status-live">
+                        <span class="play-status-dot" aria-hidden="true"></span>
+                        <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true"></span>
+                        <span id="gameTimeChip" class="panel-chip">10 + 5</span>
+                    </div>
+                    <div class="play-status-result">
+                        <h2 id="gameResultTitle" class="panel-title">Партия завершена</h2>
+                        <p id="gameResultMeta" class="play-result-meta"></p>
+                    </div>
+                </div>
 
-                        <!-- Game mode selector -->
-                        <div class="cc-mode-selector">
-                            <span class="cc-mode-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3c0 .88.38 1.67 1 2.22V8a5 5 0 0 0-4 4.9V14h12v-1.1A5 5 0 0 0 14 8v-.78A3 3 0 0 0 15 5a3 3 0 0 0-3-3Zm-6 14v2h12v-2H6Zm-1 4v2h14v-2H5Z"/></svg></span>
-                            <select id="botLevel" class="cc-mode-select">
-                                <option value="0">Редактор позиций</option>
-                                <option value="1">Бот: Ур 1 (~800)</option>
-                                <option value="5">Бот: Ур 5 (~1200)</option>
-                                <option value="10">Бот: Ур 10 (~1700)</option>
-                                <option value="15">Бот: Ур 15 (~2200)</option>
-                                <option value="20">Бот: Ур 20 (~3000+)</option>
-                            </select>
-                            <span class="cc-mode-chevron">▾</span>
-                        </div>
-
-                        <!-- Color selection -->
-                        <div id="colorSelection">
-                            <button type="button" class="color-btn color-btn-white active" data-color="white">Белые</button>
-                            <button type="button" class="color-btn color-btn-random" data-color="random" title="Случайный цвет" aria-label="Случайный цвет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg></button>
-                            <button type="button" class="color-btn color-btn-black" data-color="black">Черные</button>
-                        </div>
-
-                        <!-- Big green START button -->
-                        <button id="ccStartGameBtn" class="cc-start-btn">Начать партию</button>
-
-                        <!-- Time control categories -->
-                        <div class="cc-time-categories">
-                            <!-- Пуля -->
-                            <div class="cc-time-category">
-                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Пуля</span>
-                                <div class="cc-category-options">
-                                    <button type="button" class="cc-time-btn" data-base="1" data-inc="0">1 мин.</button>
-                                    <button type="button" class="cc-time-btn" data-base="1" data-inc="1">1 + 1</button>
-                                    <button type="button" class="cc-time-btn" data-base="2" data-inc="1">2 + 1</button>
+                <div class="play-body">
+                    <section class="review-panel" aria-label="Разбор партии">
+                        <div class="review-status" id="reviewStatus" role="status" aria-live="polite">Разбор появится после завершённой партии против бота.</div>
+                        <div id="reviewSummary" class="review-summary" hidden>
+                            <svg id="reviewEvalGraph" class="review-graph" viewBox="0 0 400 80" preserveAspectRatio="none" role="img" aria-label="График оценки по ходам">
+                                <path id="reviewEvalArea" class="review-graph-area" d=""></path>
+                                <line class="review-graph-mid" x1="0" y1="40" x2="400" y2="40"></line>
+                            </svg>
+                            <div class="review-accuracy">
+                                <div class="review-accuracy-side">
+                                    <span>Вы</span>
+                                    <strong id="reviewAccuracyYou" class="review-accuracy-score review-accuracy-score--you">–</strong>
+                                </div>
+                                <span class="review-accuracy-caption">Точность</span>
+                                <div class="review-accuracy-side">
+                                    <span>Бот</span>
+                                    <strong id="reviewAccuracyBot" class="review-accuracy-score">–</strong>
                                 </div>
                             </div>
-
-                            <!-- Блиц -->
-                            <div class="cc-time-category">
-                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Блиц</span>
-                                <div class="cc-category-options">
-                                    <button type="button" class="cc-time-btn" data-base="3" data-inc="0">3 мин.</button>
-                                    <button type="button" class="cc-time-btn" data-base="3" data-inc="2">3 + 2</button>
-                                    <button type="button" class="cc-time-btn" data-base="5" data-inc="0">5 мин.</button>
-                                </div>
-                            </div>
-
-                            <!-- Рапид -->
-                            <div class="cc-time-category">
-                                <span class="cc-category-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Рапид</span>
-                                <div class="cc-category-options">
-                                    <button type="button" class="cc-time-btn" data-base="10" data-inc="0">10 мин.</button>
-                                    <button type="button" class="cc-time-btn cc-time-btn-selected" data-base="10" data-inc="5">10 + 5</button>
-                                    <button type="button" class="cc-time-btn" data-base="15" data-inc="10">15 + 10</button>
-                                </div>
-                            </div>
+                            <ul id="reviewClassChips" class="review-class-chips" aria-label="Ваши ходы по качеству"></ul>
                         </div>
-
-                        <!-- Custom time controls expander -->
-                        <button type="button" id="ccCustomTimeToggle" class="cc-custom-toggle">
-                            Другие контроли времени <span class="cc-custom-chevron">▾</span>
-                        </button>
-
-                        <div id="ccCustomTimePanel" class="cc-custom-panel">
-                            <div class="cc-custom-inputs">
-                                <div class="cc-custom-field">
-                                    <label for="timerBase">Минут</label>
-                                    <input id="timerBase" type="number" min="1" max="180" value="10">
-                                </div>
-                                <div class="cc-custom-field">
-                                    <label for="timerInc">Добавление (сек)</label>
-                                    <input id="timerInc" type="number" min="0" max="60" value="5">
-                                </div>
-                            </div>
+                        <h3 id="reviewMomentsTitle" class="panel-subtitle" hidden>Ключевые моменты</h3>
+                        <ol id="reviewMoments" class="review-moments" aria-labelledby="reviewMomentsTitle" hidden></ol>
+                        <div class="review-actions">
+                            <button type="button" id="reviewCancelBtn" class="btn-secondary" hidden>Отменить разбор</button>
+                            <button type="button" id="reviewRetryBtn" class="btn-secondary" hidden>Повторить разбор</button>
+                            <button type="button" id="reviewPlayBestMoveBtn" class="btn-secondary" hidden>Сыграть лучший ход</button>
+                            <button type="button" id="reviewPlayFromBtn" class="btn-secondary" hidden>Доиграть отсюда</button>
                         </div>
+                    </section>
 
-                        <div class="hint-section">
-                            <label class="field-label field-label--small">
-                                Сила подсказки:
-                                <select id="hintLevel">
-                                    <option value="1">Ур 1 (~800 ELO)</option>
-                                    <option value="5">Ур 5 (~1200 ELO)</option>
-                                    <option value="10" selected>Ур 10 (~1700 ELO)</option>
-                                    <option value="15">Ур 15 (~2200 ELO)</option>
-                                    <option value="20">Ур 20 (~3000+ ELO)</option>
-                                </select>
-                            </label>
-                            <label class="toggle-label">
-                                <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
-                            </label>
-                            <button id="hintBtn" class="btn-success">Подсказать лучший ход</button>
+                    <div class="history-column" aria-labelledby="moveHistoryTitle">
+                        <h3 id="moveHistoryTitle">История ходов</h3>
+                        <div id="moveHistoryList" role="list" aria-label="Ходы партии"></div>
+                        <div class="history-controls">
+                            <button id="navFirstBtn" class="nav-btn" aria-label="К начальной позиции" title="К начальной позиции">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                            </button>
+                            <button id="navPrevBtn" class="nav-btn" aria-label="Предыдущая позиция" title="Предыдущая позиция">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"></polygon></svg>
+                            </button>
+                            <button id="navNextBtn" class="nav-btn" aria-label="Следующая позиция" title="Следующая позиция">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon></svg>
+                            </button>
+                            <button id="navLastBtn" class="nav-btn" aria-label="К последней позиции" title="К последней позиции">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                            </button>
                         </div>
                     </div>
-                </details>
+                </div>
+
+                <div class="play-actions play-actions--live">
+                    <button type="button" id="hintBtn" class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3Z"/></svg>
+                        <span class="action-btn-label">Подсказка</span>
+                    </button>
+                    <button type="button" id="flipOrientationBtn" class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 4 3 8M7 4l4 4M17 20V4M17 20l-4-4M17 20l4-4"/></svg>
+                        <span class="action-btn-label">Перевернуть</span>
+                    </button>
+                    <button type="button" class="action-btn new-game-setup-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        <span class="action-btn-label">Новая партия</span>
+                    </button>
+                </div>
+
+                <div class="play-actions play-actions--review">
+                    <button type="button" class="cc-start-btn new-game-setup-btn">Новая партия</button>
+                    <button type="button" id="reviewPuzzleBtn" class="panel-link-btn panel-link-btn--accent" hidden></button>
+                </div>
             </div>
 
             <!-- TAB 2: Setup -->
             <div class="tab-content" id="tab-setup" role="tabpanel" aria-labelledby="tab-setup-button" aria-hidden="true">
+                <h2 class="panel-title">Редактор позиций</h2>
                 <button id="startPositionBtn" class="btn-warning">Начальная позиция</button>
                 <button id="clearBoardBtn" class="btn-danger">Очистить доску</button>
 
@@ -379,6 +361,7 @@
 
             <!-- TAB 3: Style -->
             <div class="tab-content" id="tab-style" role="tabpanel" aria-labelledby="tab-style-button" aria-hidden="true">
+                <h2 class="panel-title">Вид</h2>
                 <label class="field-label">
                     Стиль фигур:
                     <select id="pieceThemeSelect">
@@ -413,6 +396,21 @@
 
                 <label class="toggle-label">
                     <div class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></div> Подсвечивать защиту
+                </label>
+
+                <h3 class="panel-subtitle">Подсказки</h3>
+                <label class="field-label">
+                    Сила подсказки:
+                    <select id="hintLevel">
+                        <option value="1">Ур 1 (~800 ELO)</option>
+                        <option value="5">Ур 5 (~1200 ELO)</option>
+                        <option value="10" selected>Ур 10 (~1700 ELO)</option>
+                        <option value="15">Ур 15 (~2200 ELO)</option>
+                        <option value="20">Ур 20 (~3000+ ELO)</option>
+                    </select>
+                </label>
+                <label class="toggle-label">
+                    <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
                 </label>
             </div>
 

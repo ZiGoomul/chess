@@ -33,15 +33,6 @@
     }
 }
 
-
-
-
-
-
-
-
-
-
 .time-control-dialog {
   background: var(--panel-bg);
   color: var(--text-primary);
@@ -217,27 +208,6 @@
   margin-top: 12px;
 }
 
-/* ============================
-   Chess.com-style Sidebar
-   ============================ */
-
-/* Selected time control pill */
-.cc-selected-pill {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    font-weight: 700;
-    box-shadow: 0 4px 0 var(--btn-shadow);
-    margin-bottom: 8px;
-    cursor: default;
-}
-
 .cc-pill-icon {
   display: inline-flex;
   align-items: center;
@@ -251,255 +221,10 @@
 }
 
 .cc-pill-text {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text-color);
-}
-
-/* Game mode selector */
-.cc-mode-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    font-weight: 700;
-    box-shadow: 0 4px 0 var(--btn-shadow);
-    margin-bottom: 10px;
-    position: relative;
-    justify-content: center;
-}
-
-.cc-mode-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cc-mode-icon svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.cc-mode-select {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-color);
-    font-weight: 700;
-    font-size: 14px;
-    padding: 0;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    text-align: center;
-    outline: none;
-}
-
-.cc-mode-chevron {
-  font-size: 12px;
-  color: #888;
-  pointer-events: none;
-}
-
-/* Rated toggle */
-.cc-rated-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 4px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.cc-toggle {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.cc-toggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.cc-toggle-track {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: #555;
-  border-radius: 24px;
-  transition: background 0.3s;
-}
-
-.cc-toggle-track::before {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  left: 3px;
-  bottom: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.3s;
-}
-
-.cc-toggle input:checked + .cc-toggle-track {
-  background: #81b64c;
-}
-
-.cc-toggle input:checked + .cc-toggle-track::before {
-  transform: translateX(20px);
-}
-
-/* Time control categories */
-.cc-time-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.cc-time-category {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cc-category-label {
-    font-size: 13px;
-    color: var(--label-muted);
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.cc-category-label svg {
-  width: 14px;
-  height: 14px;
-  stroke: var(--text-secondary);
-}
-
-.cc-info-icon {
-  font-size: 12px;
-  color: #777;
-  cursor: help;
-}
-
-.cc-category-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.cc-time-btn {
-    min-height: 44px;
-    padding: 8px 4px;
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 4px 0 var(--btn-shadow);
-    text-align: center;
-}
-
-.cc-selected-pill:hover {
-    background: var(--btn-bg-hover);
-}
-
-.cc-time-btn:hover {
-    border-color: var(--btn-green);
-    color: var(--btn-text);
-    background: var(--btn-bg-hover);
-}
-
-.cc-time-btn.cc-time-btn-selected {
-    border-color: var(--btn-green);
-    color: var(--btn-text);
-    background: var(--btn-green-tint);
-}
-
-/* Custom time controls expander */
-.cc-custom-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 8px;
-    background: var(--btn-bg);
-    border: 2px solid transparent;
-    border-radius: 6px;
-    color: var(--btn-text);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 0 var(--btn-shadow);
-}
-
-.cc-custom-toggle:hover {
-    color: var(--btn-text);
-    background: var(--btn-bg);
-    border-color: var(--border-color);
-}
-
-.cc-custom-chevron {
-  font-size: 11px;
-  transition: transform 0.2s;
-}
-
-.cc-custom-toggle.cc-expanded .cc-custom-chevron {
-  transform: rotate(180deg);
-}
-
-/* Custom time panel */
-.cc-custom-panel {
-    display: none;
-    padding: 10px 0;
-    margin-bottom: 6px;
-}
-
-.cc-custom-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.cc-custom-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.cc-custom-field label {
-  font-size: 12px;
-  color: #888;
-  font-weight: 500;
-}
-
-.cc-custom-field input {
-  min-height: 44px;
-  padding: 0 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: var(--input-bg);
-  color: var(--text-color);
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
+  flex-grow: 1;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--text-primary);
 }
 
 /* Big green start button */
@@ -513,9 +238,9 @@
     font-size: 20px;
     font-weight: 800;
     cursor: pointer;
+    min-height: 56px;
     transition: background 0.2s;
-    margin-top: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     box-shadow: 0 5px 0 var(--btn-green-shadow);
     text-shadow: 0 1px 2px rgba(0,0,0,.25);
 }
@@ -528,37 +253,6 @@
     transform: translateY(4px);
     box-shadow: 0 1px 0 var(--btn-green-shadow);
 }
-
-/* Advanced settings toggle */
-.cc-advanced-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 4px;
-  cursor: pointer;
-  color: #999;
-  font-size: 13px;
-  border-top: 1px solid var(--border-color);
-  margin-top: 2px;
-}
-
-.cc-advanced-toggle:hover {
-  color: var(--text-color);
-}
-
-.cc-advanced-toggle.cc-expanded .cc-custom-chevron {
-  transform: rotate(180deg);
-}
-
-.cc-advanced-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 4px;
-}
-
-
-
 
 @media (max-width: 600px) {
   .time-control-dialog {

@@ -39,8 +39,6 @@ export function createShellView({ $, eventBus }) {
             $('.tab-content').removeClass('is-active').attr('aria-hidden', 'true');
             $('#' + tabName).addClass('is-active').attr('aria-hidden', 'false');
 
-            $('.app-nav-btn').removeClass('active').removeAttr('aria-current');
-            $('.app-nav-btn[data-nav-tab="' + tabName + '"]').addClass('active').attr('aria-current', 'page');
 
             if (tabName === 'tab-setup') {
                 $('body').addClass('is-editor-mode');
@@ -50,16 +48,12 @@ export function createShellView({ $, eventBus }) {
             }
         });
 
-        // Left rail mirrors the sidebar tabs
-        $('.app-nav-btn').on('click', function() {
-            $('.tab-btn[data-tab="' + $(this).data('nav-tab') + '"]').trigger('click');
-        });
-
-        $('.tabs-header').on('keydown', '.tab-btn', function(event) {
+        // The left rail is the tab list (vertical; horizontal on phones)
+        $('.app-nav-list').on('keydown', '.tab-btn', function(event) {
             var tabs = $('.tab-btn');
             var index = tabs.index(this);
-            if (event.key === 'ArrowRight') index = (index + 1) % tabs.length;
-            else if (event.key === 'ArrowLeft') index = (index - 1 + tabs.length) % tabs.length;
+            if (event.key === 'ArrowDown' || event.key === 'ArrowRight') index = (index + 1) % tabs.length;
+            else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') index = (index - 1 + tabs.length) % tabs.length;
             else if (event.key === 'Home') index = 0;
             else if (event.key === 'End') index = tabs.length - 1;
             else return;
@@ -93,7 +87,7 @@ export function createShellView({ $, eventBus }) {
         });
 
         // Time Control Dialog
-        $('#newGameBtn').on('click', function() {
+        $('#newGameBtn, #selectedTimeControlPill').on('click', function() {
             $('#customTimerBase').val($('#timerBase').val());
             $('#customTimerInc').val($('#timerInc').val());
             $('#timeControlDialog')[0].showModal();
