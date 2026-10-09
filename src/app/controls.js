@@ -87,38 +87,23 @@ export function createControls({
         moveHistoryView.goToPly(parseInt($(this).data('ply'), 10) + 1);
     });
 
+    // The right panel ends level with the bottom player badge
     function syncColumnsHeight() {
-        const historyEl = $('.history-column');
         const sidebarEl = $('.sidebar-column');
         const bottomPlayerEl = $('.bottom-player:visible');
         const boardEl = $('#myBoard .board-b72b1');
+        if (!sidebarEl.length) return;
 
-        if (window.innerWidth <= 760) {
-            historyEl.css({ height: '', marginTop: '' });
-            sidebarEl.css({ height: '', maxHeight: '', minHeight: '' });
-            return;
-        }
+        sidebarEl.css({ height: '' });
+        if (window.innerWidth <= 760) return;
 
         const anchorEl = bottomPlayerEl.length ? bottomPlayerEl : (boardEl.length ? boardEl : $('#myBoard'));
         if (!anchorEl.length) return;
 
         const anchorBottom = anchorEl.offset().top + anchorEl.outerHeight();
-
-        if (historyEl.length) {
-            historyEl.css({ height: '', marginTop: '' });
-            const historyTop = historyEl.offset().top;
-            if (historyTop < anchorBottom) {
-                historyEl.css({ height: anchorBottom - historyTop, marginTop: 0 });
-            }
-        }
-
-        if (sidebarEl.length) {
-            sidebarEl.css({ height: '', maxHeight: '', minHeight: '' });
-            const sidebarTop = sidebarEl.offset().top;
-            if (sidebarTop < anchorBottom) {
-                const targetHeight = anchorBottom - sidebarTop;
-                sidebarEl.css({ minHeight: targetHeight });
-            }
+        const sidebarTop = sidebarEl.offset().top;
+        if (anchorBottom > sidebarTop) {
+            sidebarEl.css({ height: anchorBottom - sidebarTop });
         }
     }
 
