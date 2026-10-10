@@ -6,18 +6,19 @@ import { createHarness, playMoves } from './helpers/harness.js';
 function setup(options) {
   const h = createHarness(options);
   const makeMoveCalls = [];
+  const edits = [];
   let truncations = 0;
   const puzzle = { isActive: () => false, isCompleted: () => false };
   const session = {
     makeMove: (...args) => { makeMoveCalls.push(args); return true; },
     truncateToViewedPly: () => { truncations += 1; },
-    applyEditedPosition() {}
+    applyEditedPosition: event => { edits.push(event); }
   };
   const interaction = createBoardInteraction({
     $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
     puzzle, session, getBotLevel: h.getBotLevel, clearSelection: h.clearSelection
   });
-  return { h, makeMoveCalls, getTruncations: () => truncations, interaction };
+  return { h, makeMoveCalls, edits, getTruncations: () => truncations, interaction };
 }
 
 const squares = hints => hints.destinations.map(d => d.square).sort();
@@ -143,3 +144,26 @@ test('dragging from a historical position is allowed when clock is timed out', (
   h.close();
 });
 
+
+test('the editor places a spare piece and removes a piece dragged off the board', () => {
+  const { h, edits, makeMoveCalls } = setup({ botLevel: 0 });
+  const place = { source: 'spare', target: 'd4', piece: 'wQ', newPos: { d4: 'wQ' }, action: null };
+  h.eventBus.emit('board:drop', place);
+  assert.equal(place.action, null);
+  assert.equal(makeMoveCalls.length, 0);
+
+  const remove = { source: 'e2', target: 'offboard', piece: 'wP', newPos: {}, action: null };
+  h.eventBus.emit('board:drop', remove);
+  assert.equal(remove.action, null);
+  assert.deepEqual(edits.map(edit => edit.target), ['d4', 'offboard']);
+  h.close();
+});
+
+test('outside the editor a piece dragged off the board snaps back', () => {
+  const { h, edits } = setup();
+  const event = { source: 'e2', target: 'offboard', piece: 'wP', newPos: {}, action: null };
+  h.eventBus.emit('board:drop', event);
+  assert.equal(event.action, 'snapback');
+  assert.equal(edits.length, 0);
+  h.close();
+});

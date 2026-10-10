@@ -230,6 +230,12 @@ $(document).ready(function() {
         $('#reviewStatus').text('Локальное хранилище недоступно: разбор партий отключён.');
     });
 
+    // Opening the editor leaves puzzle mode but keeps the position to edit
+    $('.tab-btn[data-tab="tab-setup"]').on('click', function() {
+        if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+        session.updateStatus();
+    });
+
     const interaction = createBoardInteraction({
         $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
     });

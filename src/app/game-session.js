@@ -128,10 +128,11 @@ export function createGameSession({
         if (updateHistory !== false) moveHistoryView.updateMoveHistory();
 
         const overlay = $('#gameOverOverlay');
-        if (!historical && isGameOver && !overlay.data('dismissed')) {
+        // No game-over card in the editor: it would cover the board being set up
+        if (!historical && isGameOver && !overlay.data('dismissed') && getBotLevel() > 0) {
             $('#gameOverText').html(overlayText);
             overlay.css('display', 'flex');
-        } else if (historical || !isGameOver) {
+        } else if (historical || !isGameOver || getBotLevel() === 0) {
             overlay.hide();
             if (!historical) overlay.data('dismissed', false);
         }
@@ -200,12 +201,16 @@ export function createGameSession({
     }
 
     /** A piece was dragged in editor mode and the move was not legal: take the board as drawn. */
-    function applyEditedPosition({ piece, newPos }) {
+    function applyEditedPosition({ piece, newPos, target }) {
         const game = store.getState().game;
-        const nextTurn = piece.charAt(0) === 'w' ? 'b' : 'w';
+        // Placing a piece hands the move to the other side; removing one keeps the turn
+        const nextTurn = target === 'offboard' ? game.turn() : (piece.charAt(0) === 'w' ? 'b' : 'w');
         const editedPlacement = window.Chessboard.objToFen(newPos);
         const castlingRights = retainCastlingRights(game.fen(), editedPlacement);
-        game.load(editedPlacement + ' ' + nextTurn + ' ' + castlingRights + ' - 0 1');
+        if (!game.load(editedPlacement + ' ' + nextTurn + ' ' + castlingRights + ' - 0 1')) {
+            eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game });
+            return;
+        }
         store.setState({ historyFENs: [game.fen()], currentViewPly: 0 });
         playSoundForMove(null);
         updateStatus();

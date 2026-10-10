@@ -157,7 +157,8 @@ export function createPuzzleController({
         if (current.lastMove) boardView.highlightLastMove?.(current.lastMove.from, current.lastMove.to);
     }
 
-    function exit() {
+    /** Leaves puzzle mode; the editor keeps the puzzle position on the board. */
+    function exit({ keepPosition = false } = {}) {
         clearSelection();
         recordAttempt(false);
         active = false;
@@ -165,7 +166,7 @@ export function createPuzzleController({
         store.setState({ mode: 'free' });
         setStatus('Нажмите «Следующая задача», чтобы начать');
         showPuzzleMeta({ themes: [] });
-        $('#startPositionBtn').click();
+        if (!keepPosition) $('#startPositionBtn').click();
     }
 
     let loading = false;

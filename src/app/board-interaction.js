@@ -99,8 +99,11 @@ export function createBoardInteraction({
             event.action = 'snapback';
             return;
         }
+        const isFreePlacement = !puzzle.isActive() && getBotLevel() === 0;
         if (event.target === 'offboard') {
-            event.action = 'snapback';
+            // In the editor a piece dragged off the board is removed
+            if (isFreePlacement && event.source !== 'spare') session.applyEditedPosition(event);
+            else event.action = 'snapback';
             return;
         }
 
@@ -108,7 +111,6 @@ export function createBoardInteraction({
         clearSelection();
         setTimeout(() => { dragJustEnded = false; }, CLICK_DEBOUNCE_MS);
 
-        const isFreePlacement = !puzzle.isActive() && getBotLevel() === 0;
         const accepted = isFreePlacement && event.source === 'spare'
             ? false
             : session.makeMove(event.source, event.target, event.piece);
