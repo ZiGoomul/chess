@@ -417,7 +417,8 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('engine:hints-updated', function(data) {
              clearArrows();
-             if (!data) return;
+             // No arrows at all while solving a puzzle
+             if (!data || (store && store.getState().mode === 'puzzle')) return;
              var game = data.game || (store && store.getState() ? store.getState().game : null);
              if (data.hints) {
                  for (var i = 3; i >= 1; i--) {

@@ -1,7 +1,28 @@
 import { Chess } from 'chess.js';
 
+/**
+ * Engine hints for the displayed position. Hints belong to the position they were
+ * computed for (hintFen) and are never shown for another one, nor in puzzle mode,
+ * where arrows would give the solution away.
+ */
 export function createAnalysisCoordinator({ eventBus, store, engine }) {
     let currentHints = {};
+    let hintFen = null;
+
+    function isPuzzleMode() {
+        return store.getState().mode === 'puzzle';
+    }
+
+    function hintsMatchDisplayed() {
+        return hintFen !== null && hintFen === getDisplayedFen();
+    }
+
+    function dropStaleHints() {
+        if (!hintsMatchDisplayed()) {
+            currentHints = {};
+            hintFen = null;
+        }
+    }
 
     function getDisplayedFen() {
         const state = store.getState();
@@ -14,7 +35,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     function autoHintIfNeeded() {
         const state = store.getState();
         const autoHint = state.settings?.autoHint;
-        if (!autoHint) return;
+        if (!autoHint || isPuzzleMode()) return;
 
         const fen = getDisplayedFen();
         if (!fen) return;
@@ -37,15 +58,18 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
 
     function requestHint() {
         const fen = getDisplayedFen();
-        if (!fen) return;
-        const displayedGame = new Chess(fen);
-        if (displayedGame.game_over()) return;
+        // Nothing to analyse: still report completion so the hint button is released
+        if (isPuzzleMode() || !fen || new Chess(fen).game_over()) {
+            eventBus.emit('engine:hint-completed');
+            return;
+        }
         
         const state = store.getState();
         const domLevel = (typeof window !== 'undefined' && window.$ && window.$('#hintLevel').length) ? parseInt(String(window.$('#hintLevel').val()), 10) : 10;
         const level = state.settings?.hintLevel || domLevel || 10;
         
         currentHints = {};
+        hintFen = fen;
         eventBus.emit('engine:hints-updated', { arrows: [] });
         engine.requestHint(fen, level);
     }
@@ -61,6 +85,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     }
 
     function handleHintInfo(info) {
+        if (isPuzzleMode() || !hintsMatchDisplayed()) return;
         if (info) {
             currentHints[info.multipv] = info.move;
             if (info.multipv === 1) {
@@ -71,7 +96,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     }
 
     function handleHintComplete() {
-        emitHints();
+        if (!isPuzzleMode() && hintsMatchDisplayed()) emitHints();
         eventBus.emit('engine:hint-completed');
     }
 
@@ -90,13 +115,15 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
         return arrows;
     }
 
+    // Redraw after a resize or flip, only when the hints are for the position on the board
     function drawHintArrows() {
+        if (isPuzzleMode() || !hintsMatchDisplayed() || !Object.keys(currentHints).length) return;
         emitHints();
     }
 
     if (eventBus) {
-        eventBus.on('game:move-made', () => autoHintIfNeeded());
-        eventBus.on('game:ply-changed', () => autoHintIfNeeded());
+        eventBus.on('game:move-made', () => { dropStaleHints(); autoHintIfNeeded(); });
+        eventBus.on('game:ply-changed', () => { dropStaleHints(); autoHintIfNeeded(); });
         eventBus.on('board:resized', () => drawHintArrows());
         eventBus.on('board:orientation-changed', () => {
             setTimeout(() => drawHintArrows(), 100);
