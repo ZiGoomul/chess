@@ -26,7 +26,7 @@ test('loading a puzzle sets the position and enters puzzle mode', () => {
   assert.equal(puzzle.isCompleted(), false);
   assert.equal(h.store.getState().game.fen(), MATE_IN_ONE.fen);
   assert.equal(h.store.getState().mode, 'puzzle');
-  assert.equal(h.$('#puzzleDescText').text(), 'Mate in one');
+  assert.equal(h.$('#puzzleDescText').text(), 'Мат');
   h.close();
 });
 
@@ -77,5 +77,33 @@ test('exiting puzzle mode leaves puzzle state and asks for a fresh position', ()
   assert.equal(puzzle.isActive(), false);
   assert.equal(h.store.getState().mode, 'free');
   assert.equal(reset, 1);
+  h.close();
+});
+
+test('any mating move solves the puzzle, not only the recorded one', () => {
+  const { h, puzzle } = setup();
+  // Both Re8 and Rd8… here: only the rook mates on the back rank, from e1 or via a second rook
+  puzzle.load({ id: 'test:alt', fen: '6k1/5ppp/8/8/8/8/8/R3R1K1 w - - 0 1', moves: ['e1e8'], themes: ['mateIn1'] });
+
+  assert.equal(puzzle.tryMove('a1', 'a8'), true);
+  assert.equal(puzzle.isCompleted(), true);
+  assert.equal(h.$('#puzzleStatusText').text(), 'ЗАДАЧА РЕШЕНА!');
+  h.close();
+});
+
+test('the next puzzle comes from the catalog with the chosen theme and difficulty', async () => {
+  const { h, puzzle } = setup();
+  const requests = [];
+  h.services.puzzleCatalog = {
+    next: async options => { requests.push(options); return { puzzle: MATE_IN_ONE, source: 'online', error: null }; },
+    getCounts: async () => ({ imported: 3, solved: 1 })
+  };
+  h.$('body').append('<select id="puzzleThemeSelect"><option value="fork" selected>fork</option></select><select id="puzzleDifficultySelect"><option value="harder" selected>harder</option></select>');
+
+  await puzzle.loadNext();
+
+  assert.deepEqual(requests, [{ theme: 'fork', difficulty: 'harder', exclude: undefined }]);
+  assert.equal(h.store.getState().game.fen(), MATE_IN_ONE.fen);
+  assert.equal(h.$('#puzzlesScore').text(), 'Решено: 1');
   h.close();
 });

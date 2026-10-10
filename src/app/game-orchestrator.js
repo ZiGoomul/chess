@@ -15,6 +15,7 @@ import { createEngineWorkers } from '../services/engine-workers.js';
 import { puzzleDatabase } from '../data/puzzles.js';
 import { openLocalDatabase } from '../storage/local-database.js';
 import { createPuzzleCatalog } from '../services/puzzle-catalog.js';
+import { createLichessPuzzleSource } from '../services/lichess-puzzles.js';
 import { applyUciMove, moveToUci } from '../services/puzzle-runner.js';
 import { createGameCompletionCoordinator } from '../services/game-completion.js';
 import { createGameReviewService } from '../services/game-review.js';
@@ -107,7 +108,10 @@ $(document).ready(function() {
     analysisCoordinator = createAnalysisCoordinator({ eventBus, store, engine });
 
     // Services that become available once IndexedDB has opened.
-    const services = { repository: null, puzzleCatalog: null, gameCompletion: null, postGameReview: null };
+    const services = {
+        repository: null, puzzleCatalog: null, gameCompletion: null, postGameReview: null,
+        puzzleSource: createLichessPuzzleSource({ chessFactory: () => new Chess() })
+    };
 
     const getBotLevel = () => parseInt(String($('#botLevel').val()), 10);
     const clearSelection = () => {
@@ -201,7 +205,7 @@ $(document).ready(function() {
 
     openLocalDatabase().then(async function(repository) {
         services.repository = repository;
-        services.puzzleCatalog = createPuzzleCatalog({ builtIns: puzzleDatabase, repository });
+        services.puzzleCatalog = createPuzzleCatalog({ builtIns: puzzleDatabase, repository, onlineSource: services.puzzleSource });
         await services.puzzleCatalog.removePuzzles(['curated:mate-f8', 'curated:castle', 'curated:rook-mate', 'curated:avoid-stalemate']);
         services.postGameReview = createPostGameReviewCoordinator({
             repository: repository,
@@ -220,10 +224,9 @@ $(document).ready(function() {
                 services.postGameReview.start(record).catch(() => { reviewView.showError('Не удалось сохранить разбор партии.'); });
             }
         });
-        $('#puzzleCatalogStatus').text('Локальный каталог готов.');
         puzzle.updateCount();
     }).catch(function() {
-        $('#puzzleCatalogStatus').text('Локальное хранилище недоступно: доступны встроенные задачи.');
+        $('#puzzleCatalogStatus').text('Хранилище недоступно: задачи и прогресс не сохраняются между сессиями.');
         $('#reviewStatus').text('Локальное хранилище недоступно: разбор партий отключён.');
     });
 

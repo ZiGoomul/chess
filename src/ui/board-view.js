@@ -136,6 +136,12 @@ export function createBoardView({ $, eventBus, store }) {
         );
     }
 
+    // chessboard.js rebuilds the squares on resize and orientation change; put the marks back
+    function restoreSquareMarks() {
+        if (currentLastMove) highlightLastMove(currentLastMove.from, currentLastMove.to);
+        if (currentCheckGame) highlightCheck(currentCheckGame);
+    }
+
     function clearLastMoveHighlight() {
         currentLastMove = null;
         $('#myBoard .square-55d63').removeClass('last-move-highlight');
@@ -433,6 +439,7 @@ export function createBoardView({ $, eventBus, store }) {
              var color = data && (data.orientation || data.color);
              if (board && color) {
                  board.orientation(color);
+                 restoreSquareMarks();
              }
         });
 
@@ -450,6 +457,7 @@ export function createBoardView({ $, eventBus, store }) {
         $(window).resize(function() {
             if (board) {
                 board.resize();
+                restoreSquareMarks();
                 setTimeout(function() {
                     eventBus.emit('board:resized');
                 }, 100);

@@ -68,7 +68,8 @@ export async function openLocalDatabase({ indexedDB = globalThis.indexedDB, data
         await write('attempts', transaction => transaction.objectStore('attempts').put(record));
         return record;
       },
-      listByPuzzleId: puzzleId => read('attempts', store => store.index('puzzleId').getAll(puzzleId))
+      listByPuzzleId: puzzleId => read('attempts', store => store.index('puzzleId').getAll(puzzleId)),
+      list: () => read('attempts', store => store.getAll())
     },
     batches: {
       get: id => read('batches', store => store.get(id)),

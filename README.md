@@ -36,15 +36,22 @@ Tests (`npm test`) cover domain logic and, through jsdom, the app controllers (`
 `tests/game-session.test.js`, `tests/puzzle-controller.test.js`) with fake board, clock and bot from `tests/helpers/harness.js`.
 `tests/styles.test.js` guards the CSS conventions (no `!important`, no inline styles, theme tokens defined).
 
-## Импорт задач Lichess
+## Задачи
 
-Браузер загружает только небольшие подготовленные JSON-наборы из `public/puzzles/lichess/`. Полную CSV-базу Lichess нужно скачать и распаковать отдельно, затем преобразовать локально:
+«Следующая задача» берёт случайную задачу выбранной темы и сложности из открытого API Lichess
+(`/api/puzzle/next`, без аккаунта; `src/services/lichess-puzzles.js`). Каждая полученная задача сохраняется в IndexedDB.
+Без сети приложение предлагает сохранённые нерешённые задачи, а если сохранённых нет — подгружает наборы из
+`public/puzzles/lichess/`. Как и на Lichess, засчитывается любой матующий ход.
+
+### Импорт задач Lichess для работы без сети
+
+Офлайн-наборы — подготовленные JSON-файлы в `public/puzzles/lichess/`. Полную CSV-базу Lichess нужно скачать и распаковать отдельно, затем преобразовать локально:
 
 ```sh
 npm run import-puzzles -- /path/to/lichess_db_puzzle.csv public/puzzles/lichess 2026-09-29
 ```
 
-Скрипт применяет установочный ход каждой задачи один раз и сохраняет оставшееся решение в UCI-формате. После публикации сгенерированных `manifest.json` и JSON-наборов кнопка «Загрузить ещё задачи» импортирует их по одному и сохраняет в браузере. Без сети и без импортированных наборов встроенные задачи остаются доступны.
+Скрипт применяет установочный ход каждой задачи один раз и сохраняет оставшееся решение в UCI-формате. Когда сети нет и сохранённых задач не осталось, приложение импортирует эти наборы и сохраняет их в браузере.
 
 ## Разбор партий
 
