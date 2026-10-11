@@ -3,6 +3,7 @@
  * and layout sync between the move list and the board.
  */
 import { getDisplayedGame } from '../domain/position.js';
+import { showBotOpponent } from '../ui/player-badges.js';
 
 export function createControls({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
@@ -44,6 +45,7 @@ export function createControls({
             $('body').removeClass('is-editor-mode');
         }
         updateSettings({ botLevel: level });
+        showBotOpponent($, level);
         // Level 0 is the editor, a temporary mode: never restore it on the next visit
         if (level > 0) saveStoredSettings({ botLevel: level });
         eventBus.emit('settings:changed', { botLevel: level });

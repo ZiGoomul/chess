@@ -393,6 +393,15 @@ select.panel-select {
     color: var(--text-primary);
 }
 
+#puzzleStatusText[data-tone="success"] { color: var(--status-success); }
+#puzzleStatusText[data-tone="error"] { color: var(--status-error); }
+#puzzleStatusText[data-tone="info"] { color: var(--status-info); }
+
+/* Puzzles hide the player badges and clocks: there is no opponent to time */
+body.is-puzzle-mode .player-badge {
+    display: none;
+}
+
 #puzzleDescText {
     min-height: 20px;
     font-size: 14px;

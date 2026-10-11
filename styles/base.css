@@ -48,6 +48,11 @@
     --active-move-edge: #b9b5b0;
     --board-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
     --player-avatar-me: #81b64c;
+
+    /* Puzzle status text */
+    --status-success: #4f7d24;
+    --status-error: #c0392b;
+    --status-info: #2f6fa8;
 }
 
 [data-theme="dark"] {
@@ -84,6 +89,10 @@
     --active-move-bg: #4b4847;
     --active-move-edge: #6b6966;
     --board-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+
+    --status-success: #a3d160;
+    --status-error: #f08a7e;
+    --status-info: #7fb3e6;
 }
 
 ::-webkit-scrollbar {

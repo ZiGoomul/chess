@@ -30,11 +30,13 @@ const PAGE = `<!doctype html><body>
 
 /** Board stand-in that records what the controllers ask it to draw. */
 function createFakeBoardView() {
-  const calls = { showMoveHints: [], removeHighlights: 0 };
+  const calls = { showMoveHints: [], removeHighlights: 0, feedback: [] };
   return {
     calls,
     showMoveHints: (square, destinations) => { calls.showMoveHints.push({ square, destinations }); },
     removeHighlights: () => { calls.removeHighlights += 1; },
+    showSquareFeedback: (square, kind) => { calls.feedback.push({ square, kind }); },
+    clearSquareFeedback: () => { calls.feedback.push(null); },
     clearArrows() {},
     clearLastMoveHighlight() {},
     highlightCheck() {},

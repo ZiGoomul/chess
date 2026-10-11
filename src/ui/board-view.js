@@ -7,6 +7,7 @@ export function createBoardView({ $, eventBus, store }) {
     var board = null;
     var currentCheckGame = null;
     var currentLastMove = null;
+    var currentFeedback = null;
 
     function clearArrows() {
         var group = document.getElementById('arrowsGroup');
@@ -136,10 +137,30 @@ export function createBoardView({ $, eventBus, store }) {
         );
     }
 
+    function clearSquareFeedback() {
+        currentFeedback = null;
+        $('#myBoard .square-feedback-badge').remove();
+        $('#myBoard .square-55d63').removeClass('square-feedback--correct square-feedback--wrong');
+    }
+
+    // Puzzle feedback on the destination square: kind is 'correct' (✓) or 'wrong' (✗)
+    function showSquareFeedback(square, kind) {
+        clearSquareFeedback();
+        var squareEl = $('#myBoard [data-square="' + square + '"]').first();
+        if (!squareEl.length) return;
+        currentFeedback = { square: square, kind: kind };
+        squareEl.addClass('square-feedback--' + kind).append(
+            $('<span class="square-feedback-badge" aria-hidden="true"></span>')
+                .addClass('square-feedback-badge--' + kind)
+                .text(kind === 'correct' ? '✓' : '✗')
+        );
+    }
+
     // chessboard.js rebuilds the squares on resize and orientation change; put the marks back
     function restoreSquareMarks() {
         if (currentLastMove) highlightLastMove(currentLastMove.from, currentLastMove.to);
         if (currentCheckGame) highlightCheck(currentCheckGame);
+        if (currentFeedback) showSquareFeedback(currentFeedback.square, currentFeedback.kind);
     }
 
     function clearLastMoveHighlight() {
@@ -494,6 +515,8 @@ export function createBoardView({ $, eventBus, store }) {
         highlightLastMove: highlightLastMove,
         clearLastMoveHighlight: clearLastMoveHighlight,
         showMoveClass: showMoveClass,
+        showSquareFeedback: showSquareFeedback,
+        clearSquareFeedback: clearSquareFeedback,
         clearMoveClass: clearMoveClass,
         highlightCheck: highlightCheck,
         highlightAttackedPieces: highlightAttackedPieces

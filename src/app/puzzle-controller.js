@@ -14,9 +14,16 @@ export function createPuzzleController({
     let mistakes = 0;
     let attemptRecorded = false;
 
-    function setStatus(text, color) {
-        $('#puzzleStatusText').text(text);
-        if (color) $('#puzzleStatusText').css('color', color);
+    // tone: 'success' | 'error' | 'info' | undefined (neutral); colours come from the theme
+    function setStatus(text, tone) {
+        $('#puzzleStatusText').text(text).attr('data-tone', tone || null);
+    }
+
+    let wrongFeedbackTimer = null;
+    function flashWrongMove(square) {
+        boardView.showSquareFeedback?.(square, 'wrong');
+        clearTimeout(wrongFeedbackTimer);
+        wrongFeedbackTimer = setTimeout(() => boardView.clearSquareFeedback?.(), 900);
     }
 
     function isActive() {
@@ -65,7 +72,7 @@ export function createPuzzleController({
         sessionSolved++;
         recordAttempt(true);
         if (!services.repository) updateCount();
-        setStatus('ЗАДАЧА РЕШЕНА!', '#2ecc71');
+        setStatus('Задача решена!', 'success');
         playSound('gameEnd');
     }
 
@@ -74,6 +81,7 @@ export function createPuzzleController({
         if (!active || puzzle !== current || step >= current.moves.length) return;
 
         const game = store.getState().game;
+        boardView.clearSquareFeedback?.();
         const moveObj = applyUciMove(game, current.moves[step]);
         if (!moveObj) {
             setStatus('Не удалось воспроизвести решение задачи.');
@@ -88,7 +96,7 @@ export function createPuzzleController({
         if (step >= current.moves.length) {
             completed();
         } else {
-            setStatus('Ваш ход!', 'var(--text-color)');
+            setStatus('Ваш ход!');
         }
     }
 
@@ -103,12 +111,15 @@ export function createPuzzleController({
 
         if (!(testMove && (moveToUci(testMove) === expectedMoveUci || matesNow))) {
             mistakes++;
-            setStatus('Неверный ход! Попробуйте еще раз.', '#e74c3c');
+            setStatus('Неверный ход. Попробуйте ещё раз.', 'error');
+            flashWrongMove(target);
             playSound('check');
             return false;
         }
 
         const move = game.move({ from: source, to: target, promotion: 'q' });
+        clearTimeout(wrongFeedbackTimer);
+        boardView.showSquareFeedback?.(target, 'correct');
         pushPosition(game);
         playSoundForMove(move);
         moveHistoryView.updateMoveHistory();
@@ -118,7 +129,7 @@ export function createPuzzleController({
         if (step >= current.moves.length) {
             completed();
         } else {
-            setStatus('Верно! Ожидание хода противника...', '#3498db');
+            setStatus('Верно! Ждём ответ соперника…', 'success');
             const puzzle = current;
             setTimeout(() => playOpponentMove(puzzle), 600);
         }
@@ -132,6 +143,9 @@ export function createPuzzleController({
         services.gameCompletion?.reset();
         current = puzzle;
         step = 0;
+        clearTimeout(wrongFeedbackTimer);
+        boardView.clearSquareFeedback?.();
+        $('body').addClass('is-puzzle-mode');
         mistakes = 0;
         attemptRecorded = false;
         active = true;
@@ -146,7 +160,7 @@ export function createPuzzleController({
         eventBus.emit('board:orientation-changed', { orientation: newOrientation });
 
         const moveColor = game.turn() === 'w' ? 'белых' : 'чёрных';
-        setStatus('Ход ' + moveColor + '. Найдите лучшее продолжение', 'var(--text-primary)');
+        setStatus('Ход ' + moveColor + '. Найдите лучшее продолжение');
         showPuzzleMeta(current);
 
         moveHistoryView.updateMoveHistory();
@@ -163,6 +177,9 @@ export function createPuzzleController({
         recordAttempt(false);
         active = false;
         current = null;
+        clearTimeout(wrongFeedbackTimer);
+        boardView.clearSquareFeedback?.();
+        $('body').removeClass('is-puzzle-mode');
         store.setState({ mode: 'free' });
         setStatus('Нажмите «Следующая задача», чтобы начать');
         showPuzzleMeta({ themes: [] });
@@ -187,7 +204,7 @@ export function createPuzzleController({
                 ? await services.puzzleCatalog.next(options)
                 : await nextWithoutCatalog(options);
             if (!result.puzzle) {
-                setStatus('Нет доступных задач', 'var(--text-primary)');
+                setStatus('Нет доступных задач');
                 $('#puzzleCatalogStatus').text('Нет связи с Lichess, а сохранённых задач по этой теме нет.');
                 return;
             }

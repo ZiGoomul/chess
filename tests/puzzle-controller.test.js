@@ -35,7 +35,9 @@ test('a wrong move is refused and reported', () => {
   puzzle.load(MATE_IN_ONE);
 
   assert.equal(puzzle.tryMove('e1', 'e2'), false);
-  assert.equal(h.$('#puzzleStatusText').text(), 'Неверный ход! Попробуйте еще раз.');
+  assert.equal(h.$('#puzzleStatusText').text(), 'Неверный ход. Попробуйте ещё раз.');
+  assert.equal(h.$('#puzzleStatusText').attr('data-tone'), 'error');
+  assert.deepEqual(h.boardView.calls.feedback.at(-1), { square: 'e2', kind: 'wrong' });
   assert.equal(h.store.getState().historyFENs.length, 1);
   assert.equal(puzzle.isCompleted(), false);
   h.close();
@@ -47,7 +49,9 @@ test('the expected move solves a one-move puzzle', () => {
 
   assert.equal(puzzle.tryMove('e1', 'e8'), true);
   assert.equal(puzzle.isCompleted(), true);
-  assert.equal(h.$('#puzzleStatusText').text(), 'ЗАДАЧА РЕШЕНА!');
+  assert.equal(h.$('#puzzleStatusText').text(), 'Задача решена!');
+  assert.equal(h.$('#puzzleStatusText').attr('data-tone'), 'success');
+  assert.deepEqual(h.boardView.calls.feedback.at(-1), { square: 'e8', kind: 'correct' });
   assert.equal(h.$('#puzzlesScore').text(), 'Решено: 1');
   h.close();
 });
@@ -57,7 +61,7 @@ test('a multi-move puzzle plays the opponent reply after a correct move', async 
   puzzle.load(TWO_STEP);
 
   assert.equal(puzzle.tryMove('d1', 'd8'), true);
-  assert.equal(h.$('#puzzleStatusText').text(), 'Верно! Ожидание хода противника...');
+  assert.equal(h.$('#puzzleStatusText').text(), 'Верно! Ждём ответ соперника…');
   await new Promise(resolve => setTimeout(resolve, 800));
 
   assert.equal(h.store.getState().game.history().join(' '), 'Rd8+ Kh7');
@@ -87,7 +91,7 @@ test('any mating move solves the puzzle, not only the recorded one', () => {
 
   assert.equal(puzzle.tryMove('a1', 'a8'), true);
   assert.equal(puzzle.isCompleted(), true);
-  assert.equal(h.$('#puzzleStatusText').text(), 'ЗАДАЧА РЕШЕНА!');
+  assert.equal(h.$('#puzzleStatusText').text(), 'Задача решена!');
   h.close();
 });
 

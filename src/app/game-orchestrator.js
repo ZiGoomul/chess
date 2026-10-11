@@ -27,6 +27,7 @@ import { loadStoredSettings, saveStoredSettings } from '../storage/settings-stor
 import { createPuzzleController } from './puzzle-controller.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
+import { showBotOpponent } from '../ui/player-badges.js';
 import { createBoardInteraction } from './board-interaction.js';
 import { createTimeControlController } from './time-control-controller.js';
 import { createControls } from './controls.js';
@@ -56,6 +57,7 @@ $(document).ready(function() {
     // Sync UI inputs with stored settings
     // Older versions saved the editor (level 0) as the opponent; start against the bot instead
     $('#botLevel').val(storedSettings.botLevel > 0 ? storedSettings.botLevel : 10);
+    showBotOpponent($, storedSettings.botLevel > 0 ? storedSettings.botLevel : 10);
     $('#hintLevel').val(storedSettings.hintLevel);
     $('#autoHintCb').prop('checked', storedSettings.autoHint);
     $('#highlightMovesCb').prop('checked', storedSettings.highlightMoves);
