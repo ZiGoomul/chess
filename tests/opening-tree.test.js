@@ -18,6 +18,8 @@ test('the lines through a position share its moves', () => {
 
 test('the King\'s Indian forks where White chooses a system', () => {
   const kid = findCourse('kid');
+  assert.deepEqual(continuations(kid, ['d4', 'Nf6']).map(item => item.san).sort(), ['Bg5', 'Nf3', 'c4']);
+  assert.deepEqual(continuations(kid, ['d4', 'Nf6', 'Nf3', 'g6']).map(item => item.san).sort(), ['Bf4', 'Bg5', 'e3']);
   const base = ['d4', 'Nf6', 'c4', 'g6', 'Nc3', 'Bg7', 'e4', 'd6'];
   assert.deepEqual(continuations(kid, base).map(item => item.san).sort(), ['Be2', 'Nf3', 'f3', 'f4', 'h3']);
   const classical = [...base, 'Nf3', 'O-O', 'Be2', 'e5'];
