@@ -31,7 +31,10 @@ test('the King\'s Indian Attack covers Black\'s main set-ups after 1.Nf3', () =>
   const kia = findCourse('kia');
   // White's own first move has two options in the repertoire
   assert.deepEqual(continuations(kia, []).map(item => item.san).sort(), ['Nf3', 'e4']);
-  assert.deepEqual(continuations(kia, ['Nf3']).map(item => item.san).sort(), ['Nf6', 'd5']);
+  assert.deepEqual(continuations(kia, ['Nf3']).map(item => item.san).sort(), ['Nf6', 'c5', 'd5', 'f5']);
+  assert.deepEqual(continuations(kia, ['Nf3', 'd5', 'g3']).map(item => item.san).sort(), ['Nf6', 'c5']);
+  assert.deepEqual(continuations(kia, ['Nf3', 'Nf6', 'g3']).map(item => item.san).sort(), ['b6', 'g6']);
+  assert.deepEqual(continuations(kia, ['e4', 'c5', 'Nf3']).map(item => item.san).sort(), ['d6', 'e6']);
   assert.deepEqual(continuations(kia, ['Nf3', 'd5', 'g3', 'Nf6', 'Bg2']).map(item => item.san).sort(), ['c6', 'e6']);
   assert.deepEqual(continuations(kia, ['Nf3', 'd5', 'g3', 'Nf6', 'Bg2', 'c6', 'O-O']).map(item => item.san).sort(), ['Bf5', 'Bg4']);
 });

@@ -140,7 +140,7 @@ test('finishing a quiz without mistakes is saved as progress', () => {
   // The next line is the next one of the same opening
   assert.equal(h.$('#lessonNextLineBtn').prop('hidden'), false);
   h.$('#lessonNextLineBtn').trigger('click');
-  assert.equal(h.$('#lessonLineTitle').text(), 'Через 1.Кf3 против ...d5 и ...e6');
+  assert.equal(h.$('#lessonLineTitle').text(), '1.e4: против сицилианской с …e6');
   done();
 });
 
@@ -174,8 +174,8 @@ test('a move of another line of the opening switches to that line', () => {
   const { h, lesson, done } = setup();
   lesson.start('kia-french', 'learn');
   assert.equal(lesson.tryMove('g1', 'f3'), true);
-  assert.equal(h.$('#lessonLineTitle').text(), 'Через 1.Кf3 против ...d5 и ...e6');
-  assert.match(h.$('#lessonComments').text(), /Этот ход ведёт в вариант «Через 1\.Кf3/);
+  assert.equal(h.$('#lessonLineTitle').text(), '1.Кf3: против …d5 и …e6');
+  assert.match(h.$('#lessonComments').text(), /Этот ход ведёт в вариант «1\.Кf3: против …d5 и …e6»/);
   mock.timers.tick(700);
   assert.equal(h.store.getState().game.history().join(' '), 'Nf3 d5');
   done();
