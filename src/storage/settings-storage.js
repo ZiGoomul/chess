@@ -14,7 +14,9 @@ export const DEFAULT_SETTINGS = {
     timerBase: 10,
     timerInc: 5,
     playerColor: 'white',
-    puzzleBestStreak: 0
+    puzzleBestStreak: 0,
+    soundEnabled: true,
+    soundVolume: 70
 };
 
 function getStorage(customStorage) {

@@ -87,12 +87,8 @@ $(document).ready(function() {
             return s.game.fen();
         },
         onBotMove: (botMove) => {
-            if (botMove) {
-                const uciStr = botMove.from + botMove.to + (botMove.promotion && botMove.promotion !== 'q' ? botMove.promotion : '');
-                eventBus.emit('bot:move-ready', { bestmove: uciStr, uci: uciStr });
-            } else {
-                eventBus.emit('bot:move-ready', null);
-            }
+            const uciStr = botMove ? botMove.from + botMove.to + (botMove.promotion && botMove.promotion !== 'q' ? botMove.promotion : '') : null;
+            botCoordinator.deliverBotMove(uciStr ? { bestmove: uciStr, uci: uciStr } : null);
         },
         onBotThinkingChange: (thinking) => {
             store.setState({ isThinking: thinking });
@@ -106,6 +102,11 @@ $(document).ready(function() {
     });
 
     const botCoordinator = createBotCoordinator({ eventBus, store, engine });
+
+    // "думает…" on the bot's badge while it is choosing a move
+    store.subscribe(state => {
+        $('.top-player').toggleClass('is-thinking', Boolean(state.isThinking) && state.mode !== 'puzzle');
+    });
     analysisCoordinator = createAnalysisCoordinator({ eventBus, store, engine });
 
     // Services that become available once IndexedDB has opened.
@@ -122,6 +123,23 @@ $(document).ready(function() {
 
     const audio = createAudio(store.getState().game);
     const { playSound, playSoundForMove } = audio;
+
+    // Sound settings live in the style tab
+    function applySoundSettings() {
+        const enabled = $('#soundEnabledCb').is(':checked');
+        const volume = Number($('#soundVolume').val());
+        audio.configure({ enabled, volume: volume / 100 });
+        $('#soundVolume').prop('disabled', !enabled);
+        $('#soundVolumeValue').text(`${volume}%`);
+    }
+    $('#soundEnabledCb').prop('checked', storedSettings.soundEnabled !== false);
+    $('#soundVolume').val(storedSettings.soundVolume ?? 70);
+    applySoundSettings();
+    $('#soundEnabledCb, #soundVolume').on('input change', function() {
+        applySoundSettings();
+        saveStoredSettings({ soundEnabled: $('#soundEnabledCb').is(':checked'), soundVolume: Number($('#soundVolume').val()) });
+    });
+    $('#soundVolume').on('change', () => playSound('move'));
 
     // Controllers reference each other; these are assigned below, before any event can fire.
     let puzzle;

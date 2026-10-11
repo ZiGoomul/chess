@@ -1,4 +1,16 @@
-export function createBotCoordinator({ eventBus, store, engine }) {
+const MIN_THINK_MS = 400;
+const THINK_SPREAD_MS = 700;
+
+/** How long the bot appears to think at least, so instant engine answers do not feel mechanical. */
+function defaultThinkTime() {
+    return MIN_THINK_MS + Math.random() * THINK_SPREAD_MS;
+}
+
+export function createBotCoordinator({ eventBus, store, engine, thinkTime = defaultThinkTime, now = () => Date.now() }) {
+    let requestedAt = 0;
+    let requestFen = null;
+    let deliveryTimer = null;
+
     function makeBotMove() {
         const state = store.getState();
         const level = state.settings?.botLevel || 0;
@@ -14,10 +26,34 @@ export function createBotCoordinator({ eventBus, store, engine }) {
             return;
         }
 
-        engine.requestBotMove(state.game.fen(), level);
+        requestedAt = now();
+        requestFen = state.game.fen();
+        engine.requestBotMove(requestFen, level);
+    }
+
+    /**
+     * The engine's answer, shown after the rest of the thinking time. It is dropped if the
+     * position changed meanwhile (take back, new game).
+     */
+    function deliverBotMove(result) {
+        const fen = requestFen;
+        const wait = Math.max(0, thinkTime() - (now() - requestedAt));
+        clearTimeout(deliveryTimer);
+        store.setState({ isThinking: true });
+        deliveryTimer = setTimeout(() => {
+            deliveryTimer = null;
+            store.setState({ isThinking: false });
+            if (store.getState().game?.fen?.() !== fen) return;
+            eventBus.emit('bot:move-ready', result);
+        }, wait);
     }
 
     function cancelBotSearch() {
+        if (deliveryTimer) {
+            clearTimeout(deliveryTimer);
+            deliveryTimer = null;
+            store.setState({ isThinking: false });
+        }
         engine.cancelBotMove();
     }
 
@@ -34,5 +70,5 @@ export function createBotCoordinator({ eventBus, store, engine }) {
         });
     }
 
-    return { makeBotMove, cancelBotSearch, updateStockfishLevel };
+    return { makeBotMove, cancelBotSearch, updateStockfishLevel, deliverBotMove };
 }

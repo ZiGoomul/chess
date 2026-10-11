@@ -28,7 +28,7 @@ export function getAudioContext() {
   return sharedAudioCtx;
 }
 
-export function playSyntheticCheckSound() {
+export function playSyntheticCheckSound(volume = 1) {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -42,7 +42,7 @@ export function playSyntheticCheckSound() {
     osc.frequency.setValueAtTime(620, now);
     osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
 
-    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.setValueAtTime(0.3 * volume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
     osc.connect(gain);
@@ -62,28 +62,39 @@ export function createAudio(game) {
       )
     : {};
 
+  let enabled = true;
+  let volume = 0.7;
+
   function playSound(type) {
+    if (!enabled || volume <= 0) return;
     const sound = sounds[type];
     if (!sound) {
-      if (type === 'check') playSyntheticCheckSound();
+      if (type === 'check') playSyntheticCheckSound(volume);
       return;
     }
 
     try {
+      sound.volume = volume;
       sound.currentTime = 0;
       const playPromise = sound.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
           if (type === 'check') {
-            playSyntheticCheckSound();
+            playSyntheticCheckSound(volume);
           }
         });
       }
     } catch {
       if (type === 'check') {
-        playSyntheticCheckSound();
+        playSyntheticCheckSound(volume);
       }
     }
+  }
+
+  /** @param {{ enabled?: boolean, volume?: number }} settings volume from 0 to 1 */
+  function configure(settings) {
+    if (typeof settings.enabled === 'boolean') enabled = settings.enabled;
+    if (Number.isFinite(settings.volume)) volume = Math.max(0, Math.min(1, settings.volume));
   }
 
   function playSoundForMove(move, targetGame = null) {
@@ -92,5 +103,5 @@ export function createAudio(game) {
     playSound(soundType);
   }
 
-  return { playSound, playSoundForMove, playSyntheticCheckSound };
+  return { playSound, playSoundForMove, playSyntheticCheckSound, configure };
 }

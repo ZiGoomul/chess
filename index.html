@@ -55,6 +55,7 @@
                         <div class="player-details">
                             <span class="player-name" id="topPlayerName">Бот</span>
                             <span class="player-rating" id="topPlayerRating">~1700</span>
+                            <span class="player-thinking" aria-hidden="true">думает<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>
                         </div>
                         <div id="topMaterial" class="material-row"></div>
                     </div>
@@ -524,6 +525,18 @@
                     <label class="toggle-row" for="highlightDefensesCb">
                         <span class="toggle-row-text">Подсвечивать защиту</span>
                         <span class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></span>
+                    </label>
+                </section>
+
+                <section class="settings-group" aria-labelledby="soundSettingsTitle">
+                    <h3 id="soundSettingsTitle" class="panel-subtitle">Звук</h3>
+                    <label class="toggle-row" for="soundEnabledCb">
+                        <span class="toggle-row-text">Звуки ходов</span>
+                        <span class="switch"><input type="checkbox" id="soundEnabledCb" checked><span class="slider"></span></span>
+                    </label>
+                    <label class="panel-field" for="soundVolume">
+                        <span class="volume-label"><span class="panel-label">Громкость</span><span id="soundVolumeValue" class="panel-label">70%</span></span>
+                        <input type="range" id="soundVolume" class="volume-range" min="0" max="100" step="5" value="70">
                     </label>
                 </section>
 

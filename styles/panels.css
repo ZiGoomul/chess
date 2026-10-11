@@ -720,3 +720,21 @@ body.is-puzzle-mode .player-badge {
     flex: 1;
     min-height: 44px;
 }
+
+/* Volume */
+.volume-label {
+    display: flex;
+    justify-content: space-between;
+}
+
+.volume-range {
+    width: 100%;
+    min-height: 32px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+.volume-range:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
