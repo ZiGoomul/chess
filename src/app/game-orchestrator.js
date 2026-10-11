@@ -27,6 +27,7 @@ import { loadStoredSettings, saveStoredSettings } from '../storage/settings-stor
 import { createPuzzleController } from './puzzle-controller.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
+import { createMoveEntry } from './move-entry.js';
 import { showBotOpponent } from '../ui/player-badges.js';
 import { createGamesList } from '../ui/games-list.js';
 import { createBoardInteraction } from './board-interaction.js';
@@ -255,6 +256,7 @@ $(document).ready(function() {
     });
 
     createPositionEditor({ $, Chess, store, eventBus, session });
+    createMoveEntry({ $, Chess, store, eventBus, session });
 
     // Opening the editor leaves puzzle mode but keeps the position to edit
     $('.tab-btn[data-tab="tab-setup"]').on('click', function() {
