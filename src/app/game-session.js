@@ -6,6 +6,7 @@ import { getDisplayedGame, isHistoricalPosition } from '../domain/position.js';
 import { retainCastlingRights } from '../domain/castling-rights.js';
 import { parseUciMove } from '../services/puzzle-runner.js';
 import { saveLiveGame, loadLiveGame, clearLiveGame } from '../storage/live-game-storage.js';
+import { showBotOpponent } from '../ui/player-badges.js';
 
 export function createGameSession({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
@@ -19,7 +20,7 @@ export function createGameSession({
         updateGameActions();
     }
 
-    const END_REASONS = { checkmate: 'мат', draw: 'ничья', timeout: 'время вышло', resign: 'вы сдались' };
+    const END_REASONS = { checkmate: 'мат', draw: '', timeout: 'время вышло', resign: 'вы сдались' };
 
     const humanColor = () => (boardView.orientation() === 'black' ? 'b' : 'w');
     const isLiveGame = () => !finished && !puzzle.isActive() && getBotLevel() > 0 && $('#tab-play').attr('data-phase') === 'game';
@@ -150,7 +151,8 @@ export function createGameSession({
         return 'правило 50 ходов';
     }
 
-    function showGameResult(result, endReason, detail) {
+    /** @param {{ quiet?: boolean, meta?: string }} [options] quiet: no result card (an old game being reopened) */
+    function showGameResult(result, endReason, detail, options = {}) {
         const key = positionKey();
         if (finished && finished.key === key) return;
         const human = boardView.orientation() === 'black' ? 'b' : 'w';
@@ -159,11 +161,11 @@ export function createGameSession({
         const title = { win: 'Победа', loss: 'Поражение', draw: 'Ничья' }[outcome];
         const reason = detail || END_REASONS[endReason] || '';
         finished = { key, human };
-        overlayDismissed = false;
-        clearLiveGame(liveGameStorage);
+        overlayDismissed = Boolean(options.quiet);
+        if (!options.quiet) clearLiveGame(liveGameStorage);
 
         $('#gameResultTitle').text(reason ? `${title} · ${reason}` : title);
-        $('#gameResultMeta').text(`Вы против: ${$('#botLevel option:selected').text()} · ${$('#selectedTimeText').text()}`);
+        $('#gameResultMeta').text(options.meta || `Вы против: ${$('#botLevel option:selected').text()} · ${$('#selectedTimeText').text()}`);
 
         const sideText = human === 'w' ? 'вы играли белыми' : 'вы играли чёрными';
         const score = winner === null ? '½ – ½' : winner === human ? '1 – 0' : '0 – 1';
@@ -231,7 +233,11 @@ export function createGameSession({
         });
     }
 
+    // Set while an old game is put back on the board: its end is shown, not completed again
+    let reopening = false;
+
     function completeCurrentGame(result, endReason, detail) {
+        if (reopening) return;
         if (!puzzle.isActive() && getBotLevel() > 0) showGameResult(result, endReason, detail);
         const completion = services.gameCompletion;
         if (!completion || !completion.currentGameId || puzzle.isActive()) return;
@@ -239,6 +245,7 @@ export function createGameSession({
         completion.completeGame({
             result: result,
             endReason: endReason,
+            endDetail: detail || null,
             pgn: game.pgn(),
             fens: store.getState().historyFENs.slice(),
             moves: game.history({ verbose: true })
@@ -447,6 +454,23 @@ export function createGameSession({
         }
     }
 
+    /** Opens a finished game from the games list: final position, result header, no result card. */
+    function presentFinishedGame(record) {
+        reopening = true;
+        try {
+            restoreSavedGame(record);
+        } finally {
+            reopening = false;
+        }
+        showBotOpponent($, record.botLevel);
+        const tc = record.timeControl;
+        const timeText = tc && tc.enabled ? `${tc.baseMinutes} + ${tc.incrementSeconds}` : 'без часов';
+        showGameResult(record.result, record.endReason, record.endDetail, {
+            quiet: true,
+            meta: `Вы против: Бот · уровень ${record.botLevel ?? '?'} · ${timeText}`
+        });
+    }
+
     function setOrientation(orientation) {
         boardView.orientation(orientation);
         store.setState({ orientation });
@@ -617,7 +641,7 @@ export function createGameSession({
     return {
         makeMove, applyEditedPosition, updateStatus, completeCurrentGame,
         showReviewMoment, restoreSavedGame, truncateToViewedPly, setPanelPhase, dismissOverlay,
-        startFromCurrentPosition, takeBack, resign, resumeLiveGame, refreshResumeCard,
+        startFromCurrentPosition, takeBack, resign, resumeLiveGame, refreshResumeCard, presentFinishedGame,
         playFromReviewMoment, playBestMoveFromMoment
     };
 }

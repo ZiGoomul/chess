@@ -28,6 +28,7 @@ import { createPuzzleController } from './puzzle-controller.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
 import { showBotOpponent } from '../ui/player-badges.js';
+import { createGamesList } from '../ui/games-list.js';
 import { createBoardInteraction } from './board-interaction.js';
 import { createTimeControlController } from './time-control-controller.js';
 import { createControls } from './controls.js';
@@ -264,6 +265,18 @@ $(document).ready(function() {
         $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
     });
     const timeControl = createTimeControlController({ $, clock, saveStoredSettings });
+
+    // Finished games: reopen one with its review
+    const gamesList = createGamesList({
+        $,
+        getRepository: () => services.repository,
+        onOpen: (record, review) => {
+            session.presentFinishedGame(record);
+            if (review && review.status === 'complete') reviewView.showReport(review, record, null);
+            else reviewView.showError('Разбор этой партии не сохранён.');
+        }
+    });
+    $('.tab-btn[data-tab="tab-games"]').on('click', () => { gamesList.render(); });
 
     $('#resumeGameBtn').on('click', function() {
         if (session.resumeLiveGame()) timeControl.refresh();

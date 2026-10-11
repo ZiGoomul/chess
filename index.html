@@ -25,6 +25,10 @@
                     <svg class="app-nav-icon app-nav-icon--puzzles" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v3a3 3 0 1 1 0 6v3H9v-3a3 3 0 1 0 0-6z"/><path d="M5 21h14"/></svg>
                     Задачи
                 </button>
+                <button type="button" id="tab-games-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-games" tabindex="-1" data-tab="tab-games">
+                    <svg class="app-nav-icon app-nav-icon--games" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    Партии
+                </button>
                 <button type="button" id="tab-setup-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-setup" tabindex="-1" data-tab="tab-setup">
                     <svg class="app-nav-icon app-nav-icon--setup" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>
                     Редактор
@@ -418,6 +422,13 @@
                     <button type="button" class="cc-start-btn new-game-setup-btn">Новая партия</button>
                     <button type="button" id="reviewPuzzleBtn" class="panel-link-btn panel-link-btn--accent" hidden></button>
                 </div>
+            </div>
+
+            <!-- TAB: Finished games -->
+            <div class="tab-content" id="tab-games" role="tabpanel" aria-labelledby="tab-games-button" aria-hidden="true">
+                <h2 class="panel-title">Мои партии</h2>
+                <p id="gamesEmpty" class="panel-hint">Здесь появятся завершённые партии против бота.</p>
+                <ul id="gamesList" class="games-list" aria-label="Завершённые партии"></ul>
             </div>
 
             <!-- TAB: Position editor -->

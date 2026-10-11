@@ -75,7 +75,7 @@ export function createHarness({ botLevel = 10 } = {}) {
     updateMoveHistory() {},
     goToPly: (ply) => { store.setState({ currentViewPly: ply }); }
   };
-  const botCoordinator = { cancelBotSearch() {}, makeBotMove() {} };
+  const botCoordinator = { cancelBotSearch() {}, makeBotMove() {}, updateStockfishLevel() {} };
   const analysisCoordinator = { autoHintIfNeeded() {}, drawHintArrows() {}, requestHint() {} };
   const services = { repository: null, puzzleCatalog: null, gameCompletion: null, postGameReview: null };
   const sounds = [];

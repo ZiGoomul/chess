@@ -256,3 +256,21 @@ test('taking back every move leaves nothing to resume', () => {
   assert.equal(session.resumeLiveGame(), false);
   h.close();
 });
+
+test('reopening a finished game shows its result without the result card', () => {
+  const { h, session } = setup();
+  const start = '6k1/5ppp/8/8/8/8/8/4R1K1 w - - 0 1';
+  const game = new h.Chess(start);
+  const fens = [game.fen()];
+  game.move('Re8#');
+  fens.push(game.fen());
+  session.presentFinishedGame({
+    id: 'old', humanColor: 'w', botLevel: 15, result: '1-0', endReason: 'checkmate',
+    fens, moves: game.history({ verbose: true }), timeControl: { enabled: true, baseMinutes: 5, incrementSeconds: 0 }
+  });
+
+  assert.equal(h.$('#gameResultTitle').text(), 'Победа · мат');
+  assert.equal(h.$('#gameResultMeta').text(), 'Вы против: Бот · уровень 15 · 5 + 0');
+  assert.equal(h.$('#gameOverOverlay').css('display'), 'none');
+  h.close();
+});

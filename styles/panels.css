@@ -738,3 +738,79 @@ body.is-puzzle-mode .player-badge {
     opacity: 0.45;
     cursor: default;
 }
+
+/* Finished games list */
+.games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.game-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 8px;
+    background: var(--surface-subtle);
+    box-shadow: none;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.game-row:hover {
+    background: var(--surface-hover);
+}
+
+.game-row-score {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    background: #8b8987;
+}
+
+.game-row-score--win { background: #5d8a2e; }
+.game-row-score--loss { background: #c0392b; }
+
+.game-row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.game-row-text strong {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.game-row-text span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-muted);
+}
+
+.game-row-accuracy {
+    font-variant-numeric: tabular-nums;
+}
+
+#gamesEmpty[hidden] {
+    display: none;
+}
