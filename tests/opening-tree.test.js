@@ -9,9 +9,9 @@ test('the lines through a position share its moves', () => {
   const start = ['e4', 'c5', 'Nf3', 'd6', 'd4', 'cxd4', 'Nxd4', 'Nf6', 'Nc3', 'g6'];
   assert.equal(linesThrough(dragon, ['e4', 'c5']).length, dragon.lines.length);
   // After 1.e4 c5 White may leave the open Sicilian
-  assert.deepEqual(continuations(dragon, ['e4', 'c5']).map(item => item.san).sort(), ['Nc3', 'Nf3', 'c3', 'd4', 'f4']);
-  assert.deepEqual(continuations(dragon, ['e4', 'c5', 'Nf3', 'd6']).map(item => item.san).sort(), ['Bb5+', 'd4']);
-  assert.deepEqual(continuations(dragon, start).map(item => item.san).sort(), ['Be2', 'Be3', 'f4', 'g3']);
+  assert.deepEqual(continuations(dragon, ['e4', 'c5']).map(item => item.san).sort(), ['Nc3', 'Nf3', 'b3', 'c3', 'd4', 'f4']);
+  assert.deepEqual(continuations(dragon, ['e4', 'c5', 'Nf3', 'd6']).map(item => item.san).sort(), ['Bb5+', 'c3', 'd4']);
+  assert.deepEqual(continuations(dragon, start).map(item => item.san).sort(), ['Bc4', 'Be2', 'Be3', 'f4', 'g3']);
   assert.equal(continuations(dragon, [...start, 'Be3']).length, 1);
   assert.deepEqual(linesThrough(dragon, ['d4']), []);
 });

@@ -63,7 +63,7 @@ test('the dropdown lists every opening and the catalog shows the chosen one', ()
 
   h.$('#lessonCourseSelect').val('dragon').trigger('change');
   assert.equal(h.$('#lessonCourses .lesson-course-title').text(), 'Вариант дракона');
-  assert.equal(h.$('#lessonCourses [data-line]').length, 11);
+  assert.equal(h.$('#lessonCourses [data-line]').length, 16);
   assert.deepEqual(saved.at(-1), { lessonCourse: 'dragon' });
   done();
 });
@@ -200,18 +200,29 @@ test('learning shows the other replies the opponent may choose', () => {
   done();
 });
 
-test('the whole-opening quiz lets the opponent pick a reply at each fork', () => {
+test('the whole-opening quiz lets the opponent pick a reply at each fork', (t) => {
   const { h, lesson, done } = setup({ course: 'dragon' });
+  const random = t.mock.method(Math, 'random', () => 0);
   h.$('[data-course-quiz="dragon"]').trigger('click');
   assert.equal(lesson.isActive(), true);
   assert.equal(h.$('#lessonLineTitle').text(), 'Весь дебют · соперник отвечает по-разному');
 
+  // The first line of the opening: the open Sicilian
   mock.timers.tick(1400);
   for (const san of ['c5', 'd6', 'cxd4', 'Nf6', 'g6']) {
     const move = new h.Chess(h.store.getState().game.fen()).move(san);
     assert.equal(lesson.tryMove(move.from, move.to), true);
     mock.timers.tick(700);
   }
-  assert.ok(['Be3', 'Be2', 'f4'].includes(h.store.getState().game.history().at(-1)));
+  assert.equal(h.store.getState().game.history().at(-1), 'Be3');
+
+  // Another pick leaves the open Sicilian on White's second move
+  random.mock.mockImplementation(() => 0.99);
+  h.$('#lessonRestartBtn').trigger('click');
+  mock.timers.tick(1400);
+  const c5 = new h.Chess(h.store.getState().game.fen()).move('c5');
+  assert.equal(lesson.tryMove(c5.from, c5.to), true);
+  mock.timers.tick(700);
+  assert.equal(h.store.getState().game.history().join(' '), 'e4 c5 b3');
   done();
 });
