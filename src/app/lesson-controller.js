@@ -214,7 +214,10 @@ export function createLessonController({
         const others = continuations(course, sansBefore).filter(item => item.san !== played);
         if (!others.length) return null;
         const ply = sansBefore.length;
-        const text = others.map(item => `${numberedSan(ply, item.san)} — «${item.lines[0].name}»`).join('; ');
+        const text = others.map(item => {
+            const more = item.lines.length > 1 ? ` и ещё ${item.lines.length - 1}` : '';
+            return `${numberedSan(ply, item.san)} — «${item.lines[0].name}»${more}`;
+        }).join('; ');
         return { label: 'Соперник может ответить и иначе', text, tone: 'branch' };
     }
 

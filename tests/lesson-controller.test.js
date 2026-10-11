@@ -63,7 +63,7 @@ test('the dropdown lists every opening and the catalog shows the chosen one', ()
 
   h.$('#lessonCourseSelect').val('dragon').trigger('change');
   assert.equal(h.$('#lessonCourses .lesson-course-title').text(), 'Вариант дракона');
-  assert.equal(h.$('#lessonCourses [data-line]').length, 4);
+  assert.equal(h.$('#lessonCourses [data-line]').length, 11);
   assert.deepEqual(saved.at(-1), { lessonCourse: 'dragon' });
   done();
 });
@@ -196,6 +196,7 @@ test('learning shows the other replies the opponent may choose', () => {
   assert.match(text, /Соперник может ответить и иначе/);
   assert.match(text, /6\.Сe2 — «Классический вариант \(6\.Сe2\)»/);
   assert.match(text, /6\.f4 — «Атака Левенфиша \(6\.f4\)»/);
+  assert.match(text, /6\.g3 — «Фианкетто \(6\.g3\)»/);
   done();
 });
 
