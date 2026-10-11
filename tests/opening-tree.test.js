@@ -27,6 +27,15 @@ test('the King\'s Indian forks where White chooses a system', () => {
   assert.deepEqual(continuations(kid, [...classical, 'O-O', 'Nc6', 'd5', 'Ne7']).map(item => item.san).sort(), ['Nd2', 'Ne1', 'b4']);
 });
 
+test('the King\'s Indian Attack covers Black\'s main set-ups after 1.Nf3', () => {
+  const kia = findCourse('kia');
+  // White's own first move has two options in the repertoire
+  assert.deepEqual(continuations(kia, []).map(item => item.san).sort(), ['Nf3', 'e4']);
+  assert.deepEqual(continuations(kia, ['Nf3']).map(item => item.san).sort(), ['Nf6', 'd5']);
+  assert.deepEqual(continuations(kia, ['Nf3', 'd5', 'g3', 'Nf6', 'Bg2']).map(item => item.san).sort(), ['c6', 'e6']);
+  assert.deepEqual(continuations(kia, ['Nf3', 'd5', 'g3', 'Nf6', 'Bg2', 'c6', 'O-O']).map(item => item.san).sort(), ['Bf5', 'Bg4']);
+});
+
 test('picking a line prefers lines not yet done', () => {
   const done = new Set(dragon.lines.slice(1).map(line => line.id));
   for (let i = 0; i < 5; i++) {
