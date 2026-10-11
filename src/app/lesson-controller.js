@@ -82,10 +82,14 @@ export function createLessonController({
         $('#lessonStatus').text(text).attr('data-tone', tone || null);
     }
 
+    // The comments on screen, so a hint can add to them instead of replacing them
+    let shownComments = [];
+
     /** Comments shown under the status: [{ label, text, tone }] */
     function setComments(items) {
+        shownComments = items.filter(Boolean);
         const list = $('#lessonComments').empty();
-        items.filter(Boolean).forEach(item => {
+        shownComments.forEach(item => {
             const entry = $('<li class="lesson-comment"></li>').attr('data-tone', item.tone || null);
             if (item.label) entry.append($('<strong class="lesson-comment-move"></strong>').text(item.label));
             entry.append($('<span class="lesson-comment-text"></span>').text(item.text));
@@ -381,14 +385,26 @@ export function createLessonController({
         return true;
     }
 
+    /**
+     * Picks up the piece to move and marks its square, so one click on the marked square plays
+     * the move; the arrow and the reason for the move are shown too. In the quiz it counts as a
+     * mistake, once per move.
+     */
     function hint() {
-        if (!active || isCompleted() || !isStudentTurn()) return;
+        if (!active || isCompleted() || !isStudentTurn() || opponentTimer || !isAtLivePosition()) return;
+        const move = nextMoveDetails();
+        if (!move) return;
+        if (mode === 'quiz' && mistakes < QUIZ_MISTAKES_BEFORE_ARROW) lineMistakes++;
         mistakes = Math.max(mistakes, QUIZ_MISTAKES_BEFORE_ARROW);
-        if (mode === 'quiz') lineMistakes++;
-        const step = nextStep();
-        setStatus(`Нужный ход: ${numberedSan(ply(), step.san)}`, 'info');
-        setComments([commentFor(ply(), 'next', 'Почему ')]);
+
+        const reason = commentFor(ply(), 'next', 'Почему ');
+        const alreadyExplained = shownComments.some(item => item.label === reason.label);
+        setComments(alreadyExplained ? shownComments : [...shownComments, reason]);
+        setStatus(`Подсказка: ${numberedSan(ply(), move.san)} — нажмите на отмеченное поле`, 'info');
+        renderMoves();
         showArrow();
+        store.setState({ selectedSquare: move.from });
+        boardView.showMoveHints(move.from, [{ square: move.to, isCapture: Boolean(move.captured) }]);
     }
 
     /** Takes back the student's last move (and the opponent's reply to it). */

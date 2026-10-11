@@ -226,3 +226,31 @@ test('the whole-opening quiz lets the opponent pick a reply at each fork', (t) =
   assert.equal(h.store.getState().game.history().join(' '), 'e4 c5 b3');
   done();
 });
+
+test('a hint in learning picks up the piece and keeps the explanations', () => {
+  const { h, lesson, arrows, done } = setup();
+  lesson.start('kia-french', 'learn');
+  lesson.hint();
+
+  assert.equal(h.store.getState().selectedSquare, 'e2');
+  assert.deepEqual(h.boardView.calls.showMoveHints.at(-1), { square: 'e2', destinations: [{ square: 'e4', isCapture: false }] });
+  assert.equal(h.$('#lessonStatus').text(), 'Подсказка: 1.e4 — нажмите на отмеченное поле');
+  const comments = h.$('#lessonComments').text();
+  assert.match(comments, /Староиндийское нападение/);
+  assert.equal(comments.match(/Почему 1\.e4/g).length, 1);
+  assert.equal(arrows.at(-1), 'e2e4');
+  done();
+});
+
+test('a hint in the quiz shows the move and counts as one mistake', () => {
+  const { h, lesson, saved, arrows, done } = setup();
+  lesson.start('kia-french', 'quiz');
+  lesson.hint();
+  lesson.hint();
+  assert.deepEqual(arrows, ['e2e4', 'e2e4']);
+  assert.match(h.$('#lessonComments').text(), /Почему 1\.e4/);
+  playStudentMoves(h, lesson, 11);
+  assert.equal(h.$('#lessonStatus').text(), 'Вариант пройден. Ошибок: 1');
+  assert.deepEqual(saved.at(-1), { lessonProgress: { 'kia-french': {} } });
+  done();
+});
