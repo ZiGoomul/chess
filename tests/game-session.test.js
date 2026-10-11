@@ -3,16 +3,22 @@ import assert from 'node:assert/strict';
 import { createGameSession } from '../src/app/game-session.js';
 import { createHarness, playMoves } from './helpers/harness.js';
 
-function setup(options) {
+function memoryStorage() {
+  const data = new Map();
+  return { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, String(value)), removeItem: key => data.delete(key) };
+}
+
+function setup(options, liveGameStorage = memoryStorage()) {
   const h = createHarness(options);
   const puzzle = { isActive: () => false, exit() {} };
   const session = createGameSession({
     $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
     botCoordinator: h.botCoordinator, analysisCoordinator: h.analysisCoordinator, moveHistoryView: h.moveHistoryView,
     services: h.services, puzzle, getBotLevel: h.getBotLevel, clearSelection: h.clearSelection,
-    playSound: h.playSound, playSoundForMove: h.playSoundForMove, saveStoredSettings: h.saveStoredSettings
+    playSound: h.playSound, playSoundForMove: h.playSoundForMove, saveStoredSettings: h.saveStoredSettings,
+    liveGameStorage
   });
-  return { h, session };
+  return { h, session, liveGameStorage };
 }
 
 const state = h => h.store.getState();
@@ -190,5 +196,63 @@ test('a pawn promotes to the chosen piece', () => {
   h.store.setState({ historyFENs: [state(h).game.fen()], currentViewPly: 0 });
   assert.equal(session.makeMove('e7', 'e8', 'wP', 'n'), true);
   assert.deepEqual(state(h).game.get('e8'), { type: 'n', color: 'w' });
+  h.close();
+});
+
+
+test('taking back removes the bot reply and the player\'s move', () => {
+  const { h, session } = setup();
+  session.makeMove('e2', 'e4');
+  h.eventBus.emit('bot:move-ready', { bestmove: 'e7e5' });
+  assert.equal(state(h).game.history().join(' '), 'e4 e5');
+
+  assert.equal(session.takeBack(), true);
+  assert.equal(state(h).game.history().length, 0);
+  assert.equal(state(h).historyFENs.length, 1);
+  assert.equal(session.takeBack(), false, 'nothing left to take back');
+  h.close();
+});
+
+test('resigning ends the game as a loss', () => {
+  const { h, session } = setup();
+  session.makeMove('e2', 'e4');
+  assert.equal(session.resign(), true);
+  assert.equal(h.$('#gameOverText').text(), 'Поражение');
+  assert.equal(h.$('#gameOverReason').text(), 'Вы сдались · вы играли белыми');
+  assert.equal(h.$('#tab-play').attr('data-phase'), 'review');
+  h.close();
+});
+
+test('a game in progress is saved after each move and can be resumed', () => {
+  const storage = memoryStorage();
+  const first = setup(undefined, storage);
+  first.session.makeMove('e2', 'e4');
+  first.h.eventBus.emit('bot:move-ready', { bestmove: 'c7c5' });
+  first.session.makeMove('g1', 'f3');
+  first.h.close();
+
+  const { h, session } = setup(undefined, storage);
+  assert.equal(session.resumeLiveGame(), true);
+  assert.equal(state(h).game.history().join(' '), 'e4 c5 Nf3');
+  assert.equal(state(h).historyFENs.length, 4);
+  assert.equal(h.$('#tab-play').attr('data-phase'), 'game');
+  h.close();
+});
+
+test('a finished game is no longer offered to resume', () => {
+  const storage = memoryStorage();
+  const { h, session } = setup(undefined, storage);
+  session.makeMove('e2', 'e4');
+  session.resign();
+  assert.equal(session.resumeLiveGame(), false);
+  h.close();
+});
+
+test('taking back every move leaves nothing to resume', () => {
+  const { h, session } = setup();
+  session.makeMove('e2', 'e4');
+  h.eventBus.emit('bot:move-ready', { bestmove: 'e7e5' });
+  session.takeBack();
+  assert.equal(session.resumeLiveGame(), false);
   h.close();
 });

@@ -5,17 +5,134 @@
 import { getDisplayedGame, isHistoricalPosition } from '../domain/position.js';
 import { retainCastlingRights } from '../domain/castling-rights.js';
 import { parseUciMove } from '../services/puzzle-runner.js';
+import { saveLiveGame, loadLiveGame, clearLiveGame } from '../storage/live-game-storage.js';
 
 export function createGameSession({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
-    services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
+    services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings,
+    liveGameStorage = undefined
 }) {
     // The play panel shows the new-game form, the live game or the finished game.
     function setPanelPhase(phase) {
         $('#tab-play').attr('data-phase', phase);
+        if (phase === 'setup') refreshResumeCard();
+        updateGameActions();
     }
 
-    const END_REASONS = { checkmate: 'мат', draw: 'ничья', timeout: 'время вышло' };
+    const END_REASONS = { checkmate: 'мат', draw: 'ничья', timeout: 'время вышло', resign: 'вы сдались' };
+
+    const humanColor = () => (boardView.orientation() === 'black' ? 'b' : 'w');
+    const isLiveGame = () => !finished && !puzzle.isActive() && getBotLevel() > 0 && $('#tab-play').attr('data-phase') === 'game';
+
+    // --- The game in progress survives a reload ---
+    function persistLiveGame() {
+        const state = store.getState();
+        if (!isLiveGame()) return;
+        // Every move taken back: nothing to resume
+        if (state.historyFENs.length <= 1) { clearLiveGame(liveGameStorage); return; }
+        saveLiveGame({
+            startFen: state.historyFENs[0],
+            moves: state.game.history({ verbose: true }).map(move => move.from + move.to + (move.promotion || '')),
+            humanColor: humanColor(),
+            botLevel: getBotLevel(),
+            timeControl: { enabled: $('#timerEnableCb').is(':checked'), baseMinutes: Number($('#timerBase').val()), incrementSeconds: Number($('#timerInc').val()) },
+            clocks: clock.snapshot?.(),
+            savedAt: Date.now()
+        }, liveGameStorage);
+    }
+
+    function refreshResumeCard() {
+        const saved = loadLiveGame(liveGameStorage);
+        $('#resumeGameBtn').prop('hidden', !saved);
+        if (!saved) return;
+        const plies = saved.moves.length;
+        const moveCount = Math.ceil(plies / 2);
+        const side = saved.humanColor === 'b' ? 'чёрными' : 'белыми';
+        $('#resumeGameMeta').text(`Бот · ур. ${saved.botLevel} · ${moveCount} ${moveCount === 1 ? 'ход' : moveCount < 5 ? 'хода' : 'ходов'} · вы ${side}`);
+    }
+
+    /** Puts the saved game back on the board; returns false when there is none. */
+    function resumeLiveGame() {
+        const saved = loadLiveGame(liveGameStorage);
+        if (!saved) return false;
+        if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+        finished = null;
+        gameCompletionReset();
+        botCoordinator.cancelBotSearch();
+        clearSelection();
+        boardView.clearArrows();
+
+        $('#botLevel').val(String(saved.botLevel)).trigger('change');
+        if (saved.timeControl) {
+            $('#timerEnableCb').prop('checked', saved.timeControl.enabled);
+            $('#timerBase').val(saved.timeControl.baseMinutes);
+            $('#timerInc').val(saved.timeControl.incrementSeconds);
+        }
+
+        const game = store.getState().game;
+        if (!game.load(saved.startFen)) { clearLiveGame(liveGameStorage); return false; }
+        const fens = [game.fen()];
+        let lastMove = null;
+        for (const uci of saved.moves) {
+            const parsed = parseUciMove(uci);
+            lastMove = parsed && game.move({ from: parsed.from, to: parsed.to, promotion: parsed.promotion || 'q' });
+            if (!lastMove) break;
+            fens.push(game.fen());
+        }
+        store.setState({ historyFENs: fens, currentViewPly: fens.length - 1, isThinking: false });
+        setOrientation(saved.humanColor === 'b' ? 'black' : 'white');
+        beginCurrentGame(saved.startFen);
+        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        setPanelPhase('game');
+        clock.applySettings();
+        clock.restoreRemaining?.(saved.clocks);
+        updateStatus();
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game, move: lastMove || undefined });
+        if (fens.length > 1) clock.startClock();
+        if (game.turn() !== saved.humanColor && !game.game_over()) botCoordinator.makeBotMove();
+        return true;
+    }
+
+    // --- Take back and resign ---
+    function canTakeBack() {
+        const state = store.getState();
+        if (!isLiveGame() || isHistoricalPosition(state)) return false;
+        return state.game.history({ verbose: true }).some(move => move.color === humanColor());
+    }
+
+    /** Undoes the player's last move, and the bot's reply to it if it came. */
+    function takeBack() {
+        if (!canTakeBack()) return false;
+        botCoordinator.cancelBotSearch();
+        clearSelection();
+        boardView.clearArrows();
+        const game = store.getState().game;
+        const fens = store.getState().historyFENs.slice();
+        do {
+            game.undo();
+            fens.pop();
+        } while (fens.length > 1 && game.turn() !== humanColor());
+        store.setState({ historyFENs: fens, currentViewPly: fens.length - 1, isThinking: false, selectedSquare: null });
+        const lastMove = game.history({ verbose: true }).at(-1);
+        if (!lastMove) boardView.clearLastMoveHighlight?.();
+        updateStatus();
+        eventBus.emit('game:move-made', { fen: game.fen(), game: game, move: lastMove });
+        persistLiveGame();
+        return true;
+    }
+
+    function resign() {
+        if (!isLiveGame()) return false;
+        botCoordinator.cancelBotSearch();
+        clock.stopClock();
+        completeCurrentGame(humanColor() === 'w' ? '0-1' : '1-0', 'resign');
+        return true;
+    }
+
+    function updateGameActions() {
+        $('#takebackBtn').prop('disabled', !canTakeBack());
+        $('#resignBtn').prop('disabled', !isLiveGame());
+    }
 
     // The finished game (keyed by its final position) and whether its result card was closed
     let finished = null;
@@ -43,6 +160,7 @@ export function createGameSession({
         const reason = detail || END_REASONS[endReason] || '';
         finished = { key, human };
         overlayDismissed = false;
+        clearLiveGame(liveGameStorage);
 
         $('#gameResultTitle').text(reason ? `${title} · ${reason}` : title);
         $('#gameResultMeta').text(`Вы против: ${$('#botLevel option:selected').text()} · ${$('#selectedTimeText').text()}`);
@@ -164,6 +282,7 @@ export function createGameSession({
 
         // The result card: never in the editor or a puzzle, only on the final position
         updateOverlay();
+        updateGameActions();
     }
 
     function makeEditorMove(source, target, piece, promotion = 'q') {
@@ -228,6 +347,7 @@ export function createGameSession({
         clock.startClock();
         updateStatus();
         eventBus.emit('game:move-made', { fen: game.fen(), move: move, game: game });
+        persistLiveGame();
         return true;
     }
 
@@ -338,6 +458,7 @@ export function createGameSession({
     function startFromCurrentPosition() {
         const game = store.getState().game;
         finished = null;
+        clearLiveGame(liveGameStorage);
         gameCompletionReset();
         botCoordinator.cancelBotSearch();
         boardView.clearArrows();
@@ -351,6 +472,7 @@ export function createGameSession({
     }
 
     eventBus.on('bot:move-ready', (result) => {
+        if (finished) return;
         clearSelection();
         if (!result || clock.timedOut) {
             updateStatus();
@@ -370,6 +492,7 @@ export function createGameSession({
         clock.startClock();
         eventBus.emit('game:move-made', { fen: game.fen(), move: botMove, game: game });
         updateStatus();
+        persistLiveGame();
     });
 
     eventBus.on('shell:get-fen-requested', () => {
@@ -421,6 +544,7 @@ export function createGameSession({
         if (puzzle.isActive()) puzzle.exit();
         else $('#startPositionBtn').trigger('click');
         finished = null;
+        clearLiveGame(liveGameStorage);
         setPanelPhase('game');
         clock.applySettings(true);
         clock.startClock();
@@ -447,6 +571,28 @@ export function createGameSession({
 
     $('#closeOverlayBtn').on('click', dismissOverlay);
 
+    $('#takebackBtn').on('click', takeBack);
+
+    // Resigning takes a second click within a few seconds
+    let resignConfirmTimer = null;
+    $('#resignBtn').on('click', function() {
+        const button = $(this);
+        if (!button.hasClass('is-confirming')) {
+            button.addClass('is-confirming').find('.action-btn-label').text('Точно?');
+            clearTimeout(resignConfirmTimer);
+            resignConfirmTimer = setTimeout(() => button.removeClass('is-confirming').find('.action-btn-label').text('Сдаться'), 4000);
+            return;
+        }
+        clearTimeout(resignConfirmTimer);
+        button.removeClass('is-confirming').find('.action-btn-label').text('Сдаться');
+        resign();
+    });
+
+    // Keep the clock times of a game left open
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => { if (document.hidden) persistLiveGame(); });
+    }
+
     $('#gameOverReviewBtn').on('click', function() {
         dismissOverlay();
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
@@ -471,7 +617,7 @@ export function createGameSession({
     return {
         makeMove, applyEditedPosition, updateStatus, completeCurrentGame,
         showReviewMoment, restoreSavedGame, truncateToViewedPly, setPanelPhase, dismissOverlay,
-        startFromCurrentPosition,
+        startFromCurrentPosition, takeBack, resign, resumeLiveGame, refreshResumeCard,
         playFromReviewMoment, playBestMoveFromMoment
     };
 }

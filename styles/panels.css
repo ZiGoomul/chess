@@ -247,10 +247,7 @@ select.panel-select {
     box-shadow: 0 1px 0 var(--btn-shadow);
 }
 
-.action-btn:disabled {
-    opacity: 0.6;
-    cursor: progress;
-}
+
 
 /* Play tab: one phase visible at a time (data-phase on #tab-play) */
 #tab-play {
@@ -389,6 +386,30 @@ select.panel-select {
     flex-shrink: 0;
     gap: 8px;
     padding: 14px 16px 18px;
+}
+
+/* Two rows of three: take back, resign, hint / flip, new game */
+.play-actions--live {
+    flex-wrap: wrap;
+}
+
+.play-actions--live .action-btn {
+    flex: 1 1 calc(33.333% - 8px);
+}
+
+.action-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+}
+
+.action-btn--resign.is-confirming {
+    background: #c0392b;
+    color: #ffffff;
+}
+
+.panel-card-link--resume {
+    margin-top: 0;
 }
 
 .play-actions--review {

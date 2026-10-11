@@ -156,7 +156,24 @@ export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentView
     else blackMs += incrementMs;
   }
 
+  /** Time left on both clocks, for saving a game in progress. */
+  function snapshot() {
+    return { whiteMs, blackMs };
+  }
+
+  /** Puts saved times back on the clocks (after applySettings set the time control). */
+  function restoreRemaining(times) {
+    if (!times || !Number.isFinite(times.whiteMs) || !Number.isFinite(times.blackMs)) return;
+    stopClock();
+    timedOut = false;
+    whiteMs = times.whiteMs;
+    blackMs = times.blackMs;
+    updateClockUI();
+  }
+
   return {
+    snapshot,
+    restoreRemaining,
     applySettings,
     addIncrement,
     startClock,

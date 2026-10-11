@@ -246,6 +246,11 @@ $(document).ready(function() {
         $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
     });
     const timeControl = createTimeControlController({ $, clock, saveStoredSettings });
+
+    $('#resumeGameBtn').on('click', function() {
+        if (session.resumeLiveGame()) timeControl.refresh();
+    });
+    session.refreshResumeCard();
     createControls({
         $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
         interaction, session, clearSelection, saveStoredSettings
