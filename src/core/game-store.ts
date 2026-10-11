@@ -15,7 +15,7 @@ export interface GameState {
     historyFENs: string[];
     currentViewPly: number;
     selectedSquare: Square | null;
-    mode: 'free' | 'bot' | 'puzzle';
+    mode: 'free' | 'bot' | 'puzzle' | 'lesson';
     orientation: 'white' | 'black';
     isThinking: boolean;
     settings: GameSettings;

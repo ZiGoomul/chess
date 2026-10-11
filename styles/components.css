@@ -113,6 +113,7 @@ input:checked + .slider:before {
 
 .app-nav-icon--play { color: var(--accent-color); }
 .app-nav-icon--puzzles { color: #f1a33c; }
+.app-nav-icon--lessons { color: #4fb0a5; }
 .app-nav-icon--setup { color: #b18cdc; }
 .app-nav-icon--style { color: #5d9bd6; }
 .app-nav-icon--games { color: #e0a526; }

@@ -476,7 +476,8 @@ select.panel-select {
 #puzzleStatusText[data-tone="info"] { color: var(--status-info); }
 
 /* Puzzles hide the player badges and clocks: there is no opponent to time */
-body.is-puzzle-mode .player-badge {
+body.is-puzzle-mode .player-badge,
+body.is-lesson-mode .player-badge {
     display: none;
 }
 
@@ -904,4 +905,299 @@ body.is-puzzle-mode .player-badge {
 /* The editor places pieces by dragging only */
 body.is-editor-mode .move-entry {
     display: none;
+}
+
+/* ---- Opening lessons ---- */
+.lesson-catalog,
+.lesson-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lesson-catalog[hidden],
+.lesson-view[hidden] {
+    display: none;
+}
+
+.lesson-courses {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.lesson-course {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 10px;
+    background: var(--surface-subtle);
+}
+
+.lesson-course-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.lesson-course-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.lesson-side-chip[data-side="w"] {
+    background: #f4f2ee;
+    color: #262421;
+}
+
+.lesson-side-chip[data-side="b"] {
+    background: #262421;
+    color: #f4f2ee;
+}
+
+.lesson-course-summary {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--label-muted);
+}
+
+.lesson-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lesson-line-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--btn-bg);
+    box-shadow: 0 3px 0 var(--btn-shadow);
+    color: var(--btn-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.lesson-line-btn:hover {
+    background: var(--btn-bg-hover);
+}
+
+.lesson-line-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--btn-shadow);
+}
+
+.lesson-line-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lesson-line-name {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.lesson-line-summary {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-muted);
+}
+
+.lesson-line-marks {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.lesson-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.lesson-mark--quiz {
+    background: #f1a33c;
+}
+
+.lesson-view-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lesson-view-header .nav-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}
+
+.lesson-view-header .nav-btn svg {
+    flex-shrink: 0;
+}
+
+.lesson-view-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.lesson-line-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--label-muted);
+}
+
+.lesson-mode-switch {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background: var(--tabs-bg);
+}
+
+.lesson-mode-btn {
+    flex: 1 1 0;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--tab-text);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.lesson-mode-btn:hover {
+    background: var(--tab-hover-bg);
+}
+
+.lesson-mode-btn.active {
+    background: var(--panel-bg);
+    color: var(--tab-active-text);
+}
+
+.lesson-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--btn-bg);
+    overflow: hidden;
+}
+
+.lesson-progress-bar {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--accent-color);
+    transition: width 0.3s;
+}
+
+.lesson-status-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#lessonStatus {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+#lessonStatus[data-tone="success"] { color: var(--status-success); }
+#lessonStatus[data-tone="error"] { color: var(--status-error); }
+#lessonStatus[data-tone="info"] { color: var(--status-info); }
+
+.lesson-comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lesson-comment {
+    padding-left: 10px;
+    border-left: 3px solid var(--border-color);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+.lesson-comment[data-tone="success"] { border-left-color: var(--accent-color); }
+.lesson-comment[data-tone="next"] { border-left-color: var(--status-info); }
+.lesson-comment[data-tone="opponent"] { border-left-color: var(--label-muted); }
+.lesson-comment[data-tone="plan"] { border-left-color: #f1a33c; }
+
+.lesson-comment-move {
+    display: block;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.lesson-moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.lesson-move {
+    display: inline-flex;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--label-muted);
+}
+
+.lesson-move.is-played {
+    color: var(--text-primary);
+}
+
+.lesson-move.is-upcoming {
+    opacity: 0.5;
+}
+
+.lesson-move.is-next {
+    background: var(--btn-green-tint);
+    color: var(--text-primary);
+    outline: 2px solid var(--accent-color);
+}
+
+.lesson-move-number {
+    color: var(--label-muted);
+    font-weight: 600;
+}
+
+.lesson-actions {
+    display: flex;
+    gap: 8px;
 }

@@ -3,6 +3,7 @@ import { getKingSquareInCheck } from '../domain/check-state.js';
 import { Chess } from 'chess.js';
 import { MOVE_CLASS_LABELS } from './move-classes.js';
 import { pieceImageUrl, LOCAL_PIECE_THEME } from './piece-images.js';
+import { isGuidedMode } from '../domain/position.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
@@ -46,7 +47,12 @@ export function createBoardView({ $, eventBus, store }) {
 
         // One orange family: the best move bold, the alternatives fainter and thinner
         var color, strokeWidth, markerId;
-        if (multipv === 1) {
+        if (multipv === 'guide') {
+            // Lessons: the move to play, in green
+            color = "rgba(129, 182, 76, 0.9)";
+            strokeWidth = sqSize * 0.16;
+            markerId = "url(#arrowheadGuide)";
+        } else if (multipv === 1) {
             color = "rgba(255, 170, 0, 0.85)";
             strokeWidth = sqSize * 0.15;
             markerId = "url(#arrowhead1)";
@@ -111,6 +117,11 @@ export function createBoardView({ $, eventBus, store }) {
         
         var group = document.getElementById("arrowsGroup");
         if (group) group.appendChild(svgElem);
+    }
+
+    function showGuideArrow(from, to, game) {
+        clearArrows();
+        drawArrow(from, to, 'guide', game);
     }
 
     function highlightLastMove(from, to) {
@@ -496,8 +507,8 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('engine:hints-updated', function(data) {
              clearArrows();
-             // No arrows at all while solving a puzzle
-             if (!data || (store && store.getState().mode === 'puzzle')) return;
+             // No engine arrows while solving a puzzle or in a lesson
+             if (!data || (store && isGuidedMode(store.getState().mode))) return;
              var game = data.game || (store && store.getState() ? store.getState().game : null);
              if (data.hints) {
                  for (var i = 3; i >= 1; i--) {
@@ -568,6 +579,7 @@ export function createBoardView({ $, eventBus, store }) {
         resize: function() { if (board) board.resize(); },
         destroy: function() { if (board) board.destroy(); },
         clearArrows: clearArrows,
+        showGuideArrow: showGuideArrow,
         showMoveHints: showMoveHints,
         removeHighlights: removeHighlights,
         highlightLastMove: highlightLastMove,

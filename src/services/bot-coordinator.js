@@ -1,3 +1,5 @@
+import { isGuidedMode } from '../domain/position.js';
+
 const MIN_THINK_MS = 400;
 const THINK_SPREAD_MS = 700;
 
@@ -16,7 +18,7 @@ export function createBotCoordinator({ eventBus, store, engine, thinkTime = defa
         const level = state.settings?.botLevel || 0;
         
         const isGameOver = typeof state.game?.game_over === 'function' ? state.game.game_over() : false;
-        if (level === 0 || state.mode === 'puzzle' || isGameOver) {
+        if (level === 0 || isGuidedMode(state.mode) || isGameOver) {
             return;
         }
 

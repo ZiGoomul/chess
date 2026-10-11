@@ -1,4 +1,5 @@
 import { Chess } from 'chess.js';
+import { isGuidedMode } from '../domain/position.js';
 
 /**
  * Engine hints for the displayed position. Hints belong to the position they were
@@ -10,7 +11,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     let hintFen = null;
 
     function isPuzzleMode() {
-        return store.getState().mode === 'puzzle';
+        return isGuidedMode(store.getState().mode);
     }
 
     function hintsMatchDisplayed() {

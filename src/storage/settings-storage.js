@@ -18,7 +18,8 @@ export const DEFAULT_SETTINGS = {
     puzzleRating: 1500,
     puzzleRatingGames: 0,
     soundEnabled: true,
-    soundVolume: 70
+    soundVolume: 70,
+    lessonProgress: {}
 };
 
 function getStorage(customStorage) {

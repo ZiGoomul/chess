@@ -25,6 +25,7 @@ import { createPostGameReviewView } from '../ui/post-game-review.js';
 import { createReviewAnnotations } from '../ui/review-annotations.js';
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 import { createPuzzleController } from './puzzle-controller.js';
+import { createLessonController } from './lesson-controller.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
 import { createMoveEntry } from './move-entry.js';
@@ -147,13 +148,27 @@ $(document).ready(function() {
 
     // Controllers reference each other; these are assigned below, before any event can fire.
     let puzzle;
+    let lesson;
     let session;
+
+    // Puzzles and opening lessons both script the moves; the game session sees them as one mode
+    const guided = {
+        isActive: () => puzzle.isActive() || lesson.isActive(),
+        isCompleted: () => (lesson.isActive() ? lesson.isCompleted() : puzzle.isCompleted()),
+        tryMove: (source, target, promotion) => (lesson.isActive()
+            ? lesson.tryMove(source, target, promotion)
+            : puzzle.tryMove(source, target, promotion)),
+        exit: (options) => {
+            if (lesson.isActive()) lesson.exit(options);
+            if (puzzle.isActive()) puzzle.exit(options);
+        }
+    };
 
     const clock = createClock({
         $: $,
         game: store.getState().game,
         getBoard: () => boardView,
-        getIsPuzzleMode: () => puzzle.isActive(),
+        getIsPuzzleMode: () => guided.isActive(),
         getCurrentViewPly: () => store.getState().currentViewPly,
         getHistoryLength: () => store.getState().historyFENs.length,
         playSound,
@@ -197,9 +212,16 @@ $(document).ready(function() {
         initialRating: { rating: storedSettings.puzzleRating, games: storedSettings.puzzleRatingGames }
     });
 
+    lesson = createLessonController({
+        $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, clearSelection,
+        playSound, playSoundForMove, saveStoredSettings,
+        initialProgress: storedSettings.lessonProgress,
+        onStart: () => { if (puzzle.isActive()) puzzle.exit({ keepPosition: true }); }
+    });
+
     session = createGameSession({
         $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
-        services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
+        services, puzzle: guided, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
     });
 
     function uciToSan(fen, uci) {
@@ -226,6 +248,7 @@ $(document).ready(function() {
         },
         onSolvePuzzle: (puzzleToSolve) => {
             $('.tab-btn[data-tab="tab-puzzles"]').trigger('click');
+            if (lesson.isActive()) lesson.exit({ keepPosition: true });
             puzzle.load(puzzleToSolve);
         }
     });
@@ -260,14 +283,19 @@ $(document).ready(function() {
     createPositionEditor({ $, Chess, store, eventBus, session });
     createMoveEntry({ $, Chess, store, eventBus, session });
 
-    // Opening the editor leaves puzzle mode but keeps the position to edit
+    // Opening the editor leaves puzzle or lesson mode but keeps the position to edit
     $('.tab-btn[data-tab="tab-setup"]').on('click', function() {
-        if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+        guided.exit({ keepPosition: true });
         session.updateStatus();
     });
 
+    // Puzzles take over the board: a lesson in progress ends
+    $('#loadPuzzleBtn, #dailyPuzzleBtn').on('click', function() {
+        if (lesson.isActive()) lesson.exit({ keepPosition: true });
+    });
+
     const interaction = createBoardInteraction({
-        $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
+        $, Chess, store, eventBus, boardView, clock, puzzle: guided, session, getBotLevel, clearSelection
     });
     const timeControl = createTimeControlController({ $, clock, saveStoredSettings });
 

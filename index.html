@@ -25,6 +25,10 @@
                     <svg class="app-nav-icon app-nav-icon--puzzles" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v3a3 3 0 1 1 0 6v3H9v-3a3 3 0 1 0 0-6z"/><path d="M5 21h14"/></svg>
                     Задачи
                 </button>
+                <button type="button" id="tab-lessons-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-lessons" tabindex="-1" data-tab="tab-lessons">
+                    <svg class="app-nav-icon app-nav-icon--lessons" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/></svg>
+                    Обучение
+                </button>
                 <button type="button" id="tab-games-button" class="app-nav-btn tab-btn" role="tab" aria-selected="false" aria-controls="tab-games" tabindex="-1" data-tab="tab-games">
                     <svg class="app-nav-icon app-nav-icon--games" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
                     Партии
@@ -86,6 +90,9 @@
                             </marker>
                             <marker id="arrowhead3" markerWidth="3" markerHeight="3" refX="2" refY="1.5" orient="auto">
                                 <path d="M0,0 L0,3 L3,1.5 z" fill="rgba(255, 170, 0, 0.32)" />
+                            </marker>
+                            <marker id="arrowheadGuide" markerWidth="3" markerHeight="3" refX="2" refY="1.5" orient="auto">
+                                <path d="M0,0 L0,3 L3,1.5 z" fill="rgba(129, 182, 76, 0.9)" />
                             </marker>
                         </defs>
                         <g id="arrowsGroup"></g>
@@ -278,6 +285,62 @@
                     </div>
                 </details>
                 <button id="exitPuzzleBtn" class="btn-secondary">Выйти из режима задач</button>
+            </div>
+
+            <!-- TAB: Opening lessons -->
+            <div class="tab-content tab-content--roomy" id="tab-lessons" role="tabpanel" aria-labelledby="tab-lessons-button" aria-hidden="true">
+                <div id="lessonCatalog" class="lesson-catalog">
+                    <h2 class="panel-title">Обучение</h2>
+                    <p class="panel-hint">Выберите дебют и вариант. Вы делаете ходы за свою сторону, ходы соперника появятся сами, и каждый ход объясняется.</p>
+                    <div id="lessonCourses" class="lesson-courses"></div>
+                </div>
+
+                <div id="lessonView" class="lesson-view" hidden>
+                    <div class="lesson-view-header">
+                        <button type="button" id="lessonExitBtn" class="nav-btn" aria-label="К списку дебютов" title="К списку дебютов">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+                        </button>
+                        <div class="lesson-view-titles">
+                            <h2 id="lessonCourseTitle" class="panel-title"></h2>
+                            <p id="lessonLineTitle" class="lesson-line-title"></p>
+                        </div>
+                    </div>
+
+                    <div id="lessonModeSwitch" class="lesson-mode-switch" role="radiogroup" aria-label="Режим">
+                        <button type="button" class="lesson-mode-btn active" role="radio" aria-checked="true" data-mode="learn">Изучение</button>
+                        <button type="button" class="lesson-mode-btn" role="radio" aria-checked="false" data-mode="quiz">Проверка</button>
+                    </div>
+
+                    <div class="lesson-progress" aria-hidden="true"><span id="lessonProgressBar" class="lesson-progress-bar"></span></div>
+
+                    <div class="puzzle-status-card lesson-card">
+                        <div class="lesson-status-row">
+                            <div id="lessonStatus" role="status" aria-live="polite"></div>
+                            <span id="lessonProgressText" class="panel-chip"></span>
+                        </div>
+                        <ul id="lessonComments" class="lesson-comments" aria-live="polite"></ul>
+                    </div>
+
+                    <ol id="lessonMoves" class="lesson-moves" aria-label="Ходы варианта"></ol>
+
+                    <div class="lesson-actions">
+                        <button type="button" id="lessonBackBtn" class="action-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                            <span class="action-btn-label">Ход назад</span>
+                        </button>
+                        <button type="button" id="lessonHintBtn" class="action-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3Z"/></svg>
+                            <span class="action-btn-label">Подсказка</span>
+                        </button>
+                        <button type="button" id="lessonRestartBtn" class="action-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                            <span class="action-btn-label">Сначала</span>
+                        </button>
+                    </div>
+
+                    <button type="button" id="lessonQuizBtn" class="cc-start-btn" hidden>Проверить себя</button>
+                    <button type="button" id="lessonNextLineBtn" class="btn-secondary" hidden>Следующий вариант</button>
+                </div>
             </div>
 
             <!-- TAB: Play. data-phase: setup (new game form), game (live), review (finished game) -->

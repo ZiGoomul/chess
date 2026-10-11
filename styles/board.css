@@ -406,6 +406,7 @@ body.is-editor-mode .player-badge {
 }
 
 /* No evaluation in puzzles: it would give the answer away */
-body.is-puzzle-mode #evalBarContainer {
+body.is-puzzle-mode #evalBarContainer,
+body.is-lesson-mode #evalBarContainer {
     visibility: hidden;
 }
