@@ -3,7 +3,7 @@ const SETTINGS_KEY = 'chess_studies_settings_v1';
 export const DEFAULT_SETTINGS = {
     theme: 'dark',
     boardTheme: 'green',
-    pieceTheme: 'chesscom_neo',
+    pieceTheme: 'cburnett',
     botLevel: 10,
     hintLevel: 10,
     autoHint: false,

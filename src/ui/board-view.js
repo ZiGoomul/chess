@@ -2,6 +2,7 @@ import { getSquareFromCoords } from '../domain/move-input.js';
 import { getKingSquareInCheck } from '../domain/check-state.js';
 import { Chess } from 'chess.js';
 import { MOVE_CLASS_LABELS } from './move-classes.js';
+import { pieceImageUrl, LOCAL_PIECE_THEME } from './piece-images.js';
 
 export function createBoardView({ $, eventBus, store }) {
     var board = null;
@@ -361,15 +362,7 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function getPieceThemeUrl(piece) {
-        var theme = $('#pieceThemeSelect').val() || 'wikipedia';
-        if (theme === 'wikipedia') {
-            return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
-        } else if (theme.startsWith('chesscom_')) {
-            var chesscomTheme = theme.split('_')[1];
-            return 'https://images.chesscomfiles.com/chess-themes/pieces/' + chesscomTheme + '/150/' + piece.toLowerCase() + '.png';
-        } else {
-            return 'https://lichess1.org/assets/piece/' + theme + '/' + piece + '.svg';
-        }
+        return pieceImageUrl($('#pieceThemeSelect').val() || LOCAL_PIECE_THEME, piece);
     }
 
     function getSquareAtPoint(clientX, clientY) {

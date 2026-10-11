@@ -30,11 +30,13 @@ import { createPositionEditor } from './position-editor.js';
 import { createMoveEntry } from './move-entry.js';
 import { showBotOpponent } from '../ui/player-badges.js';
 import { createGamesList } from '../ui/games-list.js';
+import { installPieceImageFallback } from '../ui/piece-images.js';
 import { createBoardInteraction } from './board-interaction.js';
 import { createTimeControlController } from './time-control-controller.js';
 import { createControls } from './controls.js';
 
 $(document).ready(function() {
+    installPieceImageFallback();
     const storedSettings = loadStoredSettings();
     const eventBus = createEventBus();
     const store = createGameStore({

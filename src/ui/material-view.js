@@ -1,18 +1,12 @@
+import { pieceImageUrl, LOCAL_PIECE_THEME } from './piece-images.js';
+
 export function createMaterialView({ $, eventBus, Chess }) {
     let currentOrientation = 'white';
     let currentPositionGame = null;
-    let currentPieceTheme = 'chesscom_neo';
+    let currentPieceTheme = LOCAL_PIECE_THEME;
 
     function getPieceThemeUrl(piece) {
-        var theme = currentPieceTheme;
-        if (theme === 'wikipedia') {
-            return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
-        } else if (theme && theme.startsWith('chesscom_')) {
-            var chesscomTheme = theme.split('_')[1];
-            return 'https://images.chesscomfiles.com/chess-themes/pieces/' + chesscomTheme + '/150/' + piece.toLowerCase() + '.png';
-        } else {
-            return 'https://lichess1.org/assets/piece/' + theme + '/' + piece + '.svg';
-        }
+        return pieceImageUrl(currentPieceTheme, piece);
     }
 
     function updateMaterial(positionGame) {

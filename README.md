@@ -72,3 +72,10 @@ The TypeScript migration is incremental: `src/services/chess-engine.ts` is the f
 ## Context7 in VS Code
 
 The workspace MCP server is configured in `.vscode/mcp.json`. On first start, VS Code prompts for a Context7 API key; create one in the [Context7 dashboard](https://context7.com/dashboard). The key is stored by VS Code's input-variable handling and is not committed with the project. Project guidance in `.github/copilot-instructions.md` asks coding agents to use Context7 for current library docs. Context7 is a development assistant integration, not an application runtime dependency.
+
+## Фигуры и звуки
+
+Фигуры по умолчанию — набор **cburnett** (автор Colin M. L. Burnett, свободная лицензия GPLv2+ / BSD / GFDL),
+взятый из репозитория [lichess-org/lila](https://github.com/lichess-org/lila) и лежащий в `public/pieces/cburnett/`.
+Он работает без интернета; если набор с другого сайта (Chess.com, Lichess, Wikipedia) не загрузится, доска
+подставляет cburnett. Звуки синтезируются в браузере (`src/services/audio.js`), файлов не нужно.
