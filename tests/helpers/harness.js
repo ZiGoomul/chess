@@ -24,6 +24,7 @@ const PAGE = `<!doctype html><body>
   <button id="reviewPlayBestMoveBtn" hidden></button>
   <button id="reviewPlayFromBtn" hidden></button>
   <button id="reviewPuzzleBtn" hidden></button>
+  <span id="puzzleStreakCount"></span><span id="puzzleStreak"></span><span id="puzzleBestStreak"></span><button id="showSolutionBtn" hidden></button>
   <div id="puzzleStatusText"></div><div id="puzzleDescText"></div><span id="puzzlesScore"></span>
   <button id="startPositionBtn"></button>
 </body>`;

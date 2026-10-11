@@ -1,18 +1,51 @@
 import { describePuzzleThemes } from '../ui/puzzle-themes.js';
 
+const SOLUTION_STEP_MS = 700;
+
 /**
  * Puzzle mode: loading, validating the solver's moves, playing the opponent's replies,
  * attempt bookkeeping and the puzzle tab controls.
  */
 export function createPuzzleController({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, services,
-    puzzleDatabase, applyUciMove, moveToUci, clearSelection, playSound, playSoundForMove
+    puzzleDatabase, applyUciMove, moveToUci, clearSelection, playSound, playSoundForMove,
+    initialBestStreak = 0, saveStoredSettings = (_partial) => {}
 }) {
     let active = false;
     let current = null;
     let step = 0;
     let mistakes = 0;
     let attemptRecorded = false;
+    let revealed = false;
+
+    // Puzzles solved in a row with no wrong move and no revealed solution
+    let streak = 0;
+    let bestStreak = initialBestStreak;
+
+    function showStreak() {
+        $('#puzzleStreakCount').text(streak);
+        $('#puzzleStreak').attr('aria-label', `Серия: ${streak}, рекорд: ${bestStreak}`).attr('title', `Рекорд: ${bestStreak}`);
+        $('#puzzleBestStreak').text(`Рекорд серии: ${bestStreak}`);
+    }
+
+    function breakStreak() {
+        if (streak === 0) return;
+        streak = 0;
+        showStreak();
+    }
+
+    function extendStreak() {
+        streak++;
+        if (streak > bestStreak) {
+            bestStreak = streak;
+            saveStoredSettings({ puzzleBestStreak: bestStreak });
+        }
+        showStreak();
+    }
+
+    function showSolutionButton(visible) {
+        $('#showSolutionBtn').prop('hidden', !visible);
+    }
 
     // tone: 'success' | 'error' | 'info' | undefined (neutral); colours come from the theme
     function setStatus(text, tone) {
@@ -30,8 +63,9 @@ export function createPuzzleController({
         return active;
     }
 
+    // A revealed puzzle counts as finished: the board no longer takes the solver's moves
     function isCompleted() {
-        return Boolean(active && current && step >= current.moves.length);
+        return Boolean(active && current && (step >= current.moves.length || revealed));
     }
 
     let sessionSolved = 0;
@@ -72,13 +106,15 @@ export function createPuzzleController({
         sessionSolved++;
         recordAttempt(true);
         if (!services.repository) updateCount();
-        setStatus('Задача решена!', 'success');
+        if (mistakes === 0) extendStreak();
+        showSolutionButton(false);
+        setStatus(mistakes === 0 && streak > 1 ? `Задача решена! Серия: ${streak}` : 'Задача решена!', 'success');
         playSound('gameEnd');
     }
 
     function playOpponentMove(puzzle) {
         clearSelection();
-        if (!active || puzzle !== current || step >= current.moves.length) return;
+        if (!active || puzzle !== current || revealed || step >= current.moves.length) return;
 
         const game = store.getState().game;
         boardView.clearSquareFeedback?.();
@@ -102,6 +138,7 @@ export function createPuzzleController({
 
     /** Validates the solver's move. Returns true when it is the expected solution move. */
     function tryMove(source, target) {
+        if (revealed) return false;
         const game = store.getState().game;
         const expectedMoveUci = current.moves[step];
         const trial = new Chess(game.fen());
@@ -111,6 +148,7 @@ export function createPuzzleController({
 
         if (!(testMove && (moveToUci(testMove) === expectedMoveUci || matesNow))) {
             mistakes++;
+            breakStreak();
             setStatus('Неверный ход. Попробуйте ещё раз.', 'error');
             flashWrongMove(target);
             playSound('check');
@@ -137,6 +175,8 @@ export function createPuzzleController({
     }
 
     function load(puzzle) {
+        // Skipping a puzzle that was not solved ends the streak
+        if (current && !isCompleted()) breakStreak();
         recordAttempt(false);
         botCoordinator.cancelBotSearch();
         clearSelection();
@@ -148,7 +188,9 @@ export function createPuzzleController({
         $('body').addClass('is-puzzle-mode');
         mistakes = 0;
         attemptRecorded = false;
+        revealed = false;
         active = true;
+        showSolutionButton(true);
         clock.stopClock();
 
         const game = store.getState().game;
@@ -177,6 +219,8 @@ export function createPuzzleController({
         recordAttempt(false);
         active = false;
         current = null;
+        revealed = false;
+        showSolutionButton(false);
         clearTimeout(wrongFeedbackTimer);
         boardView.clearSquareFeedback?.();
         $('body').removeClass('is-puzzle-mode');
@@ -185,6 +229,46 @@ export function createPuzzleController({
         showPuzzleMeta({ themes: [] });
         if (!keepPosition) $('#startPositionBtn').click();
     }
+
+    /** Plays the rest of the solution on the board; the puzzle counts as not solved. */
+    function showSolution() {
+        if (!active || !current || isCompleted()) return Promise.resolve();
+        const puzzle = current;
+        revealed = true;
+        mistakes++;
+        breakStreak();
+        recordAttempt(false);
+        showSolutionButton(false);
+        clearSelection();
+        clearTimeout(wrongFeedbackTimer);
+        boardView.clearSquareFeedback?.();
+        setStatus('Показываем решение…', 'info');
+
+        return /** @type {Promise<void>} */ (new Promise(resolve => {
+            function playNext() {
+                if (puzzle !== current) return resolve();
+                if (step >= puzzle.moves.length) {
+                    setStatus('Решение показано. Попробуйте следующую задачу.', 'info');
+                    return resolve();
+                }
+                const game = store.getState().game;
+                const moveObj = applyUciMove(game, puzzle.moves[step]);
+                if (!moveObj) {
+                    setStatus('Не удалось воспроизвести решение задачи.');
+                    return resolve();
+                }
+                playSoundForMove(moveObj);
+                pushPosition(game);
+                moveHistoryView.updateMoveHistory();
+                eventBus.emit('game:move-made', { fen: game.fen(), move: moveObj, game: game });
+                step++;
+                setTimeout(playNext, SOLUTION_STEP_MS);
+            }
+            playNext();
+        }));
+    }
+
+    $('#showSolutionBtn').on('click', () => { showSolution(); });
 
     let loading = false;
 
@@ -250,5 +334,7 @@ export function createPuzzleController({
         }
     });
 
-    return { isActive, isCompleted, tryMove, load, loadNext, exit, updateCount };
+    showStreak();
+
+    return { isActive, isCompleted, tryMove, load, loadNext, exit, updateCount, showSolution };
 }

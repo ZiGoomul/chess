@@ -111,3 +111,43 @@ test('the next puzzle comes from the catalog with the chosen theme and difficult
   assert.equal(h.$('#puzzlesScore').text(), 'Решено: 1');
   h.close();
 });
+
+test('showing the solution plays it out, counts as unsolved and ends the streak', async () => {
+  const { h, puzzle } = setup();
+  puzzle.load(MATE_IN_ONE);
+  assert.equal(puzzle.tryMove('e1', 'e8'), true);
+  assert.equal(h.$('#puzzleStreakCount').text(), '1');
+
+  puzzle.load(TWO_STEP);
+  await puzzle.showSolution();
+
+  assert.equal(puzzle.isCompleted(), true);
+  assert.equal(h.store.getState().historyFENs.length, TWO_STEP.moves.length + 1);
+  assert.equal(h.$('#puzzleStatusText').text(), 'Решение показано. Попробуйте следующую задачу.');
+  assert.equal(h.$('#puzzleStreakCount').text(), '0');
+  assert.equal(puzzle.tryMove('d1', 'd8'), false);
+  h.close();
+});
+
+test('a wrong move ends the streak; the best streak is saved', () => {
+  const saved = [];
+  const h = createHarness();
+  const puzzle = createPuzzleController({
+    $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
+    botCoordinator: h.botCoordinator, moveHistoryView: h.moveHistoryView, services: h.services,
+    puzzleDatabase: [], applyUciMove, moveToUci, clearSelection: h.clearSelection,
+    playSound: h.playSound, playSoundForMove: h.playSoundForMove,
+    initialBestStreak: 0, saveStoredSettings: partial => saved.push(partial)
+  });
+  puzzle.load(MATE_IN_ONE);
+  puzzle.tryMove('e1', 'e8');
+  puzzle.load(MATE_IN_ONE);
+  puzzle.tryMove('e1', 'e8');
+  assert.equal(h.$('#puzzleStreakCount').text(), '2');
+  assert.deepEqual(saved.at(-1), { puzzleBestStreak: 2 });
+
+  puzzle.load(MATE_IN_ONE);
+  puzzle.tryMove('e1', 'e2');
+  assert.equal(h.$('#puzzleStreakCount').text(), '0');
+  h.close();
+});

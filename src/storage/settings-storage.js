@@ -13,7 +13,8 @@ export const DEFAULT_SETTINGS = {
     timerEnabled: true,
     timerBase: 10,
     timerInc: 5,
-    playerColor: 'white'
+    playerColor: 'white',
+    puzzleBestStreak: 0
 };
 
 function getStorage(customStorage) {

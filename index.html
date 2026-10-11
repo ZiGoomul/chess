@@ -181,7 +181,13 @@
             <div class="tab-content tab-content--roomy" id="tab-puzzles" role="tabpanel" aria-labelledby="tab-puzzles-button" aria-hidden="true">
                 <div class="puzzle-header">
                     <h2 class="panel-title">Задачи</h2>
-                    <span id="puzzlesScore" class="panel-chip panel-chip--success">Решено: 0</span>
+                    <div class="puzzle-chips">
+                        <span id="puzzleStreak" class="panel-chip panel-chip--streak" aria-label="Серия: 0">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3.5-1.5 5.5-1.5 8 0 1.4 1 2.5 2.3 2.5 1.6 0 2.2-1.6 1.7-3.5 2.6 1.6 4 4.1 4 6.8A6.5 6.5 0 0 1 12 22a6.5 6.5 0 0 1-6.5-6.2C5.5 10.5 10 7.5 12 2Z"/></svg>
+                            <span id="puzzleStreakCount">0</span>
+                        </span>
+                        <span id="puzzlesScore" class="panel-chip panel-chip--success">Решено: 0</span>
+                    </div>
                 </div>
 
                 <div class="puzzle-status-card">
@@ -194,6 +200,10 @@
                 </div>
 
                 <button id="loadPuzzleBtn" class="cc-start-btn">Следующая задача</button>
+                <button type="button" id="showSolutionBtn" class="panel-link-btn panel-link-btn--centered" hidden>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Показать решение
+                </button>
                 <div id="puzzleCatalogStatus" class="puzzle-catalog-status" role="status" aria-live="polite"></div>
                 <div class="puzzle-filters">
                     <label class="panel-field" for="puzzleThemeSelect">
@@ -233,7 +243,7 @@
                 <details class="puzzle-catalog">
                     <summary class="puzzle-catalog-summary">
                         <span>Сохранённые задачи</span>
-                        <span id="puzzleCatalogCount" class="puzzle-catalog-count">Сохранено: 0</span>
+                        <span class="puzzle-catalog-count"><span id="puzzleCatalogCount">Сохранено: 0</span> · <span id="puzzleBestStreak">Рекорд серии: 0</span></span>
                     </summary>
                     <div class="puzzle-catalog-body">
                         <button id="clearPuzzleDataBtn" type="button" class="panel-link-btn panel-link-btn--danger">

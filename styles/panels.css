@@ -190,6 +190,33 @@ select.panel-select {
     display: none;
 }
 
+.panel-link-btn--centered {
+    justify-content: center;
+    margin-top: -8px;
+}
+
+.puzzle-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Current streak: flame in orange, the number in the text colour */
+.panel-chip--streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.panel-chip--streak svg {
+    color: #f1a33c;
+}
+
 /* Icon-over-label action buttons under the move list */
 .action-btn {
     flex: 1 1 0;
