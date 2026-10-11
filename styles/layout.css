@@ -90,7 +90,8 @@ body {
     min-height: 0;
     flex-direction: column;
     gap: 18px;
-    padding: 24px 20px 20px;
+    /* The bottom padding is a variable: the lesson buttons pin themselves over it */
+    padding: 24px 20px var(--tab-padding-bottom);
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -137,8 +138,9 @@ body {
     }
 
     .sidebar-column .tab-content {
+        --tab-padding-bottom: 12px;
         gap: 10px;
-        padding: 12px;
+        padding: 12px 12px var(--tab-padding-bottom);
     }
 
 }

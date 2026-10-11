@@ -28,7 +28,7 @@ import { createPuzzleController } from './puzzle-controller.js';
 import { createLessonController } from './lesson-controller.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
-import { createMoveEntry } from './move-entry.js';
+import { createMoveAnnouncer } from './move-announcer.js';
 import { showBotOpponent } from '../ui/player-badges.js';
 import { createGamesList } from '../ui/games-list.js';
 import { installPieceImageFallback } from '../ui/piece-images.js';
@@ -282,7 +282,7 @@ $(document).ready(function() {
     });
 
     createPositionEditor({ $, Chess, store, eventBus, session });
-    createMoveEntry({ $, Chess, store, eventBus, session });
+    createMoveAnnouncer({ $, eventBus });
 
     // Opening the editor leaves puzzle or lesson mode but keeps the position to edit
     $('.tab-btn[data-tab="tab-setup"]').on('click', function() {

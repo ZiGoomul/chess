@@ -53,6 +53,9 @@
     --status-success: #4f7d24;
     --status-error: #c0392b;
     --status-info: #2f6fa8;
+
+    /* Bottom padding of the sidebar panels (tighter in short windows) */
+    --tab-padding-bottom: 20px;
 }
 
 [data-theme="dark"] {

@@ -1,18 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Chess } from 'chess.js';
-import { normalizeMoveText, findTypedMove, describeMoveForSpeech } from '../src/app/move-entry.js';
-
-test('typed moves accept SAN, coordinates, zeros for castling and Russian piece letters', () => {
-  const game = new Chess();
-  assert.equal(findTypedMove(game, 'e4', Chess).san, 'e4');
-  assert.equal(findTypedMove(game, 'g1f3', Chess).san, 'Nf3');
-  assert.equal(findTypedMove(game, 'Кf3', Chess).san, 'Nf3');
-  assert.equal(findTypedMove(game, 'e5', Chess), null);
-  assert.equal(normalizeMoveText(' 0-0 '), 'O-O');
-  assert.equal(normalizeMoveText('Крg1'), 'Kg1');
-  assert.equal(normalizeMoveText('Лхd8+!'), 'Rxd8+');
-});
+import { describeMoveForSpeech } from '../src/app/move-announcer.js';
 
 test('moves are described in Russian for screen readers', () => {
   const game = new Chess('r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3');

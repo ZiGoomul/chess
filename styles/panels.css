@@ -846,67 +846,6 @@ body.is-lesson-mode .player-badge {
     display: none;
 }
 
-/* Typing a move under the board */
-.move-entry {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-}
-
-.move-entry-input {
-    flex: 1 1 200px;
-    min-width: 0;
-    min-height: 40px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--input-bg);
-    color: var(--text-primary);
-    font: inherit;
-    font-size: 14px;
-}
-
-.move-entry-input[aria-invalid="true"] {
-    border-color: var(--status-error);
-}
-
-.move-entry-submit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    min-height: 40px;
-    padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: var(--btn-bg);
-    box-shadow: none;
-    color: var(--btn-text);
-    cursor: pointer;
-}
-
-.move-entry-submit:hover {
-    background: var(--btn-bg-hover);
-}
-
-.move-entry-feedback {
-    flex-basis: 100%;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--status-error);
-}
-
-.move-entry-feedback:empty {
-    display: none;
-}
-
-/* The editor places pieces by dragging only */
-body.is-editor-mode .move-entry {
-    display: none;
-}
-
 /* ---- Opening lessons ---- */
 .lesson-catalog,
 .lesson-view {
@@ -1215,4 +1154,14 @@ body.is-editor-mode .move-entry {
 .lesson-actions {
     display: flex;
     gap: 8px;
+}
+
+/* The lesson buttons stay in view at the bottom of the panel while the comments scroll */
+.lesson-view .lesson-actions {
+    position: sticky;
+    bottom: calc(-1 * var(--tab-padding-bottom));
+    z-index: 1;
+    margin-bottom: calc(-1 * var(--tab-padding-bottom));
+    padding: 10px 0 var(--tab-padding-bottom);
+    background: var(--panel-bg);
 }
