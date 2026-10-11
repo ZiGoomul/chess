@@ -44,7 +44,8 @@ export function createControls({
             $('body').removeClass('is-editor-mode');
         }
         updateSettings({ botLevel: level });
-        saveStoredSettings({ botLevel: level });
+        // Level 0 is the editor, a temporary mode: never restore it on the next visit
+        if (level > 0) saveStoredSettings({ botLevel: level });
         eventBus.emit('settings:changed', { botLevel: level });
         session.updateStatus();
     });

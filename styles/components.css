@@ -410,3 +410,9 @@ button:focus-visible, select:focus-visible, input:focus-visible, .move-text:focu
     clip-path: inset(50%);
     white-space: nowrap;
 }
+
+/* The checkbox itself is hidden, so show keyboard focus on the drawn switch */
+.switch input:focus-visible + .slider {
+    outline: 3px solid #f39c12;
+    outline-offset: 2px;
+}

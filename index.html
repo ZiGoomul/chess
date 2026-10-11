@@ -245,7 +245,7 @@
                         <span class="panel-label">Соперник</span>
                         <span class="panel-select-wrap">
                             <select id="botLevel" class="panel-select">
-                                <option value="0">Редактор позиций</option>
+                                <option value="0" hidden>Редактор позиций</option>
                                 <option value="1">Бот · уровень 1 (~800)</option>
                                 <option value="5">Бот · уровень 5 (~1200)</option>
                                 <option value="10">Бот · уровень 10 (~1700)</option>
@@ -361,76 +361,101 @@
                 </div>
             </div>
 
-            <!-- TAB 2: Setup -->
+            <!-- TAB: Position editor -->
             <div class="tab-content" id="tab-setup" role="tabpanel" aria-labelledby="tab-setup-button" aria-hidden="true">
                 <h2 class="panel-title">Редактор позиций</h2>
-                <button id="startPositionBtn" class="btn-warning">Начальная позиция</button>
-                <button id="clearBoardBtn" class="btn-danger">Очистить доску</button>
+                <p class="panel-hint">Перетащите фигуру из запаса на доску. Чтобы убрать фигуру, вытащите её за край доски.</p>
 
-                <div class="setup-fen">
-                    <label for="fenInput">FEN позиция:</label>
-                    <input type="text" id="fenInput" aria-describedby="fenError" placeholder="Введите FEN">
+                <div class="editor-actions">
+                    <button type="button" id="startPositionBtn" class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
+                        <span class="action-btn-label">Начальная позиция</span>
+                    </button>
+                    <button type="button" id="clearBoardBtn" class="action-btn action-btn--danger">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                        <span class="action-btn-label">Очистить доску</span>
+                    </button>
+                </div>
+
+                <section class="settings-group setup-fen" aria-labelledby="fenTitle">
+                    <h3 id="fenTitle" class="panel-subtitle">Позиция в FEN</h3>
+                    <input type="text" id="fenInput" class="panel-input" aria-labelledby="fenTitle" aria-describedby="fenError" placeholder="Вставьте FEN" spellcheck="false" autocomplete="off">
                     <div id="fenError" class="fen-error" role="alert" aria-live="assertive"></div>
                     <div class="button-row">
-                        <button id="setFenBtn">Установить</button>
-                        <button id="getFenBtn">Получить</button>
+                        <button type="button" id="setFenBtn" class="btn-secondary">Применить</button>
+                        <button type="button" id="getFenBtn" class="btn-secondary">Взять с доски</button>
                     </div>
-                </div>
+                </section>
             </div>
 
-            <!-- TAB 3: Style -->
+            <!-- TAB: Appearance and hint settings -->
             <div class="tab-content" id="tab-style" role="tabpanel" aria-labelledby="tab-style-button" aria-hidden="true">
                 <h2 class="panel-title">Вид</h2>
-                <label class="field-label">
-                    Стиль фигур:
-                    <select id="pieceThemeSelect">
-                        <option value="chesscom_neo">Neo (Chess.com)</option>
-                        <option value="chesscom_classic">Классика (Chess.com)</option>
-                        <option value="wikipedia">Wikipedia (Классика)</option>
-                        <option value="cburnett">CBurnett (Lichess)</option>
-                        <option value="merida">Merida</option>
-                        <option value="alpha">Alpha</option>
-                        <option value="california">California</option>
-                        <option value="staunty">Staunty</option>
-                    </select>
-                </label>
 
-                <label class="field-label">
-                    Цвет доски:
-                    <select id="boardThemeSelect">
-                        <option value="green">Зеленая (Chess.com)</option>
-                        <option value="wood">Деревянная (Классика)</option>
-                        <option value="blue">Синяя (Lichess)</option>
-                        <option value="gray">Серая (Минимализм)</option>
-                    </select>
-                </label>
+                <section class="settings-group" aria-labelledby="boardSettingsTitle">
+                    <h3 id="boardSettingsTitle" class="panel-subtitle">Доска</h3>
+                    <label class="panel-field" for="pieceThemeSelect">
+                        <span class="panel-label">Фигуры</span>
+                        <span class="panel-select-wrap">
+                            <select id="pieceThemeSelect" class="panel-select">
+                                <option value="chesscom_neo">Neo (Chess.com)</option>
+                                <option value="chesscom_classic">Классика (Chess.com)</option>
+                                <option value="wikipedia">Wikipedia</option>
+                                <option value="cburnett">CBurnett (Lichess)</option>
+                                <option value="merida">Merida</option>
+                                <option value="alpha">Alpha</option>
+                                <option value="california">California</option>
+                                <option value="staunty">Staunty</option>
+                            </select>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                    <label class="panel-field" for="boardThemeSelect">
+                        <span class="panel-label">Цвет доски</span>
+                        <span class="panel-select-wrap">
+                            <select id="boardThemeSelect" class="panel-select">
+                                <option value="green">Зелёная (Chess.com)</option>
+                                <option value="wood">Деревянная</option>
+                                <option value="blue">Синяя (Lichess)</option>
+                                <option value="gray">Серая</option>
+                            </select>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                    <label class="toggle-row" for="highlightMovesCb">
+                        <span class="toggle-row-text">Показывать возможные ходы</span>
+                        <span class="switch"><input type="checkbox" id="highlightMovesCb" checked><span class="slider"></span></span>
+                    </label>
+                    <label class="toggle-row" for="highlightAttacksCb">
+                        <span class="toggle-row-text">Подсвечивать нападения</span>
+                        <span class="switch"><input type="checkbox" id="highlightAttacksCb"><span class="slider"></span></span>
+                    </label>
+                    <label class="toggle-row" for="highlightDefensesCb">
+                        <span class="toggle-row-text">Подсвечивать защиту</span>
+                        <span class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></span>
+                    </label>
+                </section>
 
-                <label class="toggle-label">
-                    <div class="switch"><input type="checkbox" id="highlightMovesCb" checked><span class="slider"></span></div> Подсвечивать возможные ходы
-                </label>
-
-                <label class="toggle-label">
-                    <div class="switch"><input type="checkbox" id="highlightAttacksCb"><span class="slider"></span></div> Подсвечивать нападения
-                </label>
-
-                <label class="toggle-label">
-                    <div class="switch"><input type="checkbox" id="highlightDefensesCb"><span class="slider"></span></div> Подсвечивать защиту
-                </label>
-
-                <h3 class="panel-subtitle">Подсказки</h3>
-                <label class="field-label">
-                    Сила подсказки:
-                    <select id="hintLevel">
-                        <option value="1">Ур 1 (~800 ELO)</option>
-                        <option value="5">Ур 5 (~1200 ELO)</option>
-                        <option value="10" selected>Ур 10 (~1700 ELO)</option>
-                        <option value="15">Ур 15 (~2200 ELO)</option>
-                        <option value="20">Ур 20 (~3000+ ELO)</option>
-                    </select>
-                </label>
-                <label class="toggle-label">
-                    <div class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></div> Авто-подсказка
-                </label>
+                <section class="settings-group" aria-labelledby="hintSettingsTitle">
+                    <h3 id="hintSettingsTitle" class="panel-subtitle">Подсказки</h3>
+                    <label class="panel-field" for="hintLevel">
+                        <span class="panel-label">Сила подсказки</span>
+                        <span class="panel-select-wrap">
+                            <select id="hintLevel" class="panel-select">
+                                <option value="1">Уровень 1 (~800)</option>
+                                <option value="5">Уровень 5 (~1200)</option>
+                                <option value="10" selected>Уровень 10 (~1700)</option>
+                                <option value="15">Уровень 15 (~2200)</option>
+                                <option value="20">Уровень 20 (~3000+)</option>
+                            </select>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                    <label class="toggle-row" for="autoHintCb">
+                        <span class="toggle-row-text">Авто-подсказка в партии</span>
+                        <span class="switch"><input type="checkbox" id="autoHintCb"><span class="slider"></span></span>
+                    </label>
+                </section>
             </div>
 
         </div>

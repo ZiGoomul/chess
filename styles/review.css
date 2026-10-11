@@ -127,8 +127,6 @@
 
 .fen-error {
     display: none;
-    color: var(--color-danger);
-    font-size: 13px;
 }
 
 .review-panel {

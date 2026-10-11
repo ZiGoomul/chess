@@ -40,10 +40,16 @@ export function createShellView({ $, eventBus }) {
             $('#' + tabName).addClass('is-active').attr('aria-hidden', 'false');
 
 
+            // The editor is a mode of its own tab only: entering it parks the bot level,
+            // leaving it brings the bot (and the player badges) back
+            var botLevel = $('#botLevel');
             if (tabName === 'tab-setup') {
+                if (botLevel.val() !== '0') botLevel.data('playLevel', botLevel.val());
                 $('body').addClass('is-editor-mode');
-                $('#botLevel').val('0').trigger('change');
-            } else if ($('#botLevel').val() !== '0') {
+                botLevel.val('0').trigger('change');
+            } else if (botLevel.val() === '0') {
+                botLevel.val(botLevel.data('playLevel') || '10').trigger('change');
+            } else {
                 $('body').removeClass('is-editor-mode');
             }
         });

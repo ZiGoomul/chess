@@ -482,66 +482,77 @@ select.panel-select {
 }
 
 /* Style and editor tabs */
-.field-label {
+.panel-hint {
+    margin: -6px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--label-muted);
+}
+
+.settings-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-color);
-}
-
-.field-label select {
-    min-height: 44px;
-}
-
-.toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 32px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-warning {
-    background-color: var(--color-warning);
-}
-
-.btn-danger {
-    background-color: var(--color-danger);
-}
-
-.setup-fen {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-    padding-top: 15px;
+    gap: 14px;
+    padding-top: 16px;
     border-top: 1px solid var(--border-color);
 }
 
-.setup-fen label {
-    font-weight: 700;
+.settings-group .panel-subtitle {
+    margin: 0;
 }
 
-#fenInput {
+.panel-input {
     width: 100%;
-    min-height: 44px;
+    min-height: 48px;
+    padding: 0 14px;
     box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 14px;
+}
+
+/* Label on the left, switch on the right */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.toggle-row .switch {
+    flex-shrink: 0;
+}
+
+.editor-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.action-btn--danger svg {
+    color: var(--color-danger);
+}
+
+.fen-error {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-danger);
 }
 
 .button-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .button-row button {
     flex: 1;
-}
-
-/* The status line above already names the panel during a game */
-#tab-play[data-phase="game"] #moveHistoryTitle {
-    display: none;
+    min-height: 44px;
 }

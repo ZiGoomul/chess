@@ -41,7 +41,7 @@ $(document).ready(function() {
             highlightAttacks: storedSettings.highlightAttacks,
             highlightDefenses: storedSettings.highlightDefenses,
             autoHint: storedSettings.autoHint,
-            botLevel: storedSettings.botLevel,
+            botLevel: storedSettings.botLevel > 0 ? storedSettings.botLevel : 10,
             hintLevel: storedSettings.hintLevel
         }
     });
@@ -53,10 +53,8 @@ $(document).ready(function() {
     createMaterialView({ $, eventBus, Chess });
 
     // Sync UI inputs with stored settings
-    $('#botLevel').val(storedSettings.botLevel);
-    if (storedSettings.botLevel === 0) {
-        $('body').addClass('is-editor-mode');
-    }
+    // Older versions saved the editor (level 0) as the opponent; start against the bot instead
+    $('#botLevel').val(storedSettings.botLevel > 0 ? storedSettings.botLevel : 10);
     $('#hintLevel').val(storedSettings.hintLevel);
     $('#autoHintCb').prop('checked', storedSettings.autoHint);
     $('#highlightMovesCb').prop('checked', storedSettings.highlightMoves);
