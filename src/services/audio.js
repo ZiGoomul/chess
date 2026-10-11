@@ -1,5 +1,14 @@
 import { determineMoveSound } from '../domain/check-state.js';
 
+// The familiar Chess.com sounds, used while they can be loaded; offline the sounds are synthesised
+export const SOUND_URLS = {
+  move: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-self.mp3',
+  capture: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3',
+  check: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-check.mp3',
+  castle: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/castle.mp3',
+  gameEnd: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-end.mp3',
+  gameStart: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-start.mp3'
+};
 
 let sharedAudioCtx = null;
 
@@ -86,7 +95,7 @@ function playChime(ctx, at, notes, gain) {
   });
 }
 
-/** Plays a game sound synthesised in the browser; no files, works offline. */
+/** Plays a game sound synthesised in the browser: the fallback when the sound files cannot be loaded. */
 export function playSynthesizedSound(type, volume = 1) {
   const ctx = getAudioContext();
   if (!ctx) return;
@@ -107,13 +116,98 @@ export function playSynthesizedSound(type, volume = 1) {
   }
 }
 
-export function createAudio(game) {
+function browserIsOnline() {
+  return typeof navigator === 'undefined' || navigator.onLine !== false;
+}
+
+/**
+ * Loads the sound files and tells which are ready. A file counts as ready only once it
+ * has loaded; one that failed is tried again when the browser comes back online.
+ */
+export function createSoundFiles({
+  urls = SOUND_URLS,
+  AudioCtor = typeof Audio !== 'undefined' ? Audio : null,
+  isOnline = browserIsOnline,
+  target = typeof window !== 'undefined' ? window : null,
+  now = () => Date.now(),
+  retryAfterMs = 30000
+} = {}) {
+  const files = {};
+  // When each sound last failed, so an unreachable server is not asked again on every move
+  const failedAt = {};
+
+  function load(type) {
+    if (!AudioCtor || !isOnline()) return;
+    if (failedAt[type] !== undefined && now() - failedAt[type] < retryAfterMs) return;
+    const element = new AudioCtor();
+    const entry = { element, ready: false };
+    files[type] = entry;
+    element.preload = 'auto';
+    element.addEventListener('canplaythrough', () => { entry.ready = true; }, { once: true });
+    element.addEventListener('error', () => {
+      if (files[type] !== entry) return;
+      delete files[type];
+      failedAt[type] = now();
+    }, { once: true });
+    element.src = urls[type];
+    element.load?.();
+  }
+
+  function loadMissing() {
+    Object.keys(urls).forEach(type => { if (!files[type]) load(type); });
+  }
+
+  function reconnect() {
+    Object.keys(failedAt).forEach(type => { delete failedAt[type]; });
+    loadMissing();
+  }
+
+  /** The loaded file for a sound, or null when it should be synthesised. */
+  function get(type) {
+    const entry = files[type];
+    if (!entry || !entry.ready || !isOnline()) {
+      if (!entry) load(type);
+      return null;
+    }
+    return entry.element;
+  }
+
+  /** A file that failed to play is dropped and loaded again later. */
+  function drop(type) {
+    delete files[type];
+    failedAt[type] = now();
+  }
+
+  target?.addEventListener?.('online', reconnect);
+  loadMissing();
+  return { get, drop };
+}
+
+export function createAudio(game, { soundFiles = createSoundFiles(), synthesize = playSynthesizedSound } = {}) {
   let enabled = true;
   let volume = 0.7;
 
   function playSound(type) {
     if (!enabled || volume <= 0) return;
-    playSynthesizedSound(type, volume);
+    const file = soundFiles.get(type);
+    if (!file) {
+      synthesize(type, volume);
+      return;
+    }
+    try {
+      file.volume = volume;
+      file.currentTime = 0;
+      const playing = file.play();
+      playing?.catch?.((error) => {
+        // Blocked autoplay is not a broken file; anything else falls back to the synthesised sound
+        if (error?.name === 'NotAllowedError') return;
+        soundFiles.drop(type);
+        synthesize(type, volume);
+      });
+    } catch {
+      soundFiles.drop(type);
+      synthesize(type, volume);
+    }
   }
 
   /** @param {{ enabled?: boolean, volume?: number }} settings volume from 0 to 1 */

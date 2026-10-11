@@ -78,4 +78,8 @@ The workspace MCP server is configured in `.vscode/mcp.json`. On first start, VS
 Фигуры по умолчанию — набор **cburnett** (автор Colin M. L. Burnett, свободная лицензия GPLv2+ / BSD / GFDL),
 взятый из репозитория [lichess-org/lila](https://github.com/lichess-org/lila) и лежащий в `public/pieces/cburnett/`.
 Он работает без интернета; если набор с другого сайта (Chess.com, Lichess, Wikipedia) не загрузится, доска
-подставляет cburnett. Звуки синтезируются в браузере (`src/services/audio.js`), файлов не нужно.
+подставляет cburnett.
+
+Звуки (`src/services/audio.js`): при наличии интернета играют привычные звуки Chess.com. Без сети, пока файл
+ещё не загрузился или если он не загрузился вовсе, звук синтезируется в браузере. Когда связь возвращается,
+файлы загружаются снова.
