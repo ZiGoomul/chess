@@ -86,14 +86,37 @@
                         <g id="arrowsGroup"></g>
                     </svg>
 
-                    <div id="gameOverOverlay" class="game-over-overlay">
-                        <div class="game-over-card">
-                            <div class="game-over-icon" aria-hidden="true">
-                                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2Z"></path></svg>
+                    <div id="gameOverOverlay" class="game-over-overlay" data-outcome="win">
+                        <div class="game-over-card" role="dialog" aria-labelledby="gameOverText" aria-describedby="gameOverReason">
+                            <div class="game-over-header">
+                                <button type="button" id="closeOverlayBtn" class="game-over-close" aria-label="Скрыть результат">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                                </button>
+                                <h2 id="gameOverText" class="game-over-title">Победа</h2>
+                                <p id="gameOverReason" class="game-over-reason"></p>
                             </div>
-                            <div id="gameOverText" class="game-over-title">МАТ</div>
-                            <div class="game-over-actions">
-                                <button id="closeOverlayBtn" class="btn-secondary">Скрыть</button>
+                            <div class="game-over-body">
+                                <div class="game-over-players">
+                                    <div class="game-over-player">
+                                        <span class="game-over-avatar game-over-avatar--you" aria-hidden="true">
+                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        </span>
+                                        <span>Вы</span>
+                                    </div>
+                                    <span id="gameOverScore" class="game-over-score">1 – 0</span>
+                                    <div class="game-over-player">
+                                        <span class="game-over-avatar" aria-hidden="true">
+                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+                                        </span>
+                                        <span id="gameOverBotName">Бот</span>
+                                    </div>
+                                </div>
+                                <p id="gameOverReviewNote" class="game-over-note" hidden></p>
+                                <button type="button" id="gameOverReviewBtn" class="cc-start-btn">Разбор партии</button>
+                                <div class="game-over-actions">
+                                    <button type="button" id="gameOverNewGameBtn" class="btn-secondary">Новая партия</button>
+                                    <button type="button" id="gameOverRematchBtn" class="btn-secondary">Реванш</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -369,13 +392,40 @@
                 <div class="editor-actions">
                     <button type="button" id="startPositionBtn" class="action-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
-                        <span class="action-btn-label">Начальная позиция</span>
+                        <span class="action-btn-label">Начальная</span>
                     </button>
                     <button type="button" id="clearBoardBtn" class="action-btn action-btn--danger">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
-                        <span class="action-btn-label">Очистить доску</span>
+                        <span class="action-btn-label">Очистить</span>
+                    </button>
+                    <button type="button" id="editorFlipBtn" class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 4 3 8M7 4l4 4M17 20V4M17 20l-4-4M17 20l4-4"/></svg>
+                        <span class="action-btn-label">Перевернуть</span>
                     </button>
                 </div>
+
+                <section class="settings-group" aria-label="Параметры позиции">
+                    <div class="panel-field">
+                        <span class="panel-label" id="editorTurnLabel">Чей ход</span>
+                        <div id="editorTurn" class="segmented" role="radiogroup" aria-labelledby="editorTurnLabel">
+                            <button type="button" class="segmented-btn" role="radio" aria-checked="true" data-turn="w">
+                                <span class="turn-dot turn-dot--white" aria-hidden="true"></span>Белые
+                            </button>
+                            <button type="button" class="segmented-btn" role="radio" aria-checked="false" data-turn="b">
+                                <span class="turn-dot turn-dot--black" aria-hidden="true"></span>Чёрные
+                            </button>
+                        </div>
+                    </div>
+                    <fieldset id="editorCastling" class="castling-field">
+                        <legend class="panel-label">Рокировка</legend>
+                        <div class="castling-grid">
+                            <label class="check-row"><input type="checkbox" data-castle="K"> Белые O-O</label>
+                            <label class="check-row"><input type="checkbox" data-castle="k"> Чёрные O-O</label>
+                            <label class="check-row"><input type="checkbox" data-castle="Q"> Белые O-O-O</label>
+                            <label class="check-row"><input type="checkbox" data-castle="q"> Чёрные O-O-O</label>
+                        </div>
+                    </fieldset>
+                </section>
 
                 <section class="settings-group setup-fen" aria-labelledby="fenTitle">
                     <h3 id="fenTitle" class="panel-subtitle">Позиция в FEN</h3>
@@ -386,6 +436,12 @@
                         <button type="button" id="getFenBtn" class="btn-secondary">Взять с доски</button>
                     </div>
                 </section>
+
+                <div class="editor-play">
+                    <div id="editorError" class="editor-error" role="alert"></div>
+                    <button type="button" id="playFromPositionBtn" class="cc-start-btn">Играть с этой позиции</button>
+                    <span id="playFromPositionHint" class="editor-play-hint"></span>
+                </div>
             </div>
 
             <!-- TAB: Appearance and hint settings -->

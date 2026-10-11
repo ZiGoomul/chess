@@ -62,8 +62,6 @@ export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentView
     if (timedOut) return;
     timedOut = true;
     stopClock();
-    $('#gameOverText').text(`ВРЕМЯ ВЫШЛО! Победили ${winnerColor}`);
-    $('#gameOverOverlay').css('display', 'flex');
     playSound('gameEnd');
     onTimeout({ winnerColor: winnerColor === 'Белые' ? 'w' : 'b', loserColor: winnerColor === 'Белые' ? 'b' : 'w' });
   }

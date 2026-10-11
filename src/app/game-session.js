@@ -11,25 +11,66 @@ export function createGameSession({
     services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
 }) {
     // The play panel shows the new-game form, the live game or the finished game.
-    let lastResultKey = null;
     function setPanelPhase(phase) {
         $('#tab-play').attr('data-phase', phase);
     }
 
     const END_REASONS = { checkmate: 'мат', draw: 'ничья', timeout: 'время вышло' };
 
-    function showGameResult(result, endReason) {
+    // The finished game (keyed by its final position) and whether its result card was closed
+    let finished = null;
+    let overlayDismissed = false;
+
+    function positionKey() {
         const fens = store.getState().historyFENs;
-        const key = `${fens.length}:${fens[fens.length - 1]}`;
-        if (key === lastResultKey) return;
-        lastResultKey = key;
+        return `${fens.length}:${fens[fens.length - 1]}`;
+    }
+
+    function drawReason(game) {
+        if (game.in_stalemate()) return 'пат';
+        if (game.in_threefold_repetition()) return 'троекратное повторение';
+        if (game.insufficient_material()) return 'недостаточно материала';
+        return 'правило 50 ходов';
+    }
+
+    function showGameResult(result, endReason, detail) {
+        const key = positionKey();
+        if (finished && finished.key === key) return;
         const human = boardView.orientation() === 'black' ? 'b' : 'w';
         const winner = result === '1-0' ? 'w' : result === '0-1' ? 'b' : null;
-        const outcome = winner === null ? 'Ничья' : winner === human ? 'Победа' : 'Поражение';
-        const reason = END_REASONS[endReason];
-        $('#gameResultTitle').text(reason && reason !== 'ничья' ? `${outcome} · ${reason}` : outcome);
+        const outcome = winner === null ? 'draw' : winner === human ? 'win' : 'loss';
+        const title = { win: 'Победа', loss: 'Поражение', draw: 'Ничья' }[outcome];
+        const reason = detail || END_REASONS[endReason] || '';
+        finished = { key, human };
+        overlayDismissed = false;
+
+        $('#gameResultTitle').text(reason ? `${title} · ${reason}` : title);
         $('#gameResultMeta').text(`Вы против: ${$('#botLevel option:selected').text()} · ${$('#selectedTimeText').text()}`);
+
+        const sideText = human === 'w' ? 'вы играли белыми' : 'вы играли чёрными';
+        const score = winner === null ? '½ – ½' : winner === human ? '1 – 0' : '0 – 1';
+        $('#gameOverOverlay').attr('data-outcome', outcome);
+        $('#gameOverText').text(title);
+        $('#gameOverReason').text(reason ? `${reason[0].toUpperCase()}${reason.slice(1)} · ${sideText}` : sideText);
+        $('#gameOverScore').text(score);
+        $('#gameOverBotName').text(`Бот · ур. ${getBotLevel()}`);
+        $('#gameOverReviewNote').text('Разбор готовится — точность появится через несколько секунд').prop('hidden', !services.postGameReview);
         setPanelPhase('review');
+        updateOverlay();
+    }
+
+    function updateOverlay() {
+        const state = store.getState();
+        const visible = Boolean(finished) && !overlayDismissed && !isHistoricalPosition(state) &&
+            finished.key === positionKey() && !puzzle.isActive() && getBotLevel() > 0;
+        const overlay = $('#gameOverOverlay');
+        if (visible) overlay.css('display', 'flex');
+        else overlay.hide();
+    }
+
+    function dismissOverlay() {
+        overlayDismissed = true;
+        updateOverlay();
     }
 
     function pushPosition(game) {
@@ -51,7 +92,7 @@ export function createGameSession({
         store.setState({ historyFENs: fens, currentViewPly: fens.length - 1, isThinking: false, selectedSquare: null });
         gameCompletionReset();
         clock.applySettings();
-        $('#gameOverOverlay').hide().data('dismissed', true);
+        dismissOverlay();
         boardView.clearArrows();
         botCoordinator.cancelBotSearch();
         if (typeof boardView.position === 'function') {
@@ -72,8 +113,8 @@ export function createGameSession({
         });
     }
 
-    function completeCurrentGame(result, endReason) {
-        if (!puzzle.isActive() && getBotLevel() > 0) showGameResult(result, endReason);
+    function completeCurrentGame(result, endReason, detail) {
+        if (!puzzle.isActive() && getBotLevel() > 0) showGameResult(result, endReason, detail);
         const completion = services.gameCompletion;
         if (!completion || !completion.currentGameId || puzzle.isActive()) return;
         const game = store.getState().game;
@@ -93,24 +134,18 @@ export function createGameSession({
         const displayedGame = getDisplayedGame(state, Chess);
         const moveColor = displayedGame.turn() === 'w' ? 'Белые' : 'Черные';
         let status;
-        let isGameOver = false;
-        let overlayText = '';
 
         if (displayedGame.in_checkmate()) {
             status = 'Мат! ' + moveColor + ' проиграли.';
-            isGameOver = true;
-            overlayText = 'МАТ!<br><span style="font-size: 20px">' + moveColor + ' проиграли</span>';
             if (!historical) {
                 clock.stopClock();
                 completeCurrentGame(displayedGame.turn() === 'w' ? '0-1' : '1-0', 'checkmate');
             }
         } else if (displayedGame.in_draw()) {
-            status = 'Ничья!';
-            isGameOver = true;
-            overlayText = 'НИЧЬЯ';
+            status = 'Ничья: ' + drawReason(displayedGame) + '.';
             if (!historical) {
                 clock.stopClock();
-                completeCurrentGame('1/2-1/2', 'draw');
+                completeCurrentGame('1/2-1/2', 'draw', drawReason(displayedGame));
             }
         } else if (historical) {
             status = (displayedGame.in_check() ? 'Шах! ' : '') + (state.currentViewPly === 0 ? 'Начальная позиция' : 'Просмотр позиции после хода ' + state.currentViewPly) + '. Ход: ' + moveColor;
@@ -127,15 +162,8 @@ export function createGameSession({
         boardView.highlightAttackedPieces(displayedGame);
         if (updateHistory !== false) moveHistoryView.updateMoveHistory();
 
-        const overlay = $('#gameOverOverlay');
-        // No game-over card in the editor: it would cover the board being set up
-        if (!historical && isGameOver && !overlay.data('dismissed') && getBotLevel() > 0) {
-            $('#gameOverText').html(overlayText);
-            overlay.css('display', 'flex');
-        } else if (historical || !isGameOver || getBotLevel() === 0) {
-            overlay.hide();
-            if (!historical) overlay.data('dismissed', false);
-        }
+        // The result card: never in the editor or a puzzle, only on the final position
+        updateOverlay();
     }
 
     function makeEditorMove(source, target, piece) {
@@ -218,6 +246,7 @@ export function createGameSession({
     }
 
     function resetPosition(mutate) {
+        finished = null;
         gameCompletionReset();
         botCoordinator.cancelBotSearch();
         boardView.clearArrows();
@@ -254,7 +283,7 @@ export function createGameSession({
         }
 
         boardView.orientation(record.humanColor === 'b' ? 'black' : 'white');
-        $('#gameOverOverlay').data('dismissed', true);
+        overlayDismissed = true;
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
         setPanelPhase('review');
         updateStatus();
@@ -300,6 +329,22 @@ export function createGameSession({
         store.setState({ orientation });
         eventBus.emit('board:orientation-changed', { orientation });
         clock.updateClockUI();
+    }
+
+    /** A game against the bot from the position on the board; the player takes the side to move. */
+    function startFromCurrentPosition() {
+        const game = store.getState().game;
+        finished = null;
+        gameCompletionReset();
+        botCoordinator.cancelBotSearch();
+        boardView.clearArrows();
+        boardView.clearLastMoveHighlight?.();
+        store.setState({ historyFENs: [game.fen()], currentViewPly: 0 });
+        setOrientation(game.turn() === 'w' ? 'white' : 'black');
+        setPanelPhase('game');
+        clock.applySettings();
+        updateStatus();
+        eventBus.emit('game:move-made', { fen: game.fen(), animate: false, game: game });
     }
 
     eventBus.on('bot:move-ready', (result) => {
@@ -372,7 +417,7 @@ export function createGameSession({
     $('#ccStartGameBtn').on('click', function() {
         if (puzzle.isActive()) puzzle.exit();
         else $('#startPositionBtn').trigger('click');
-        lastResultKey = null;
+        finished = null;
         setPanelPhase('game');
         clock.applySettings(true);
         clock.startClock();
@@ -397,13 +442,33 @@ export function createGameSession({
         setPanelPhase('review');
     });
 
-    $('#closeOverlayBtn').on('click', function() {
-        $('#gameOverOverlay').hide().data('dismissed', true);
+    $('#closeOverlayBtn').on('click', dismissOverlay);
+
+    $('#gameOverReviewBtn').on('click', function() {
+        dismissOverlay();
+        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        setPanelPhase('review');
+    });
+
+    $('#gameOverNewGameBtn').on('click', function() {
+        dismissOverlay();
+        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        setPanelPhase('setup');
+    });
+
+    // Same bot and time control, colours swapped
+    $('#gameOverRematchBtn').on('click', function() {
+        const nextColor = finished && finished.human === 'w' ? 'black' : 'white';
+        $('.color-btn').removeClass('active');
+        $(`.color-btn[data-color="${nextColor}"]`).addClass('active');
+        $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        $('#ccStartGameBtn').trigger('click');
     });
 
     return {
         makeMove, applyEditedPosition, updateStatus, completeCurrentGame,
-        showReviewMoment, restoreSavedGame, truncateToViewedPly, setPanelPhase,
+        showReviewMoment, restoreSavedGame, truncateToViewedPly, setPanelPhase, dismissOverlay,
+        startFromCurrentPosition,
         playFromReviewMoment, playBestMoveFromMoment
     };
 }

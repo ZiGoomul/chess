@@ -9,7 +9,7 @@ const PAGE = `<!doctype html><body>
   <input type="checkbox" id="highlightMovesCb" checked>
   <input id="timerBase" value="10"><input id="timerInc" value="0">
   <div id="gameStatus"></div>
-  <div id="gameOverOverlay"><div id="gameOverText"></div></div>
+  <div id="gameOverOverlay"><div id="gameOverText"></div><p id="gameOverReason"></p><span id="gameOverScore"></span><span id="gameOverBotName"></span><p id="gameOverReviewNote"></p></div>
   <div id="reviewStatus"></div>
   <div id="reviewSummary" hidden><svg><path id="reviewEvalArea"></path></svg>
     <strong id="reviewAccuracyYou"></strong><strong id="reviewAccuracyBot"></strong>

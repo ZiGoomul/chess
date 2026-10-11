@@ -154,3 +154,32 @@ test('the play panel moves from setup to the game on the first move and to the r
   assert.equal(phase(), 'setup');
   h.close();
 });
+
+test('the result card names the outcome and stays closed once dismissed', () => {
+  const { h, session } = setup();
+  state(h).game.load('6k1/5ppp/8/8/8/8/8/4R1K1 w - - 0 1');
+  h.store.setState({ historyFENs: [state(h).game.fen()], currentViewPly: 0 });
+  session.makeMove('e1', 'e8');
+
+  assert.equal(h.$('#gameOverText').text(), 'Победа');
+  assert.equal(h.$('#gameOverReason').text(), 'Мат · вы играли белыми');
+  assert.equal(h.$('#gameOverScore').text(), '1 – 0');
+  assert.equal(h.$('#gameOverOverlay').attr('data-outcome'), 'win');
+
+  session.dismissOverlay();
+  session.updateStatus();
+  assert.equal(h.$('#gameOverOverlay').css('display'), 'none');
+  h.close();
+});
+
+test('stalemate is reported as a draw with its reason', () => {
+  const { h, session } = setup();
+  state(h).game.load('7k/8/6Q1/8/8/8/8/K7 w - - 0 1');
+  h.store.setState({ historyFENs: [state(h).game.fen()], currentViewPly: 0 });
+  session.makeMove('g6', 'f7');
+
+  assert.equal(h.$('#gameStatus').text(), 'Ничья: пат.');
+  assert.equal(h.$('#gameOverText').text(), 'Ничья');
+  assert.equal(h.$('#gameOverScore').text(), '½ – ½');
+  h.close();
+});

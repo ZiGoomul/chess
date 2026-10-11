@@ -533,8 +533,115 @@ select.panel-select {
 
 .editor-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+}
+
+/* Two-option switch: side to move in the editor */
+.segmented {
+    display: flex;
+    gap: 8px;
+}
+
+.segmented-btn {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: var(--surface-subtle);
+    box-shadow: none;
+    color: var(--label-muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.segmented-btn:hover {
+    background: var(--btn-bg-hover);
+}
+
+.segmented-btn[aria-checked="true"] {
+    border-color: var(--accent-color);
+    background: var(--btn-bg);
+    color: var(--text-primary);
+}
+
+.turn-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid #8b8987;
+}
+
+.turn-dot--white { background: #ffffff; }
+.turn-dot--black { background: #262421; }
+
+.castling-field {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.castling-field legend {
+    padding: 0;
+    margin-bottom: 4px;
+}
+
+.castling-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+}
+
+.check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.check-row input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+}
+
+.check-row:has(input:disabled) {
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.editor-play {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.editor-error {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-danger);
+}
+
+.editor-error:empty {
+    display: none;
+}
+
+.editor-play-hint {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-muted);
 }
 
 .action-btn--danger svg {

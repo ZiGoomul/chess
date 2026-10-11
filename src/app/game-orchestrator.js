@@ -26,6 +26,7 @@ import { createReviewAnnotations } from '../ui/review-annotations.js';
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 import { createPuzzleController } from './puzzle-controller.js';
 import { createGameSession } from './game-session.js';
+import { createPositionEditor } from './position-editor.js';
 import { createBoardInteraction } from './board-interaction.js';
 import { createTimeControlController } from './time-control-controller.js';
 import { createControls } from './controls.js';
@@ -188,6 +189,8 @@ $(document).ready(function() {
         onPlayFromMoment: session.playFromReviewMoment,
         onPlayBestMove: session.playBestMoveFromMoment,
         onSummary: (record, summary, report) => {
+            const accuracy = summary.accuracy[record.humanColor === 'b' ? 'b' : 'w'];
+            if (accuracy != null) $('#gameOverReviewNote').text(`Ваша точность: ${accuracy.toFixed(1)}. Подробности — в разборе.`);
             reviewAnnotations.set(record, summary, report.evaluations || []);
             moveHistoryView.updateMoveHistory();
         },
@@ -227,6 +230,8 @@ $(document).ready(function() {
         $('#puzzleCatalogStatus').text('Хранилище недоступно: задачи и прогресс не сохраняются между сессиями.');
         $('#reviewStatus').text('Локальное хранилище недоступно: разбор партий отключён.');
     });
+
+    createPositionEditor({ $, Chess, store, eventBus, session });
 
     // Opening the editor leaves puzzle mode but keeps the position to edit
     $('.tab-btn[data-tab="tab-setup"]').on('click', function() {
