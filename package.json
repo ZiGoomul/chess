@@ -13,7 +13,8 @@
     "test": "tsx --test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.strict.json",
-    "import-puzzles": "node scripts/import-lichess-puzzles.js"
+    "import-puzzles": "node scripts/import-lichess-puzzles.js",
+    "check-openings": "node scripts/check-openings.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
