@@ -1,4 +1,5 @@
 import { describePuzzleThemes } from '../ui/puzzle-themes.js';
+import { START_PUZZLE_RATING, updatePuzzleRating, difficultyForRating } from '../services/puzzle-rating.js';
 
 const SOLUTION_STEP_MS = 700;
 
@@ -9,7 +10,8 @@ const SOLUTION_STEP_MS = 700;
 export function createPuzzleController({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, services,
     puzzleDatabase, applyUciMove, moveToUci, clearSelection, playSound, playSoundForMove,
-    initialBestStreak = 0, saveStoredSettings = (_partial) => {}
+    initialBestStreak = 0, saveStoredSettings = (_partial) => {},
+    initialRating = { rating: START_PUZZLE_RATING, games: 0 }
 }) {
     let active = false;
     let current = null;
@@ -41,6 +43,32 @@ export function createPuzzleController({
             saveStoredSettings({ puzzleBestStreak: bestStreak });
         }
         showStreak();
+    }
+
+    // The player's puzzle rating changes once per puzzle: on the first wrong move, a reveal or the solve
+    let player = {
+        rating: Number.isFinite(initialRating?.rating) ? initialRating.rating : START_PUZZLE_RATING,
+        games: Number.isFinite(initialRating?.games) ? initialRating.games : 0
+    };
+    let rated = false;
+
+    function showRating(delta) {
+        $('#puzzleRatingValue').text(player.rating);
+        const deltaEl = $('#puzzleRatingDelta');
+        if (delta === undefined) {
+            deltaEl.text('').removeAttr('data-tone');
+        } else {
+            deltaEl.text(delta >= 0 ? `+${delta}` : `−${Math.abs(delta)}`).attr('data-tone', delta >= 0 ? 'success' : 'error');
+        }
+    }
+
+    function ratePuzzle(solved) {
+        if (rated || !current || !Number.isFinite(current.rating)) return;
+        rated = true;
+        const result = updatePuzzleRating(player, current.rating, solved);
+        player = { rating: result.rating, games: result.games };
+        saveStoredSettings({ puzzleRating: player.rating, puzzleRatingGames: player.games });
+        showRating(result.delta);
     }
 
     function showSolutionButton(visible) {
@@ -107,6 +135,7 @@ export function createPuzzleController({
         recordAttempt(true);
         if (!services.repository) updateCount();
         if (mistakes === 0) extendStreak();
+        ratePuzzle(mistakes === 0);
         showSolutionButton(false);
         setStatus(mistakes === 0 && streak > 1 ? `Задача решена! Серия: ${streak}` : 'Задача решена!', 'success');
         playSound('gameEnd');
@@ -149,6 +178,7 @@ export function createPuzzleController({
         if (!(testMove && (moveToUci(testMove) === expectedMoveUci || matesNow))) {
             mistakes++;
             breakStreak();
+            ratePuzzle(false);
             setStatus('Неверный ход. Попробуйте ещё раз.', 'error');
             flashWrongMove(target);
             playSound('check');
@@ -189,6 +219,8 @@ export function createPuzzleController({
         mistakes = 0;
         attemptRecorded = false;
         revealed = false;
+        rated = false;
+        showRating();
         active = true;
         showSolutionButton(true);
         clock.stopClock();
@@ -237,6 +269,7 @@ export function createPuzzleController({
         revealed = true;
         mistakes++;
         breakStreak();
+        ratePuzzle(false);
         recordAttempt(false);
         showSolutionButton(false);
         clearSelection();
@@ -274,9 +307,10 @@ export function createPuzzleController({
 
     async function loadNext() {
         if (loading) return;
+        const chosen = $('#puzzleDifficultySelect').val() || 'auto';
         const options = {
             theme: $('#puzzleThemeSelect').val() || undefined,
-            difficulty: $('#puzzleDifficultySelect').val() || 'normal',
+            difficulty: chosen === 'auto' ? difficultyForRating(player.rating) : chosen,
             exclude: current?.id
         };
         const button = $('#loadPuzzleBtn');
@@ -317,6 +351,26 @@ export function createPuzzleController({
 
     $('#loadPuzzleBtn').on('click', loadNext);
 
+    async function loadDaily() {
+        if (loading || !services.puzzleSource?.daily) return;
+        loading = true;
+        const button = $('#dailyPuzzleBtn').prop('disabled', true);
+        $('#puzzleCatalogStatus').text('');
+        try {
+            const puzzle = await services.puzzleSource.daily();
+            services.repository?.puzzles.upsertMany([puzzle]).catch(() => {});
+            load(puzzle);
+            $('#puzzleDescText').text(['Задача дня', describePuzzleThemes(puzzle.themes)].filter(Boolean).join(' · '));
+        } catch {
+            $('#puzzleCatalogStatus').text('Не удалось загрузить задачу дня: нет связи с Lichess.');
+        } finally {
+            loading = false;
+            button.prop('disabled', false);
+        }
+    }
+
+    $('#dailyPuzzleBtn').on('click', loadDaily);
+
     $('#exitPuzzleBtn').on('click', function() {
         exit();
         $('.tab-btn[data-tab="tab-play"]').click();
@@ -335,6 +389,7 @@ export function createPuzzleController({
     });
 
     showStreak();
+    showRating();
 
-    return { isActive, isCompleted, tryMove, load, loadNext, exit, updateCount, showSolution };
+    return { isActive, isCompleted, tryMove, load, loadNext, loadDaily, exit, updateCount, showSolution };
 }

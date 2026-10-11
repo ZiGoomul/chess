@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS = {
     timerInc: 5,
     playerColor: 'white',
     puzzleBestStreak: 0,
+    puzzleRating: 1500,
+    puzzleRatingGames: 0,
     soundEnabled: true,
     soundVolume: 70
 };

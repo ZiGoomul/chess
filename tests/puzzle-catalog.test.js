@@ -71,3 +71,16 @@ test('puzzle themes read in Russian with the tactical motif first', () => {
   assert.equal(describePuzzleThemes(['middlegame', 'advantage', 'fork', 'long', 'capturingDefender']), 'Вилка · Уничтожение защиты · Миттельшпиль');
   assert.equal(describePuzzleThemes(['unknownTheme']), '');
 });
+
+import { updatePuzzleRating, difficultyForRating } from '../src/services/puzzle-rating.js';
+
+test('the puzzle rating moves by Elo against the puzzle and steps less once established', () => {
+  const win = updatePuzzleRating({ rating: 1500, games: 0 }, 1500, true);
+  assert.deepEqual(win, { rating: 1524, games: 1, delta: 24 });
+  const loss = updatePuzzleRating({ rating: 1500, games: 30 }, 1500, false);
+  assert.equal(loss.delta, -12);
+  assert.ok(updatePuzzleRating({ rating: 1500, games: 30 }, 2100, true).delta > 20, 'beating a much harder puzzle pays more');
+  assert.equal(difficultyForRating(1200), 'easier');
+  assert.equal(difficultyForRating(1500), 'normal');
+  assert.equal(difficultyForRating(1900), 'harder');
+});

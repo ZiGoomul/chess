@@ -190,7 +190,8 @@ $(document).ready(function() {
     puzzle = createPuzzleController({
         $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, services,
         puzzleDatabase, applyUciMove, moveToUci, clearSelection, playSound, playSoundForMove,
-        initialBestStreak: storedSettings.puzzleBestStreak, saveStoredSettings
+        initialBestStreak: storedSettings.puzzleBestStreak, saveStoredSettings,
+        initialRating: { rating: storedSettings.puzzleRating, games: storedSettings.puzzleRatingGames }
     });
 
     session = createGameSession({

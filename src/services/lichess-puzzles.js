@@ -41,17 +41,25 @@ export function parseLichessApiPuzzle(data, chessFactory) {
 
 /** Fetches random puzzles from the public Lichess API (no account needed). */
 export function createLichessPuzzleSource({ chessFactory, fetchImpl = globalThis.fetch, baseUrl = 'https://lichess.org' }) {
+  async function fetchPuzzle(url) {
+    const response = await fetchImpl(url.toString());
+    if (!response.ok) throw new Error(`Lichess puzzle request failed (${response.status})`);
+    const puzzle = parseLichessApiPuzzle(await response.json(), chessFactory);
+    if (!puzzle) throw new Error('Lichess returned a puzzle that could not be replayed');
+    return puzzle;
+  }
+
   return {
     /** @param {{ theme?: string, difficulty?: string }} [options] */
     async next({ theme, difficulty = 'normal' } = {}) {
       const url = new URL('/api/puzzle/next', baseUrl);
       if (theme) url.searchParams.set('angle', theme);
       if (PUZZLE_DIFFICULTIES.includes(difficulty)) url.searchParams.set('difficulty', difficulty);
-      const response = await fetchImpl(url.toString());
-      if (!response.ok) throw new Error(`Lichess puzzle request failed (${response.status})`);
-      const puzzle = parseLichessApiPuzzle(await response.json(), chessFactory);
-      if (!puzzle) throw new Error('Lichess returned a puzzle that could not be replayed');
-      return puzzle;
+      return fetchPuzzle(url);
+    },
+    /** Lichess' puzzle of the day. */
+    async daily() {
+      return fetchPuzzle(new URL('/api/puzzle/daily', baseUrl));
     }
   };
 }

@@ -151,3 +151,30 @@ test('a wrong move ends the streak; the best streak is saved', () => {
   assert.equal(h.$('#puzzleStreakCount').text(), '0');
   h.close();
 });
+
+test('a solved puzzle raises the rating once; a wrong move lowers it once', () => {
+  const saved = [];
+  const h = createHarness();
+  const puzzle = createPuzzleController({
+    $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
+    botCoordinator: h.botCoordinator, moveHistoryView: h.moveHistoryView, services: h.services,
+    puzzleDatabase: [], applyUciMove, moveToUci, clearSelection: h.clearSelection,
+    playSound: h.playSound, playSoundForMove: h.playSoundForMove,
+    saveStoredSettings: partial => saved.push(partial), initialRating: { rating: 1500, games: 0 }
+  });
+  h.$('body').append('<span id="puzzleRatingValue"></span><span id="puzzleRatingDelta"></span>');
+
+  puzzle.load({ ...MATE_IN_ONE, rating: 1500 });
+  puzzle.tryMove('e1', 'e8');
+  assert.equal(h.$('#puzzleRatingValue').text(), '1524');
+  assert.equal(h.$('#puzzleRatingDelta').text(), '+24');
+
+  puzzle.load({ ...MATE_IN_ONE, rating: 1500 });
+  puzzle.tryMove('e1', 'e2');
+  puzzle.tryMove('e1', 'e3');
+  puzzle.tryMove('e1', 'e8');
+  const ratings = saved.filter(entry => entry.puzzleRating).map(entry => entry.puzzleRating);
+  assert.equal(ratings.length, 2, 'one change per puzzle');
+  assert.ok(ratings[1] < 1524);
+  h.close();
+});

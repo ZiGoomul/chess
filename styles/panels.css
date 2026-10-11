@@ -190,9 +190,39 @@ select.panel-select {
     display: none;
 }
 
-.panel-link-btn--centered {
-    justify-content: center;
+.puzzle-quick-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
     margin-top: -8px;
+}
+
+.puzzle-rating-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.puzzle-rating-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--label-muted);
+}
+
+.puzzle-rating-delta {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.puzzle-rating-delta[data-tone="success"] { color: var(--status-success); }
+.puzzle-rating-delta[data-tone="error"] { color: var(--status-error); }
+
+.puzzle-catalog-saved {
+    padding: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-muted);
 }
 
 .puzzle-chips {
