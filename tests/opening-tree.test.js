@@ -16,6 +16,15 @@ test('the lines through a position share its moves', () => {
   assert.deepEqual(linesThrough(dragon, ['d4']), []);
 });
 
+test('the King\'s Indian forks where White chooses a system', () => {
+  const kid = findCourse('kid');
+  const base = ['d4', 'Nf6', 'c4', 'g6', 'Nc3', 'Bg7', 'e4', 'd6'];
+  assert.deepEqual(continuations(kid, base).map(item => item.san).sort(), ['Be2', 'Nf3', 'f3', 'f4', 'h3']);
+  const classical = [...base, 'Nf3', 'O-O', 'Be2', 'e5'];
+  assert.deepEqual(continuations(kid, classical).map(item => item.san).sort(), ['Be3', 'O-O', 'd5', 'dxe5']);
+  assert.deepEqual(continuations(kid, [...classical, 'O-O', 'Nc6', 'd5', 'Ne7']).map(item => item.san).sort(), ['Nd2', 'Ne1', 'b4']);
+});
+
 test('picking a line prefers lines not yet done', () => {
   const done = new Set(dragon.lines.slice(1).map(line => line.id));
   for (let i = 0; i < 5; i++) {

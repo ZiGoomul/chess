@@ -57,7 +57,7 @@ test('the dropdown lists every opening and the catalog shows the chosen one', ()
   assert.equal(h.$('#lessonCourseSelect option').length, 3);
   assert.equal(h.$('#lessonCourseSelect').val(), 'kid');
   assert.equal(h.$('#lessonCourses .lesson-course').length, 1);
-  assert.equal(h.$('#lessonCourses [data-line]').length, 6);
+  assert.equal(h.$('#lessonCourses [data-line]').length, 11);
   assert.equal(h.$('[data-line="kid-classical"] .lesson-mark').length, 1);
   assert.match(h.$('.lesson-course-count').text(), /пройдено: 1/);
 
