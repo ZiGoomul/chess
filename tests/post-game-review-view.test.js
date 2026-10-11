@@ -109,3 +109,28 @@ test('completed review shows accuracy and move classes for the human and the bot
   assert.equal(h.$('#reviewClassChips .review-class--blunder').text(), '??Зевок · 0');
   assert.match(h.$('#reviewEvalArea').attr('d'), /^M0 80 /);
 });
+
+test('key moments are listed in game order and can be stepped through', () => {
+  const h = createHarness();
+  const selected = [];
+  const view = createPostGameReviewView({
+    $: h.$, toSan: () => null, onSelectMoment: (_record, moment) => selected.push(moment.ply), onCancel() {}, onRetry() {}, onSolvePuzzle() {}
+  });
+  const record = { id: 'g', humanColor: 'w', fens: ['x w - - 0 1'], moves: [] };
+  const moments = [
+    { ply: 20, san: 'Qxb7', lossCp: 300, beforeCp: -40, afterCp: -310 },
+    { ply: 8, san: 'h3', lossCp: 150, beforeCp: 60, afterCp: -90 }
+  ];
+  view.showReport({ gameId: 'g', status: 'complete', moments }, record, null);
+
+  assert.deepEqual(h.$('#reviewMoments strong').map((_, el) => h.$(el).text()).get(), ['5. h3', '11. Qxb7']);
+  assert.equal(h.$('#reviewMomentNav').prop('hidden'), false);
+
+  h.$('#reviewNextMomentBtn').trigger('click');
+  assert.equal(h.$('#reviewMomentPosition').text(), 'Момент 1 из 2');
+  h.$('#reviewNextMomentBtn').trigger('click');
+  assert.equal(h.$('#reviewMomentPosition').text(), 'Момент 2 из 2');
+  assert.equal(h.$('#reviewNextMomentBtn').prop('disabled'), true);
+  assert.deepEqual(selected, [8, 20]);
+  h.close();
+});

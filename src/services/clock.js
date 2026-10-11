@@ -1,3 +1,6 @@
+// Below this the clock turns red; tenths of a second show below 10 s (formatTime)
+const LOW_TIME_MS = 20000;
+
 export function formatTime(ms) {
   if (ms <= 0) return '00:00.0';
 
@@ -36,8 +39,8 @@ export function createClock({ $, game, getBoard, getIsPuzzleMode, getCurrentView
     const bottomMs = flipped ? blackMs : whiteMs;
     $('#topClock').text(formatTime(topMs));
     $('#bottomClock').text(formatTime(bottomMs));
-    $('#topClock').toggleClass('danger', topMs < 10000 && topMs > 0);
-    $('#bottomClock').toggleClass('danger', bottomMs < 10000 && bottomMs > 0);
+    $('#topClock').toggleClass('danger', topMs < LOW_TIME_MS && topMs > 0);
+    $('#bottomClock').toggleClass('danger', bottomMs < LOW_TIME_MS && bottomMs > 0);
     $('#topClock, #bottomClock').removeClass('active');
 
     if (game.game_over() || getCurrentViewPly() < getHistoryLength() - 1) return;

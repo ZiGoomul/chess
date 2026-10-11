@@ -15,6 +15,7 @@ const PAGE = `<!doctype html><body>
     <strong id="reviewAccuracyYou"></strong><strong id="reviewAccuracyBot"></strong>
     <ul id="reviewClassChips"></ul></div>
   <h3 id="reviewMomentsTitle" hidden></h3>
+  <div id="reviewMomentNav" hidden><button id="reviewPrevMomentBtn"></button><span id="reviewMomentPosition"></span><button id="reviewNextMomentBtn"></button></div>
   <button id="openLastReviewBtn" hidden></button>
   <div id="tab-play" data-phase="setup"></div>
   <h2 id="gameResultTitle"></h2><p id="gameResultMeta"></p>

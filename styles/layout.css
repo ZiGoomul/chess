@@ -222,6 +222,12 @@ body {
         height: 240px;
     }
 
+    /* The board is too small to hold the result card: show it over the whole screen */
+    .game-over-overlay {
+        position: fixed;
+        z-index: 100;
+    }
+
     #moveHistoryList {
         -webkit-overflow-scrolling: touch;
     }

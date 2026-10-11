@@ -19,18 +19,14 @@
     color: var(--clock-active-text);
 }
 
+/* Low on time: red digits, and a red face on the clock that is running */
 .chess-clock.danger {
-    color: #ff4757;
-    animation: clock-pulse 1s infinite alternate;
+    color: var(--status-error);
 }
 
-@keyframes clock-pulse {
-    from {
-        box-shadow: 0 0 4px rgba(255, 71, 87, 0.4);
-    }
-    to {
-        box-shadow: 0 0 12px rgba(255, 71, 87, 0.8);
-    }
+.chess-clock.active.danger {
+    background: #c0392b;
+    color: #ffffff;
 }
 
 .time-control-dialog {

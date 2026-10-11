@@ -15,6 +15,15 @@
   color: var(--text-secondary);
 }
 
+/* Before the first move */
+#moveHistoryList:empty::before {
+  content: 'Ходов пока нет';
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 #moveHistoryList {
   flex: 1;
   min-height: 0;
@@ -203,6 +212,8 @@
   display: block;
   width: 100%;
   height: 72px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   background: var(--eval-bg);
 }
@@ -373,6 +384,33 @@
 .review-moment-btn.is-active {
   border-color: var(--accent-color);
   background: var(--btn-bg-hover);
+}
+
+.review-moment-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-moment-nav[hidden] {
+  display: none;
+}
+
+.review-moment-nav .nav-btn {
+  flex: 0 0 52px;
+}
+
+.review-moment-nav .nav-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.review-moment-position {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-muted);
 }
 
 .review-actions {

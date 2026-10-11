@@ -344,6 +344,15 @@
                         </div>
                         <h3 id="reviewMomentsTitle" class="panel-subtitle" hidden>Ключевые моменты</h3>
                         <ol id="reviewMoments" class="review-moments" aria-labelledby="reviewMomentsTitle" hidden></ol>
+                        <div id="reviewMomentNav" class="review-moment-nav" hidden>
+                            <button type="button" id="reviewPrevMomentBtn" class="nav-btn" aria-label="Предыдущий момент">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+                            </button>
+                            <span id="reviewMomentPosition" class="review-moment-position" aria-live="polite"></span>
+                            <button type="button" id="reviewNextMomentBtn" class="nav-btn" aria-label="Следующий момент">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                            </button>
+                        </div>
                         <div class="review-actions">
                             <button type="button" id="reviewCancelBtn" class="btn-secondary" hidden>Отменить разбор</button>
                             <button type="button" id="reviewRetryBtn" class="btn-secondary" hidden>Повторить разбор</button>

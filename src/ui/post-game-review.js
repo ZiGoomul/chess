@@ -81,8 +81,29 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
   cancelBtn.on('click', () => onCancel());
   retryBtn.on('click', () => gameId && onRetry(gameId));
 
+  // ‹ Момент 2 из 3 › — steps through the key moments in game order
+  function updateMomentNav() {
+    const buttons = list.find('.review-moment-btn');
+    const index = buttons.index(buttons.filter('.is-active'));
+    $('#reviewMomentNav').prop('hidden', buttons.length < 2);
+    $('#reviewMomentPosition').text(index >= 0 ? `Момент ${index + 1} из ${buttons.length}` : `Моментов: ${buttons.length}`);
+    $('#reviewPrevMomentBtn').prop('disabled', index <= 0);
+    $('#reviewNextMomentBtn').prop('disabled', index >= buttons.length - 1);
+  }
+
+  function stepMoment(delta) {
+    const buttons = list.find('.review-moment-btn');
+    const index = buttons.index(buttons.filter('.is-active'));
+    const next = index < 0 ? 0 : index + delta;
+    if (next >= 0 && next < buttons.length) buttons.eq(next).trigger('click');
+  }
+
+  $('#reviewPrevMomentBtn').on('click', () => stepMoment(-1));
+  $('#reviewNextMomentBtn').on('click', () => stepMoment(1));
+
   function reset() {
     summary.prop('hidden', true);
+    $('#reviewMomentNav').prop('hidden', true);
     $('#reviewMomentsTitle').prop('hidden', true);
     list.empty().prop('hidden', true);
     cancelBtn.prop('hidden', true);
@@ -96,6 +117,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     playFromBtn.prop('hidden', true).off('click');
     playBestMoveBtn.prop('hidden', true).off('click');
     list.find('.review-moment-btn').removeClass('is-active');
+    updateMomentNav();
   }
 
   return {
@@ -114,7 +136,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
       }
       showSummary(report, record);
       $('#openLastReviewBtn').prop('hidden', false);
-      const moments = report.moments || [];
+      const moments = (report.moments || []).slice().sort((a, b) => a.ply - b.ply);
       status.text(moments.length ? '' : 'Серьёзных ошибок не найдено.');
       $('#reviewMomentsTitle').prop('hidden', moments.length === 0);
       moments.forEach(moment => {
@@ -132,6 +154,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
           .on('click', () => {
             list.find('.review-moment-btn').removeClass('is-active');
             btn.addClass('is-active');
+            updateMomentNav();
             onSelectMoment(record, moment);
 
             if (onPlayBestMove && moment.bestMove) {
@@ -163,6 +186,7 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
         list.append(item);
       });
       list.prop('hidden', moments.length === 0);
+      updateMomentNav();
       if (recommendedPuzzle) {
         const label = report.recommendation.reason === 'motif'
           ? 'Задача на ту же тему'
