@@ -966,6 +966,20 @@ body.is-editor-mode .move-entry {
     color: var(--label-muted);
 }
 
+.lesson-course-count {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--label-muted);
+}
+
+.lesson-course-note {
+    margin: -4px 0 0;
+    font-size: 13px;
+    color: var(--label-muted);
+    text-align: center;
+}
+
 .lesson-lines {
     display: flex;
     flex-direction: column;
@@ -1152,6 +1166,7 @@ body.is-editor-mode .move-entry {
 .lesson-comment[data-tone="next"] { border-left-color: var(--status-info); }
 .lesson-comment[data-tone="opponent"] { border-left-color: var(--label-muted); }
 .lesson-comment[data-tone="plan"] { border-left-color: #f1a33c; }
+.lesson-comment[data-tone="branch"] { border-left-color: #b18cdc; }
 
 .lesson-comment-move {
     display: block;

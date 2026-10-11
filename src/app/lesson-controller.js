@@ -1,4 +1,5 @@
-import { openingCourses, findLine } from '../data/openings.js';
+import { openingCourses, findCourse, findLine } from '../data/openings.js';
+import { continuations, linesThrough, pickLine } from '../domain/opening-tree.js';
 
 const OPPONENT_DELAY_MS = 700;
 // In the quiz an arrow shows the move after this many wrong tries
@@ -23,21 +24,27 @@ export function numberedSan(ply, san) {
  * the opponent's are played for them. Every move comes with why it is played.
  * Mode 'learn' shows the next move with an arrow and its reason before it is played;
  * mode 'quiz' asks for the move and explains it afterwards.
+ *
+ * The lines of a course form a tree. Scope 'line' follows one line; a move of the student's
+ * that belongs to another line of the course switches to it. Scope 'course' is a quiz on the
+ * whole opening: at every fork the opponent picks a reply at random.
  */
 export function createLessonController({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, clearSelection,
     playSound, playSoundForMove, onStart = () => {},
-    initialProgress = {}, saveStoredSettings = (_partial) => {}
+    initialProgress = {}, initialCourse = '', saveStoredSettings = (_partial) => {}
 }) {
     let active = false;
     let course = null;
     let line = null;
     let mode = 'learn';
+    let scope = 'line';
     let mistakes = 0;
     let lineMistakes = 0;
     let opponentTimer = null;
     // Lines finished per mode: { [lineId]: { learn: true, quiz: true } }
     let progress = { ...initialProgress };
+    let selectedCourseId = findCourse(initialCourse) ? initialCourse : openingCourses[0].id;
 
     function game() {
         return store.getState().game;
@@ -46,6 +53,10 @@ export function createLessonController({
     // Moves played so far in the line; navigation back in history undoes moves in the live game
     function ply() {
         return game().history().length;
+    }
+
+    function playedSans() {
+        return game().history();
     }
 
     function isStudentTurn() {
@@ -117,35 +128,53 @@ export function createLessonController({
         return { learn: Boolean(done.learn), quiz: Boolean(done.quiz) };
     }
 
-    function renderCatalog() {
-        const container = $('#lessonCourses').empty();
+    function renderCourseOptions() {
+        const select = $('#lessonCourseSelect').empty();
         openingCourses.forEach(item => {
-            const card = $('<section class="lesson-course"></section>').attr('aria-label', item.name);
-            const header = $('<div class="lesson-course-header"></div>');
-            header.append($('<h3 class="lesson-course-title"></h3>').text(item.name));
-            header.append($('<span class="panel-chip lesson-side-chip"></span>')
-                .attr('data-side', item.color)
-                .text(item.color === 'w' ? 'за белых' : 'за чёрных'));
-            card.append(header);
-            card.append($('<p class="lesson-course-summary"></p>').text(item.summary));
-            const lines = $('<ul class="lesson-lines"></ul>');
-            item.lines.forEach(entry => {
-                const badges = lineBadges(entry.id);
-                const button = $('<button type="button" class="lesson-line-btn"></button>').attr('data-line', entry.id);
-                const text = $('<span class="lesson-line-text"></span>');
-                text.append($('<span class="lesson-line-name"></span>').text(entry.name));
-                text.append($('<span class="lesson-line-summary"></span>').text(entry.summary));
-                button.append(text);
-                const marks = $('<span class="lesson-line-marks"></span>');
-                if (badges.learn) marks.append($('<span class="lesson-mark" title="Изучено">✓</span>'));
-                if (badges.quiz) marks.append($('<span class="lesson-mark lesson-mark--quiz" title="Проверка пройдена">★</span>'));
-                button.append(marks);
-                button.attr('aria-label', `${item.name}: ${entry.name}${badges.quiz ? ', проверка пройдена' : badges.learn ? ', изучено' : ''}`);
-                lines.append($('<li></li>').append(button));
-            });
-            card.append(lines);
-            container.append(card);
+            const side = item.color === 'w' ? 'за белых' : 'за чёрных';
+            select.append($('<option></option>').val(item.id).text(`${item.name} (${side})`));
         });
+        select.val(selectedCourseId);
+    }
+
+    /** The chosen course with its lines. */
+    function renderCatalog() {
+        const item = findCourse(selectedCourseId) || openingCourses[0];
+        const container = $('#lessonCourses').empty();
+        const card = $('<section class="lesson-course"></section>').attr('aria-label', item.name);
+        const header = $('<div class="lesson-course-header"></div>');
+        header.append($('<h3 class="lesson-course-title"></h3>').text(item.name));
+        header.append($('<span class="panel-chip lesson-side-chip"></span>')
+            .attr('data-side', item.color)
+            .text(item.color === 'w' ? 'за белых' : 'за чёрных'));
+        card.append(header);
+        card.append($('<p class="lesson-course-summary"></p>').text(item.summary));
+        const finished = item.lines.filter(entry => lineBadges(entry.id).learn || lineBadges(entry.id).quiz).length;
+        card.append($('<p class="lesson-course-count"></p>').text(`Вариантов: ${item.lines.length} · пройдено: ${finished}`));
+        const lines = $('<ul class="lesson-lines"></ul>');
+        item.lines.forEach(entry => {
+            const badges = lineBadges(entry.id);
+            const button = $('<button type="button" class="lesson-line-btn"></button>').attr('data-line', entry.id);
+            const text = $('<span class="lesson-line-text"></span>');
+            text.append($('<span class="lesson-line-name"></span>').text(entry.name));
+            text.append($('<span class="lesson-line-summary"></span>').text(entry.summary));
+            button.append(text);
+            const marks = $('<span class="lesson-line-marks"></span>');
+            if (badges.learn) marks.append($('<span class="lesson-mark" title="Изучено">✓</span>'));
+            if (badges.quiz) marks.append($('<span class="lesson-mark lesson-mark--quiz" title="Проверка пройдена">★</span>'));
+            button.append(marks);
+            button.attr('aria-label', `${entry.name}${badges.quiz ? ', проверка пройдена' : badges.learn ? ', изучено' : ''}`);
+            lines.append($('<li></li>').append(button));
+        });
+        card.append(lines);
+        if (item.lines.length > 1) {
+            card.append($('<button type="button" class="btn-secondary lesson-course-quiz"></button>')
+                .attr('data-course-quiz', item.id)
+                .text('Проверить весь дебют'));
+            card.append($('<p class="lesson-course-note"></p>')
+                .text('Соперник выбирает ответы случайно — как в настоящей партии.'));
+        }
+        container.append(card);
     }
 
     function showCatalog() {
@@ -158,7 +187,35 @@ export function createLessonController({
         $('#lessonCatalog').prop('hidden', true);
         $('#lessonView').prop('hidden', false);
         $('#lessonCourseTitle').text(course.name);
-        $('#lessonLineTitle').text(line.name);
+        showLineTitle();
+    }
+
+    function showLineTitle() {
+        const text = scope === 'course'
+            ? (isCompleted() ? `Весь дебют · ${line.name}` : 'Весь дебют · соперник отвечает по-разному')
+            : line.name;
+        $('#lessonLineTitle').text(text);
+    }
+
+    function isQuizDone(entry) {
+        return Boolean(progress[entry.id]?.quiz);
+    }
+
+    /** Follows another line of the course that passes through the current position. */
+    function switchLine(nextLine) {
+        if (!nextLine || nextLine === line) return false;
+        line = nextLine;
+        showLineTitle();
+        return true;
+    }
+
+    /** "Соперник мог ответить и иначе: …" for the replies the course has besides `played`. */
+    function otherReplies(sansBefore, played) {
+        const others = continuations(course, sansBefore).filter(item => item.san !== played);
+        if (!others.length) return null;
+        const ply = sansBefore.length;
+        const text = others.map(item => `${numberedSan(ply, item.san)} — «${item.lines[0].name}»`).join('; ');
+        return { label: 'Соперник может ответить и иначе', text, tone: 'branch' };
     }
 
     // ---- board ------------------------------------------------------------------
@@ -227,14 +284,18 @@ export function createLessonController({
         saveStoredSettings({ lessonProgress: progress });
 
         const lastIndex = line.moves.length - 1;
-        if (mode === 'quiz') {
+        showLineTitle();
+        if (scope === 'course') {
+            setStatus(lineMistakes === 0 ? `Без ошибок! Вариант: «${line.name}»` : `Пройдено. Вариант: «${line.name}», ошибок: ${lineMistakes}`, lineMistakes === 0 ? 'success' : 'info');
+        } else if (mode === 'quiz') {
             setStatus(lineMistakes === 0 ? 'Вариант сыгран без ошибок!' : `Вариант пройден. Ошибок: ${lineMistakes}`, lineMistakes === 0 ? 'success' : 'info');
         } else {
             setStatus('Вариант изучен! Теперь попробуйте режим «Проверка».', 'success');
         }
         setComments([commentFor(lastIndex, 'success'), { label: 'Что дальше', text: line.outro, tone: 'plan' }]);
         $('#lessonQuizBtn').prop('hidden', mode === 'quiz');
-        $('#lessonNextLineBtn').prop('hidden', !followingLine());
+        $('#lessonNextLineBtn').text(scope === 'course' ? 'Сыграть ещё раз' : 'Следующий вариант')
+            .prop('hidden', scope === 'line' && !followingLine());
         playSound('gameEnd');
     }
 
@@ -242,13 +303,15 @@ export function createLessonController({
         opponentTimer = null;
         if (!active || isStudentTurn() || isCompleted()) return;
         const index = ply();
+        const before = playedSans();
+        if (scope === 'course') switchLine(pickLine(course, before, isQuizDone));
         const moveObj = game().move(line.moves[index].san);
         if (!moveObj) {
             setStatus('Не удалось воспроизвести ход соперника.', 'error');
             return;
         }
         announceMove(moveObj);
-        const comments = [...previous, commentFor(index, 'opponent', 'Соперник: ')];
+        const comments = [...previous, commentFor(index, 'opponent', 'Соперник: '), otherReplies(before, moveObj.san)];
         if (isCompleted()) finish();
         else promptStudent(comments);
     }
@@ -280,7 +343,11 @@ export function createLessonController({
         const attempt = trial.move({ from: source, to: target, promotion });
         if (!attempt) return false;
 
-        if (attempt.san !== step.san) {
+        // A move of another line of the course is right too: follow that line
+        const otherLine = attempt.san === step.san ? null : linesThrough(course, [...playedSans(), attempt.san])[0];
+        const switched = Boolean(otherLine) && switchLine(otherLine);
+
+        if (attempt.san !== step.san && !switched) {
             mistakes++;
             lineMistakes++;
             boardView.showSquareFeedback?.(target, 'wrong');
@@ -302,9 +369,12 @@ export function createLessonController({
         boardView.showSquareFeedback?.(target, 'correct');
         announceMove(moveObj);
         const comment = commentFor(index, 'success', mode === 'quiz' ? 'Верно! ' : '');
+        const note = switched && scope === 'line'
+            ? { label: 'Другой вариант', text: `Этот ход ведёт в вариант «${line.name}» — продолжаем его.`, tone: 'branch' }
+            : null;
         mistakes = 0;
         if (isCompleted()) finish();
-        else scheduleOpponent([comment]);
+        else scheduleOpponent([comment, note]);
         return true;
     }
 
@@ -338,9 +408,10 @@ export function createLessonController({
         resume();
     }
 
-    function start(lineId, startMode = mode) {
+    function start(lineId, startMode = mode, startScope = 'line') {
         const found = findLine(lineId);
         if (!found) return;
+        scope = startScope;
         onStart();
         clearTimeout(opponentTimer);
         opponentTimer = null;
@@ -349,6 +420,7 @@ export function createLessonController({
         clock.stopClock();
         course = found.course;
         line = found.line;
+        selectCourse(course.id);
         mode = startMode;
         mistakes = 0;
         lineMistakes = 0;
@@ -375,17 +447,32 @@ export function createLessonController({
         else scheduleOpponent([intro], OPPONENT_DELAY_MS * 2);
     }
 
+    /** A quiz on the whole opening: the opponent's replies are picked at random at every fork. */
+    function startCourse(courseId) {
+        const chosen = findCourse(courseId);
+        if (!chosen) return;
+        const first = pickLine(chosen, [], isQuizDone);
+        start(first.id, 'quiz', 'course');
+    }
+
     function setMode(nextMode) {
         if (nextMode !== 'learn' && nextMode !== 'quiz') return;
+        if (active && nextMode === mode) return;
         mode = nextMode;
         renderModeSwitch();
         if (active) start(line.id, mode);
     }
 
+    function restart() {
+        if (!line) return;
+        if (scope === 'course') startCourse(course.id);
+        else start(line.id, mode);
+    }
+
+    /** The next line of the same opening. */
     function followingLine() {
-        const lines = openingCourses.flatMap(item => item.lines);
-        const index = lines.findIndex(item => item.id === line.id);
-        return lines[index + 1] || null;
+        const index = course.lines.findIndex(item => item.id === line.id);
+        return course.lines[index + 1] || null;
     }
 
     /** Leaves the lesson; the editor keeps the position on the board. */
@@ -407,6 +494,17 @@ export function createLessonController({
     eventBus.on('game:ply-changed', () => { if (active) showArrow(); });
     eventBus.on('board:resized', () => { if (active) showArrow(); });
 
+    function selectCourse(id) {
+        if (!findCourse(id) || id === selectedCourseId) return;
+        selectedCourseId = id;
+        $('#lessonCourseSelect').val(id);
+        saveStoredSettings({ lessonCourse: id });
+    }
+
+    $('#lessonCourseSelect').on('change', function() {
+        selectCourse(String($(this).val()));
+        renderCatalog();
+    });
     $('#lessonCourses').on('click', '[data-line]', function() {
         start($(this).data('line'), 'learn');
     });
@@ -415,18 +513,23 @@ export function createLessonController({
     });
     $('#lessonHintBtn').on('click', hint);
     $('#lessonBackBtn').on('click', stepBack);
-    $('#lessonRestartBtn').on('click', () => { if (line) start(line.id, mode); });
+    $('#lessonCourses').on('click', '[data-course-quiz]', function() {
+        startCourse(String($(this).data('course-quiz')));
+    });
+    $('#lessonRestartBtn').on('click', restart);
     $('#lessonQuizBtn').on('click', () => { if (line) start(line.id, 'quiz'); });
     $('#lessonNextLineBtn').on('click', () => {
+        if (scope === 'course') return restart();
         const next = followingLine();
         if (next) start(next.id, 'learn');
     });
     $('#lessonExitBtn').on('click', () => exit());
 
+    renderCourseOptions();
     showCatalog();
 
     return {
-        isActive, isCompleted, tryMove, start, exit, hint, stepBack, setMode,
+        isActive, isCompleted, tryMove, start, startCourse, exit, hint, stepBack, setMode,
         getProgress: () => progress
     };
 }

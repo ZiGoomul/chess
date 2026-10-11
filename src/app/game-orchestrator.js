@@ -216,6 +216,7 @@ $(document).ready(function() {
         $, Chess, store, eventBus, boardView, clock, botCoordinator, moveHistoryView, clearSelection,
         playSound, playSoundForMove, saveStoredSettings,
         initialProgress: storedSettings.lessonProgress,
+        initialCourse: storedSettings.lessonCourse,
         onStart: () => { if (puzzle.isActive()) puzzle.exit({ keepPosition: true }); }
     });
 

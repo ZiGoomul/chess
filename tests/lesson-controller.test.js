@@ -5,7 +5,7 @@ import { findLine } from '../src/data/openings.js';
 import { createHarness } from './helpers/harness.js';
 
 const LESSON_DOM = `
-  <div id="lessonCatalog"><div id="lessonCourses"></div></div>
+  <div id="lessonCatalog"><select id="lessonCourseSelect"></select><div id="lessonCourses"></div></div>
   <div id="lessonView" hidden>
     <h2 id="lessonCourseTitle"></h2><p id="lessonLineTitle"></p>
     <div id="lessonModeSwitch"><button data-mode="learn"></button><button data-mode="quiz"></button></div>
@@ -15,7 +15,7 @@ const LESSON_DOM = `
     <button id="lessonQuizBtn" hidden></button><button id="lessonNextLineBtn" hidden></button><button id="lessonExitBtn"></button>
   </div>`;
 
-function setup({ progress = {} } = {}) {
+function setup({ progress = {}, course = '' } = {}) {
   mock.timers.enable({ apis: ['setTimeout'] });
   const h = createHarness();
   h.$('body').append(LESSON_DOM);
@@ -26,7 +26,7 @@ function setup({ progress = {} } = {}) {
     $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
     botCoordinator: h.botCoordinator, moveHistoryView: h.moveHistoryView, clearSelection: h.clearSelection,
     playSound: h.playSound, playSoundForMove: h.playSoundForMove,
-    initialProgress: progress, saveStoredSettings: (partial) => { saved.push(partial); }
+    initialProgress: progress, initialCourse: course, saveStoredSettings: (partial) => { saved.push(partial); }
   });
   const done = () => { mock.timers.reset(); h.close(); };
   return { h, lesson, arrows, saved, done };
@@ -52,11 +52,26 @@ test('Russian notation for the lesson texts', () => {
   assert.equal(numberedSan(13, 'b5'), '7…b5');
 });
 
-test('the catalog lists every course and its lines', () => {
-  const { h, done } = setup({ progress: { 'kid-classical': { learn: true } } });
-  assert.equal(h.$('#lessonCourses .lesson-course').length, 3);
-  assert.equal(h.$('#lessonCourses [data-line]').length, 7);
+test('the dropdown lists every opening and the catalog shows the chosen one', () => {
+  const { h, saved, done } = setup({ progress: { 'kid-classical': { learn: true } }, course: 'kid' });
+  assert.equal(h.$('#lessonCourseSelect option').length, 3);
+  assert.equal(h.$('#lessonCourseSelect').val(), 'kid');
+  assert.equal(h.$('#lessonCourses .lesson-course').length, 1);
+  assert.equal(h.$('#lessonCourses [data-line]').length, 6);
   assert.equal(h.$('[data-line="kid-classical"] .lesson-mark').length, 1);
+  assert.match(h.$('.lesson-course-count').text(), /пройдено: 1/);
+
+  h.$('#lessonCourseSelect').val('dragon').trigger('change');
+  assert.equal(h.$('#lessonCourses .lesson-course-title').text(), 'Вариант дракона');
+  assert.equal(h.$('#lessonCourses [data-line]').length, 4);
+  assert.deepEqual(saved.at(-1), { lessonCourse: 'dragon' });
+  done();
+});
+
+test('the catalog starts on the first opening when the saved one is unknown', () => {
+  const { h, done } = setup({ course: 'missing' });
+  assert.equal(h.$('#lessonCourseSelect').val(), 'kia');
+  assert.equal(h.$('#lessonCourses [data-line="kia-french"]').length, 1);
   done();
 });
 
@@ -109,7 +124,7 @@ test('the quiz hides the move until two mistakes or a hint', () => {
 
   lesson.tryMove('d2', 'd4');
   assert.deepEqual(arrows, []);
-  lesson.tryMove('g1', 'f3');
+  lesson.tryMove('a2', 'a3');
   assert.deepEqual(arrows, ['e2e4']);
   done();
 });
@@ -122,7 +137,10 @@ test('finishing a quiz without mistakes is saved as progress', () => {
   assert.equal(lesson.isCompleted(), true);
   assert.equal(h.$('#lessonStatus').text(), 'Вариант сыгран без ошибок!');
   assert.deepEqual(saved.at(-1), { lessonProgress: { 'kia-french': { quiz: true } } });
+  // The next line is the next one of the same opening
   assert.equal(h.$('#lessonNextLineBtn').prop('hidden'), false);
+  h.$('#lessonNextLineBtn').trigger('click');
+  assert.equal(h.$('#lessonLineTitle').text(), 'Через 1.Кf3 против ...d5 и ...e6');
   done();
 });
 
@@ -149,5 +167,50 @@ test('exiting a lesson returns to the catalog and free mode', () => {
   assert.equal(h.store.getState().mode, 'free');
   assert.equal(h.$('#lessonCatalog').prop('hidden'), false);
   assert.equal(reset, 1);
+  done();
+});
+
+test('a move of another line of the opening switches to that line', () => {
+  const { h, lesson, done } = setup();
+  lesson.start('kia-french', 'learn');
+  assert.equal(lesson.tryMove('g1', 'f3'), true);
+  assert.equal(h.$('#lessonLineTitle').text(), 'Через 1.Кf3 против ...d5 и ...e6');
+  assert.match(h.$('#lessonComments').text(), /Этот ход ведёт в вариант «Через 1\.Кf3/);
+  mock.timers.tick(700);
+  assert.equal(h.store.getState().game.history().join(' '), 'Nf3 d5');
+  done();
+});
+
+test('learning shows the other replies the opponent may choose', () => {
+  const { h, lesson, done } = setup();
+  lesson.start('dragon-yugoslav', 'learn');
+  // Play the student's moves up to White's sixth move, where the lines part
+  mock.timers.tick(1400);
+  for (const san of ['c5', 'd6', 'cxd4', 'Nf6', 'g6']) {
+    const move = new h.Chess(h.store.getState().game.fen()).move(san);
+    assert.equal(lesson.tryMove(move.from, move.to), true);
+    mock.timers.tick(700);
+  }
+  assert.equal(h.store.getState().game.history().at(-1), 'Be3');
+  const text = h.$('#lessonComments').text();
+  assert.match(text, /Соперник может ответить и иначе/);
+  assert.match(text, /6\.Сe2 — «Классический вариант \(6\.Сe2\)»/);
+  assert.match(text, /6\.f4 — «Атака Левенфиша \(6\.f4\)»/);
+  done();
+});
+
+test('the whole-opening quiz lets the opponent pick a reply at each fork', () => {
+  const { h, lesson, done } = setup({ course: 'dragon' });
+  h.$('[data-course-quiz="dragon"]').trigger('click');
+  assert.equal(lesson.isActive(), true);
+  assert.equal(h.$('#lessonLineTitle').text(), 'Весь дебют · соперник отвечает по-разному');
+
+  mock.timers.tick(1400);
+  for (const san of ['c5', 'd6', 'cxd4', 'Nf6', 'g6']) {
+    const move = new h.Chess(h.store.getState().game.fen()).move(san);
+    assert.equal(lesson.tryMove(move.from, move.to), true);
+    mock.timers.tick(700);
+  }
+  assert.ok(['Be3', 'Be2', 'f4'].includes(h.store.getState().game.history().at(-1)));
   done();
 });

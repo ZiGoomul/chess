@@ -292,7 +292,14 @@
                 <div id="lessonCatalog" class="lesson-catalog">
                     <h2 class="panel-title">Обучение</h2>
                     <p class="panel-hint">Выберите дебют и вариант. Вы делаете ходы за свою сторону, ходы соперника появятся сами, и каждый ход объясняется.</p>
-                    <div id="lessonCourses" class="lesson-courses"></div>
+                    <label class="panel-field" for="lessonCourseSelect">
+                        <span class="panel-label">Дебют</span>
+                        <span class="panel-select-wrap">
+                            <select id="lessonCourseSelect" class="panel-select"></select>
+                            <svg class="panel-select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                    <div id="lessonCourses" class="lesson-courses" aria-live="polite"></div>
                 </div>
 
                 <div id="lessonView" class="lesson-view" hidden>

@@ -19,7 +19,8 @@ export const DEFAULT_SETTINGS = {
     puzzleRatingGames: 0,
     soundEnabled: true,
     soundVolume: 70,
-    lessonProgress: {}
+    lessonProgress: {},
+    lessonCourse: 'kia'
 };
 
 function getStorage(customStorage) {
