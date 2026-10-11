@@ -43,18 +43,19 @@ export function createBoardView({ $, eventBus, store }) {
         var sqSize = $('#myBoard').width() / 8;
         var shorten = sqSize * 0.35;
 
+        // One orange family: the best move bold, the alternatives fainter and thinner
         var color, strokeWidth, markerId;
         if (multipv === 1) {
-            color = "rgba(46, 204, 113, 0.8)"; // Green
+            color = "rgba(255, 170, 0, 0.85)";
             strokeWidth = sqSize * 0.15;
             markerId = "url(#arrowhead1)";
         } else if (multipv === 2) {
-            color = "rgba(52, 152, 219, 0.8)"; // Blue
-            strokeWidth = sqSize * 0.08;
+            color = "rgba(255, 170, 0, 0.5)";
+            strokeWidth = sqSize * 0.1;
             markerId = "url(#arrowhead2)";
         } else {
-            color = "rgba(155, 89, 182, 0.8)"; // Purple
-            strokeWidth = sqSize * 0.04;
+            color = "rgba(255, 170, 0, 0.32)";
+            strokeWidth = sqSize * 0.07;
             markerId = "url(#arrowhead3)";
         }
 
@@ -135,6 +136,68 @@ export function createBoardView({ $, eventBus, store }) {
         squareEl.first().append(
             $('<span class="board-move-class" aria-hidden="true"></span>').addClass('move-class--' + cls).attr('title', label.label).text(label.icon)
         );
+    }
+
+    var PROMOTION_PIECES = [
+        { type: 'q', label: 'Ферзь' },
+        { type: 'r', label: 'Ладья' },
+        { type: 'b', label: 'Слон' },
+        { type: 'n', label: 'Конь' }
+    ];
+    var resolvePromotion = null;
+
+    function closePromotion(choice) {
+        $('.promotion-layer').remove();
+        $(document).off('keydown.promotion');
+        if (resolvePromotion) {
+            var resolve = resolvePromotion;
+            resolvePromotion = null;
+            resolve(choice);
+        }
+    }
+
+    /**
+     * Shows the four pieces in a column on the promotion square's file, growing from the
+     * square towards the middle of the board. Resolves to q / r / b / n, or null if cancelled.
+     */
+    function choosePromotion(square, color) {
+        closePromotion(null);
+        var squareEl = $('#myBoard [data-square="' + square + '"]').first();
+        var stage = $('#myBoard').closest('.board-stage');
+        if (!squareEl.length || !stage.length) return Promise.resolve('q');
+
+        var size = squareEl.outerWidth();
+        var squareOffset = squareEl.offset();
+        var stageOffset = stage.offset();
+        var left = squareOffset.left - stageOffset.left;
+        var top = squareOffset.top - stageOffset.top;
+        var downward = top + size / 2 < stage.height() / 2;
+
+        var layer = $('<div class="promotion-layer"></div>');
+        var picker = $('<div class="promotion-picker" role="dialog" aria-label="Выберите фигуру для превращения"></div>')
+            .toggleClass('promotion-picker--up', !downward)
+            .css({ left: left, width: size, top: downward ? top : 'auto', bottom: downward ? 'auto' : stage.height() - top - size });
+
+        PROMOTION_PIECES.forEach(function(option) {
+            $('<button type="button" class="promotion-option"></button>')
+                .attr('aria-label', option.label)
+                .css({ width: size, height: size })
+                .append($('<img alt="">').attr('src', getPieceThemeUrl(color + option.type.toUpperCase())))
+                .on('click', function(event) { event.stopPropagation(); closePromotion(option.type); })
+                .appendTo(picker);
+        });
+        $('<button type="button" class="promotion-cancel" aria-label="Отменить превращение">✕</button>')
+            .on('click', function(event) { event.stopPropagation(); closePromotion(null); })
+            .appendTo(picker);
+
+        layer.on('click', function(event) { if (event.target === layer[0]) closePromotion(null); });
+        layer.append(picker).appendTo(stage);
+        $(document).on('keydown.promotion', function(event) {
+            if (event.key === 'Escape') closePromotion(null);
+        });
+        picker.find('.promotion-option').first().trigger('focus');
+
+        return new Promise(function(resolve) { resolvePromotion = resolve; });
     }
 
     function clearSquareFeedback() {
@@ -378,6 +441,8 @@ export function createBoardView({ $, eventBus, store }) {
         var downTrackInfo = null;
         $(document).on('pointerdown mousedown touchstart', function(e) {
             if (e.button !== undefined && e.button !== 0 && e.type === 'mousedown') return;
+            // The promotion picker handles its own clicks
+            if ($(e.target).closest('.promotion-layer').length) { downTrackInfo = null; return; }
             var clientX = e.clientX ?? e.originalEvent?.touches?.[0]?.clientX;
             var clientY = e.clientY ?? e.originalEvent?.touches?.[0]?.clientY;
             if (clientX === undefined || clientY === undefined) return;
@@ -516,6 +581,7 @@ export function createBoardView({ $, eventBus, store }) {
         clearLastMoveHighlight: clearLastMoveHighlight,
         showMoveClass: showMoveClass,
         showSquareFeedback: showSquareFeedback,
+        choosePromotion: choosePromotion,
         clearSquareFeedback: clearSquareFeedback,
         clearMoveClass: clearMoveClass,
         highlightCheck: highlightCheck,

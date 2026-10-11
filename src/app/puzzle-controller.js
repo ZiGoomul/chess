@@ -137,12 +137,12 @@ export function createPuzzleController({
     }
 
     /** Validates the solver's move. Returns true when it is the expected solution move. */
-    function tryMove(source, target) {
+    function tryMove(source, target, promotion = 'q') {
         if (revealed) return false;
         const game = store.getState().game;
         const expectedMoveUci = current.moves[step];
         const trial = new Chess(game.fen());
-        const testMove = trial.move({ from: source, to: target, promotion: 'q' });
+        const testMove = trial.move({ from: source, to: target, promotion });
         // Like Lichess, any move that mates solves the puzzle
         const matesNow = Boolean(testMove && trial.in_checkmate());
 
@@ -155,7 +155,7 @@ export function createPuzzleController({
             return false;
         }
 
-        const move = game.move({ from: source, to: target, promotion: 'q' });
+        const move = game.move({ from: source, to: target, promotion });
         clearTimeout(wrongFeedbackTimer);
         boardView.showSquareFeedback?.(target, 'correct');
         pushPosition(game);

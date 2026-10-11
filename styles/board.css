@@ -324,6 +324,7 @@ body.is-editor-mode .player-badge {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .promotion-picker,
     #arrowsGroup > *,
     .move-dest-marker::after,
     #myBoard .square-feedback-badge,
@@ -335,4 +336,76 @@ body.is-editor-mode .player-badge {
     #evalBarWhite {
         transition: none;
     }
+}
+
+/* Promotion choice: a column of pieces over the promotion square's file */
+.promotion-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: rgba(20, 19, 17, 0.35);
+}
+
+.promotion-picker {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    animation: fade-in 0.12s ease-out;
+}
+
+.promotion-picker--up {
+    flex-direction: column-reverse;
+}
+
+.promotion-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.promotion-option:hover,
+.promotion-option:focus-visible {
+    background: #e2efd2;
+}
+
+.promotion-option img {
+    width: 88%;
+    height: 88%;
+}
+
+.promotion-cancel {
+    min-height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: #e6e3df;
+    box-shadow: none;
+    color: #4b4847;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.promotion-cancel:hover {
+    background: #dbd8d3;
+}
+
+/* Eval bar without an evaluation of the current position */
+#evalBarContainer.is-idle #evalBarWhite {
+    opacity: 0.35;
+}
+
+/* No evaluation in puzzles: it would give the answer away */
+body.is-puzzle-mode #evalBarContainer {
+    visibility: hidden;
 }

@@ -58,8 +58,33 @@ export function createBoardInteraction({
             clearSelection();
         } else if (resolution.action === 'move') {
             clearSelection();
-            session.makeMove(resolution.from, resolution.to);
+            commitMove(resolution.from, resolution.to);
         }
+    }
+
+    /** The colour of a pawn whose legal move from → to promotes, else null. */
+    function promotingColor(from, to) {
+        const game = getDisplayedGame(store.getState(), Chess);
+        const piece = game.get(from);
+        if (!piece || piece.type !== 'p' || to[1] !== (piece.color === 'w' ? '8' : '1')) return null;
+        // In the editor either side may move, so ask as the pawn's side
+        const parts = game.fen().split(' ');
+        parts[1] = piece.color;
+        parts[3] = '-';
+        const asMover = new Chess();
+        if (!asMover.load(parts.join(' '))) return null;
+        return asMover.moves({ square: from, verbose: true }).some(move => move.to === to && move.promotion) ? piece.color : null;
+    }
+
+    /** Makes a move, asking which piece a promoting pawn becomes. */
+    async function commitMove(from, to, piece) {
+        const color = promotingColor(from, to);
+        if (!color || typeof boardView.choosePromotion !== 'function') {
+            return piece === undefined ? session.makeMove(from, to) : session.makeMove(from, to, piece);
+        }
+        const choice = await boardView.choosePromotion(to, color);
+        if (!choice) return false;
+        return session.makeMove(from, to, piece, choice);
     }
 
     function isWrongColor(game, piece) {
@@ -110,6 +135,13 @@ export function createBoardInteraction({
         dragJustEnded = true;
         clearSelection();
         setTimeout(() => { dragJustEnded = false; }, CLICK_DEBOUNCE_MS);
+
+        // A promotion waits for the piece choice: the pawn goes back until it is made
+        if (event.source !== 'spare' && promotingColor(event.source, event.target) && typeof boardView.choosePromotion === 'function') {
+            event.action = 'snapback';
+            commitMove(event.source, event.target, event.piece);
+            return;
+        }
 
         const accepted = isFreePlacement && event.source === 'spare'
             ? false

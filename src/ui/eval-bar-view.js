@@ -9,8 +9,21 @@ export function createEvalBarView({ $, eventBus }) {
 
     eventBus.on('engine:eval-updated', (payload) => {
         currentEval = payload;
+        $('#evalBarContainer').removeClass('is-idle');
         render();
     });
+
+    // A new position has no evaluation yet: show an even, unlabelled bar instead of a stale one
+    function reset() {
+        currentEval = null;
+        $('#evalBarContainer').addClass('is-idle');
+        $('#evalBarText').text('');
+        $('#evalBarWhite').css({ top: 'auto', bottom: 0, height: '50%' });
+    }
+
+    eventBus.on('game:move-made', reset);
+    eventBus.on('game:ply-changed', reset);
+    reset();
 
     function render() {
         if (!currentEval) return;
@@ -65,6 +78,7 @@ export function createEvalBarView({ $, eventBus }) {
     }
 
     return {
-        render
+        render,
+        reset
     };
 }

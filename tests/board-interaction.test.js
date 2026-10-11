@@ -167,3 +167,32 @@ test('outside the editor a piece dragged off the board snaps back', () => {
   assert.equal(edits.length, 0);
   h.close();
 });
+
+test('a promoting pawn asks for the piece and passes the choice on', async () => {
+  const { h, makeMoveCalls } = setup();
+  h.store.getState().game.load('8/4P3/8/8/8/8/8/k6K w - - 0 1');
+  h.store.setState({ historyFENs: [h.store.getState().game.fen()], currentViewPly: 0 });
+  const asked = [];
+  h.boardView.choosePromotion = async (square, color) => { asked.push({ square, color }); return 'n'; };
+
+  const drop = { source: 'e7', target: 'e8', piece: 'wP', newPos: {}, action: null };
+  h.eventBus.emit('board:drop', drop);
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  assert.equal(drop.action, 'snapback', 'the pawn waits on its square for the choice');
+  assert.deepEqual(asked, [{ square: 'e8', color: 'w' }]);
+  assert.deepEqual(makeMoveCalls.at(-1), ['e7', 'e8', 'wP', 'n']);
+  h.close();
+});
+
+test('cancelling the promotion choice makes no move', async () => {
+  const { h, makeMoveCalls } = setup();
+  h.store.getState().game.load('8/4P3/8/8/8/8/8/k6K w - - 0 1');
+  h.store.setState({ historyFENs: [h.store.getState().game.fen()], currentViewPly: 0 });
+  h.boardView.choosePromotion = async () => null;
+
+  h.eventBus.emit('board:drop', { source: 'e7', target: 'e8', piece: 'wP', newPos: {}, action: null });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(makeMoveCalls.length, 0);
+  h.close();
+});

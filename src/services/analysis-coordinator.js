@@ -89,7 +89,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
         if (info) {
             currentHints[info.multipv] = info.move;
             if (info.multipv === 1) {
-                eventBus.emit('engine:eval-updated', { cp: info.cp, mate: info.mate });
+                eventBus.emit('engine:eval-updated', { cp: info.cp, mate: info.mate, isWhiteTurn: hintFen.split(' ')[1] === 'w' });
             }
             emitHints();
         }

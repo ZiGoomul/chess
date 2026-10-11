@@ -51,3 +51,13 @@ test('puzzle mode never asks for or draws hints, and releases the hint button', 
   assert.deepEqual(drawn, []);
   assert.equal(completed.length, 1);
 });
+
+test('the evaluation says whose turn its sign is relative to', () => {
+  const { eventBus, store, coordinator } = setup();
+  const evals = [];
+  eventBus.on('engine:eval-updated', payload => evals.push(payload));
+  store.setState({ historyFENs: [AFTER_E4], currentViewPly: 0 });
+  coordinator.requestHint();
+  coordinator.handleHintInfo({ multipv: 1, move: 'e7e5', cp: -30 });
+  assert.deepEqual(evals.at(-1), { cp: -30, mate: undefined, isWhiteTurn: false });
+});

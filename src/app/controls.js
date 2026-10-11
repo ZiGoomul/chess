@@ -80,6 +80,18 @@ export function createControls({
     $('#navNextBtn').on('click', function() { moveHistoryView.goToPly(currentPly() + 1); });
     $('#navLastBtn').on('click', function() { moveHistoryView.goToPly(lastPly()); });
 
+    // ← → step through the moves, Home / End jump to the start and the end
+    const NAV_KEYS = { ArrowLeft: '#navPrevBtn', ArrowRight: '#navNextBtn', Home: '#navFirstBtn', End: '#navLastBtn' };
+    $(document).on('keydown', function(event) {
+        const button = NAV_KEYS[event.key];
+        if (!button || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        // Leave the keys to text fields, lists, the section rail, radio groups and open dialogs
+        if ($(event.target).closest('input, select, textarea, [contenteditable], [role="tablist"], [role="radiogroup"], dialog, .promotion-layer').length) return;
+        if ($('#timeControlDialog').prop('open')) return;
+        event.preventDefault();
+        $(button).trigger('click');
+    });
+
     $('#moveHistoryList').on('click', '.move-text', function() {
         moveHistoryView.goToPly(parseInt($(this).data('ply'), 10) + 1);
     });

@@ -183,3 +183,12 @@ test('stalemate is reported as a draw with its reason', () => {
   assert.equal(h.$('#gameOverScore').text(), '½ – ½');
   h.close();
 });
+
+test('a pawn promotes to the chosen piece', () => {
+  const { h, session } = setup();
+  state(h).game.load('8/4P3/8/8/8/8/8/k6K w - - 0 1');
+  h.store.setState({ historyFENs: [state(h).game.fen()], currentViewPly: 0 });
+  assert.equal(session.makeMove('e7', 'e8', 'wP', 'n'), true);
+  assert.deepEqual(state(h).game.get('e8'), { type: 'n', color: 'w' });
+  h.close();
+});

@@ -166,7 +166,7 @@ export function createGameSession({
         updateOverlay();
     }
 
-    function makeEditorMove(source, target, piece) {
+    function makeEditorMove(source, target, piece, promotion = 'q') {
         if (source === 'spare' || target === 'offboard' || source === target) return false;
         const game = store.getState().game;
         if (!piece) {
@@ -181,14 +181,14 @@ export function createGameSession({
             const fenParts = game.fen().split(' ');
             fenParts[1] = editorColor;
             const flippedFen = fenParts.join(' ');
-            editorMove = new Chess(flippedFen).move({ from: source, to: target, promotion: 'q' });
+            editorMove = new Chess(flippedFen).move({ from: source, to: target, promotion });
             if (editorMove) {
                 game.load(flippedFen);
-                editorMove = game.move({ from: source, to: target, promotion: 'q' });
+                editorMove = game.move({ from: source, to: target, promotion });
                 fens = [flippedFen];
             }
         } else {
-            editorMove = game.move({ from: source, to: target, promotion: 'q' });
+            editorMove = game.move({ from: source, to: target, promotion });
         }
 
         if (!editorMove) return false;
@@ -200,21 +200,24 @@ export function createGameSession({
         return true;
     }
 
-    /** Returns true when the move was accepted. */
-    function makeMove(source, target, piece) {
-        if (puzzle.isActive()) return puzzle.tryMove(source, target);
+    /**
+     * Returns true when the move was accepted. `promotion` is the piece a pawn becomes
+     * (q, r, b, n); a one-letter `piece` is accepted for it as well.
+     */
+    function makeMove(source, target, piece, promotion) {
+        const promoteTo = promotion || ((typeof piece === 'string' && piece.length === 1) ? piece.toLowerCase() : 'q');
+        if (puzzle.isActive()) return puzzle.tryMove(source, target, promoteTo);
 
         const game = store.getState().game;
         boardView.clearArrows();
 
-        if (getBotLevel() === 0) return makeEditorMove(source, target, piece);
+        if (getBotLevel() === 0) return makeEditorMove(source, target, piece, promoteTo);
 
         truncateToViewedPly();
         boardView.removeHighlights();
 
         const startingFen = game.fen();
-        const promotion = (typeof piece === 'string' && piece.length === 1) ? piece.toLowerCase() : 'q';
-        const move = game.move({ from: source, to: target, promotion });
+        const move = game.move({ from: source, to: target, promotion: promoteTo });
         if (move === null) return false;
 
         beginCurrentGame(startingFen);
