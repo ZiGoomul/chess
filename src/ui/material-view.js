@@ -3,10 +3,11 @@ import { pieceImageUrl, LOCAL_PIECE_THEME } from './piece-images.js';
 export function createMaterialView({ $, eventBus, Chess }) {
     let currentOrientation = 'white';
     let currentPositionGame = null;
-    let currentPieceTheme = LOCAL_PIECE_THEME;
 
+    // The set chosen in the settings, read when drawing like the board does: the stored set is
+    // announced at start-up before this view exists
     function getPieceThemeUrl(piece) {
-        return pieceImageUrl(currentPieceTheme, piece);
+        return pieceImageUrl($('#pieceThemeSelect').val() || LOCAL_PIECE_THEME, piece);
     }
 
     function updateMaterial(positionGame) {
@@ -63,12 +64,9 @@ export function createMaterialView({ $, eventBus, Chess }) {
         }
     });
 
-    eventBus.on('theme:changed', (payload) => {
-        if (payload && payload.pieceTheme) {
-            currentPieceTheme = payload.pieceTheme;
-            if (currentPositionGame) {
-                updateMaterial(currentPositionGame);
-            }
+    eventBus.on('settings:changed', (payload) => {
+        if (payload && payload.pieceTheme && currentPositionGame) {
+            updateMaterial(currentPositionGame);
         }
     });
 
