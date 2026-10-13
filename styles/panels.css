@@ -1165,3 +1165,70 @@ body.is-lesson-mode .player-badge {
     padding: 10px 0 var(--tab-padding-bottom);
     background: var(--panel-bg);
 }
+
+/* ---- Rating ---- */
+.play-rating-note {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--label-muted);
+}
+
+.play-rating-note[data-rated="false"] {
+    color: var(--status-error);
+}
+
+.rated-chip[hidden] {
+    display: none;
+}
+
+.rated-chip[data-rated="true"] {
+    background: var(--btn-green-tint);
+    color: var(--text-primary);
+}
+
+.rated-chip[data-rated="false"] {
+    color: var(--label-muted);
+}
+
+.play-result-rating[hidden],
+.game-over-rating[hidden] {
+    display: none;
+}
+
+.game-over-rating {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.game-over-rating[data-change="1"],
+.game-row-rating[data-change="1"] {
+    color: var(--status-success);
+}
+
+.game-over-rating[data-change="-1"],
+.game-row-rating[data-change="-1"] {
+    color: var(--status-error);
+}
+
+.game-row-rating {
+    font-variant-numeric: tabular-nums;
+}
+
+.ratings-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ratings-summary .panel-hint {
+    margin: 0;
+}
+
+.ratings-summary-chip {
+    font-variant-numeric: tabular-nums;
+}

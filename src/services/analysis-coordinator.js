@@ -10,8 +10,10 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     let currentHints = {};
     let hintFen = null;
 
-    function isPuzzleMode() {
-        return isGuidedMode(store.getState().mode);
+    // No hints in puzzles and lessons, nor in a rated game played with the help switched off
+    function hintsBlocked() {
+        const state = store.getState();
+        return isGuidedMode(state.mode) || Boolean(state.assistsOff);
     }
 
     function hintsMatchDisplayed() {
@@ -36,7 +38,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     function autoHintIfNeeded() {
         const state = store.getState();
         const autoHint = state.settings?.autoHint;
-        if (!autoHint || isPuzzleMode()) return;
+        if (!autoHint || hintsBlocked()) return;
 
         const fen = getDisplayedFen();
         if (!fen) return;
@@ -60,7 +62,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     function requestHint() {
         const fen = getDisplayedFen();
         // Nothing to analyse: still report completion so the hint button is released
-        if (isPuzzleMode() || !fen || new Chess(fen).game_over()) {
+        if (hintsBlocked() || !fen || new Chess(fen).game_over()) {
             eventBus.emit('engine:hint-completed');
             return;
         }
@@ -86,7 +88,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     }
 
     function handleHintInfo(info) {
-        if (isPuzzleMode() || !hintsMatchDisplayed()) return;
+        if (hintsBlocked() || !hintsMatchDisplayed()) return;
         if (info) {
             currentHints[info.multipv] = info.move;
             if (info.multipv === 1) {
@@ -97,7 +99,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
     }
 
     function handleHintComplete() {
-        if (!isPuzzleMode() && hintsMatchDisplayed()) emitHints();
+        if (!hintsBlocked() && hintsMatchDisplayed()) emitHints();
         eventBus.emit('engine:hint-completed');
     }
 
@@ -118,7 +120,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
 
     // Redraw after a resize or flip, only when the hints are for the position on the board
     function drawHintArrows() {
-        if (isPuzzleMode() || !hintsMatchDisplayed() || !Object.keys(currentHints).length) return;
+        if (hintsBlocked() || !hintsMatchDisplayed() || !Object.keys(currentHints).length) return;
         emitHints();
     }
 

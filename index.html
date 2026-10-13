@@ -123,6 +123,7 @@
                                         <span id="gameOverBotName">Бот</span>
                                     </div>
                                 </div>
+                                <p id="gameOverRating" class="game-over-rating" hidden></p>
                                 <p id="gameOverReviewNote" class="game-over-note" hidden></p>
                                 <button type="button" id="gameOverReviewBtn" class="cc-start-btn">Разбор партии</button>
                                 <div class="game-over-actions">
@@ -142,6 +143,7 @@
                         </div>
                         <div class="player-details">
                             <span class="player-name" id="bottomPlayerName">Вы</span>
+                            <span class="player-rating" id="bottomPlayerRating" hidden></span>
                         </div>
                         <div id="bottomMaterial" class="material-row"></div>
                     </div>
@@ -384,6 +386,11 @@
                         </div>
                     </div>
 
+                    <label class="toggle-row play-rated-toggle" for="ratedModeCb">
+                        <span class="toggle-row-text">Играть на рейтинг</span>
+                        <span class="switch"><input type="checkbox" id="ratedModeCb" aria-describedby="playRatingNote"><span class="slider"></span></span>
+                    </label>
+                    <p id="playRatingNote" class="play-rating-note" aria-live="polite"></p>
                     <button id="ccStartGameBtn" class="cc-start-btn">Играть</button>
 
                     <button type="button" id="resumeGameBtn" class="panel-card-link panel-card-link--resume" hidden>
@@ -409,11 +416,13 @@
                     <div class="play-status-live">
                         <span class="play-status-dot" aria-hidden="true"></span>
                         <span id="gameStatus" role="status" aria-live="polite" aria-atomic="true"></span>
+                        <span id="ratedChip" class="panel-chip rated-chip" hidden></span>
                         <span id="gameTimeChip" class="panel-chip">10 + 5</span>
                     </div>
                     <div class="play-status-result">
                         <h2 id="gameResultTitle" class="panel-title">Партия завершена</h2>
                         <p id="gameResultMeta" class="play-result-meta"></p>
+                        <p id="gameResultRating" class="play-result-meta play-result-rating" hidden></p>
                     </div>
                 </div>
 
@@ -509,6 +518,7 @@
             <!-- TAB: Finished games -->
             <div class="tab-content" id="tab-games" role="tabpanel" aria-labelledby="tab-games-button" aria-hidden="true">
                 <h2 class="panel-title">Мои партии</h2>
+                <div id="ratingsSummary" class="ratings-summary" aria-label="Ваш рейтинг"></div>
                 <p id="gamesEmpty" class="panel-hint">Здесь появятся завершённые партии против бота.</p>
                 <ul id="gamesList" class="games-list" aria-label="Завершённые партии"></ul>
             </div>

@@ -18,6 +18,8 @@ export interface GameState {
     mode: 'free' | 'bot' | 'puzzle' | 'lesson';
     orientation: 'white' | 'black';
     isThinking: boolean;
+    /** A rated game is being played with every help switched off; the settings stay as they are */
+    assistsOff: boolean;
     settings: GameSettings;
     eval: { cp: number | null; mate: number | null };
 }
@@ -40,6 +42,7 @@ export function createGameStore(initialState: Partial<GameState> = {}): GameStor
         mode: 'free',
         orientation: 'white',
         isThinking: false,
+        assistsOff: false,
         settings: {
             highlightMoves: true,
             highlightAttacks: false,

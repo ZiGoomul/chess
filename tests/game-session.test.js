@@ -2,24 +2,32 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGameSession } from '../src/app/game-session.js';
 import { createHarness, playMoves } from './helpers/harness.js';
+import { createRatedGame } from '../src/app/rated-game.js';
 
 function memoryStorage() {
   const data = new Map();
   return { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, String(value)), removeItem: key => data.delete(key) };
 }
 
-function setup(options, liveGameStorage = memoryStorage()) {
+function setup(options, liveGameStorage = memoryStorage(), { rated = false } = {}) {
   const h = createHarness(options);
+  h.$('body').append('<p id="gameOverRating" hidden></p><span id="ratedChip" hidden></span><input type="checkbox" id="timerEnableCb" checked><input id="timerBase" value="10">');
+  const savedRatings = [];
+  const rating = rated
+    ? createRatedGame({ $: h.$, botLevelToRating: () => 1700, saveRatings: value => { savedRatings.push(value); } })
+    : null;
   const puzzle = { isActive: () => false, exit() {} };
   const session = createGameSession({
     $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
     botCoordinator: h.botCoordinator, analysisCoordinator: h.analysisCoordinator, moveHistoryView: h.moveHistoryView,
     services: h.services, puzzle, getBotLevel: h.getBotLevel, clearSelection: h.clearSelection,
     playSound: h.playSound, playSoundForMove: h.playSoundForMove, saveStoredSettings: h.saveStoredSettings,
-    liveGameStorage
+    liveGameStorage, rating
   });
-  return { h, session, liveGameStorage };
+  return { h, session, liveGameStorage, rating, savedRatings };
 }
+
+const RAPID = { enabled: true, baseMinutes: 10 };
 
 const state = h => h.store.getState();
 
@@ -272,5 +280,67 @@ test('reopening a finished game shows its result without the result card', () =>
   assert.equal(h.$('#gameResultTitle').text(), 'Победа · мат');
   assert.equal(h.$('#gameResultMeta').text(), 'Вы против: Бот · уровень 15 · 5 + 0');
   assert.equal(h.$('#gameOverOverlay').css('display'), 'none');
+  h.close();
+});
+
+test('a rated game shows the rating change on the result card', () => {
+  const { h, session, rating, savedRatings } = setup(undefined, memoryStorage(), { rated: true });
+  rating.begin({ timeControl: RAPID, botLevel: 10, humanColor: 'w' });
+  session.makeMove('e2', 'e4');
+  session.resign();
+  assert.match(h.$('#gameOverRating').text(), /^Рапид: \d+\? \(−\d+\)$/);
+  assert.equal(h.$('#gameOverRating').prop('hidden'), false);
+  assert.equal(savedRatings.at(-1).rapid.games, 1);
+  h.close();
+});
+
+test('taking a move back makes the game unrated', () => {
+  const { h, session, rating, savedRatings } = setup(undefined, memoryStorage(), { rated: true });
+  rating.begin({ timeControl: RAPID, botLevel: 10, humanColor: 'w' });
+  session.makeMove('e2', 'e4');
+  h.eventBus.emit('bot:move-ready', { bestmove: 'e7e5' });
+  session.takeBack();
+  assert.equal(h.$('#ratedChip').text(), 'Без рейтинга');
+  session.makeMove('d2', 'd4');
+  session.resign();
+  assert.equal(h.$('#gameOverRating').text(), 'Без рейтинга: вы брали ход назад');
+  assert.deepEqual(savedRatings, []);
+  h.close();
+});
+
+test('moving on from an earlier position also makes the game unrated', () => {
+  const { h, session, rating } = setup(undefined, memoryStorage(), { rated: true });
+  rating.begin({ timeControl: RAPID, botLevel: 10, humanColor: 'w' });
+  session.makeMove('e2', 'e4');
+  h.eventBus.emit('bot:move-ready', { bestmove: 'e7e5' });
+  h.store.setState({ currentViewPly: 0 });
+  session.makeMove('d2', 'd4');
+  assert.equal(h.$('#ratedChip').text(), 'Без рейтинга');
+  h.close();
+});
+
+test('a resumed game stays unrated after help taken before the reload', () => {
+  const storage = memoryStorage();
+  const first = setup(undefined, storage, { rated: true });
+  first.rating.begin({ timeControl: RAPID, botLevel: 10, humanColor: 'w' });
+  first.session.makeMove('e2', 'e4');
+  first.rating.markUnrated('hint');
+  first.h.eventBus.emit('bot:move-ready', { bestmove: 'e7e5' });
+  first.h.close();
+
+  const { h, session, savedRatings } = setup(undefined, storage, { rated: true });
+  assert.equal(session.resumeLiveGame(), true);
+  assert.equal(h.$('#ratedChip').text(), 'Без рейтинга');
+  session.resign();
+  assert.equal(h.$('#gameOverRating').text(), 'Без рейтинга: вы брали подсказку');
+  assert.deepEqual(savedRatings, []);
+  h.close();
+});
+
+test('a game played without pressing «Играть» shows no rating', () => {
+  const { h, session } = setup(undefined, memoryStorage(), { rated: true });
+  session.makeMove('e2', 'e4');
+  session.resign();
+  assert.equal(h.$('#gameOverRating').prop('hidden'), true);
   h.close();
 });

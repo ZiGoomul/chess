@@ -7,11 +7,12 @@ import { retainCastlingRights } from '../domain/castling-rights.js';
 import { parseUciMove } from '../services/puzzle-runner.js';
 import { saveLiveGame, loadLiveGame, clearLiveGame } from '../storage/live-game-storage.js';
 import { showBotOpponent } from '../ui/player-badges.js';
+import { describeRatingChange } from './rated-game.js';
 
 export function createGameSession({
     $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
     services, puzzle, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings,
-    liveGameStorage = undefined
+    liveGameStorage = undefined, rating = null
 }) {
     // The play panel shows the new-game form, the live game or the finished game.
     function setPanelPhase(phase) {
@@ -38,6 +39,7 @@ export function createGameSession({
             botLevel: getBotLevel(),
             timeControl: { enabled: $('#timerEnableCb').is(':checked'), baseMinutes: Number($('#timerBase').val()), incrementSeconds: Number($('#timerInc').val()) },
             clocks: clock.snapshot?.(),
+            rated: rating?.snapshot() || null,
             savedAt: Date.now()
         }, liveGameStorage);
     }
@@ -83,6 +85,7 @@ export function createGameSession({
         store.setState({ historyFENs: fens, currentViewPly: fens.length - 1, isThinking: false });
         setOrientation(saved.humanColor === 'b' ? 'black' : 'white');
         beginCurrentGame(saved.startFen);
+        rating?.restore(saved.rated);
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
         setPanelPhase('game');
         clock.applySettings();
@@ -104,6 +107,7 @@ export function createGameSession({
     /** Undoes the player's last move, and the bot's reply to it if it came. */
     function takeBack() {
         if (!canTakeBack()) return false;
+        rating?.markUnrated('takeback');
         botCoordinator.cancelBotSearch();
         clearSelection();
         boardView.clearArrows();
@@ -151,7 +155,10 @@ export function createGameSession({
         return 'правило 50 ходов';
     }
 
-    /** @param {{ quiet?: boolean, meta?: string }} [options] quiet: no result card (an old game being reopened) */
+    /**
+     * @param {{ quiet?: boolean, meta?: string, ratingChange?: { rated: boolean, delta?: number } | null }} [options]
+     * quiet: no result card (an old game being reopened); ratingChange: what the game did to the rating
+     */
     function showGameResult(result, endReason, detail, options = {}) {
         const key = positionKey();
         if (finished && finished.key === key) return;
@@ -175,6 +182,10 @@ export function createGameSession({
         $('#gameOverScore').text(score);
         $('#gameOverBotName').text(`Бот · ур. ${getBotLevel()}`);
         $('#gameOverReviewNote').text('Разбор готовится — точность появится через несколько секунд').prop('hidden', !services.postGameReview);
+        const ratingText = describeRatingChange(options.ratingChange);
+        $('#gameOverRating').text(ratingText).prop('hidden', !ratingText)
+            .attr('data-change', options.ratingChange?.rated ? Math.sign(options.ratingChange.delta) : null);
+        $('#gameResultRating').text(ratingText).prop('hidden', !ratingText);
         setPanelPhase('review');
         updateOverlay();
     }
@@ -203,6 +214,8 @@ export function createGameSession({
     function truncateToViewedPly() {
         const state = store.getState();
         if (!isHistoricalPosition(state)) return;
+        // Moving on from an earlier position takes moves back
+        rating?.markUnrated('takeback');
         const game = state.game;
         const fens = state.historyFENs.slice();
         while (fens.length - 1 > state.currentViewPly) {
@@ -238,11 +251,19 @@ export function createGameSession({
 
     function completeCurrentGame(result, endReason, detail) {
         if (reopening) return;
-        if (!puzzle.isActive() && getBotLevel() > 0) showGameResult(result, endReason, detail);
+        const game = store.getState().game;
+        const againstBot = !puzzle.isActive() && getBotLevel() > 0;
+        const moves = game.history({ verbose: true });
+        const ratingChange = againstBot
+            ? rating?.complete({ result, movesBy: color => moves.filter(move => move.color === color).length }) || null
+            : null;
+        if (againstBot) showGameResult(result, endReason, detail, { ratingChange });
         const completion = services.gameCompletion;
         if (!completion || !completion.currentGameId || puzzle.isActive()) return;
-        const game = store.getState().game;
         completion.completeGame({
+            rating: ratingChange?.rated
+                ? { category: ratingChange.category, before: ratingChange.before, after: ratingChange.after, delta: ratingChange.delta, provisional: ratingChange.provisional }
+                : null,
             result: result,
             endReason: endReason,
             endDetail: detail || null,
@@ -376,6 +397,7 @@ export function createGameSession({
     }
 
     function resetPosition(mutate) {
+        rating?.cancel();
         finished = null;
         gameCompletionReset();
         botCoordinator.cancelBotSearch();
@@ -397,6 +419,7 @@ export function createGameSession({
 
     function restoreSavedGame(record) {
         if (puzzle.isActive()) puzzle.exit();
+        rating?.cancel();
         gameCompletionReset();
         botCoordinator.cancelBotSearch();
         clock.stopClock();
@@ -467,7 +490,8 @@ export function createGameSession({
         const timeText = tc && tc.enabled ? `${tc.baseMinutes} + ${tc.incrementSeconds}` : 'без часов';
         showGameResult(record.result, record.endReason, record.endDetail, {
             quiet: true,
-            meta: `Вы против: Бот · уровень ${record.botLevel ?? '?'} · ${timeText}`
+            meta: `Вы против: Бот · уровень ${record.botLevel ?? '?'} · ${timeText}`,
+            ratingChange: record.rating ? { rated: true, ...record.rating } : null
         });
     }
 
@@ -481,6 +505,7 @@ export function createGameSession({
     /** A game against the bot from the position on the board; the player takes the side to move. */
     function startFromCurrentPosition() {
         const game = store.getState().game;
+        rating?.cancel();
         finished = null;
         clearLiveGame(liveGameStorage);
         gameCompletionReset();
@@ -576,6 +601,11 @@ export function createGameSession({
         let chosen = $('.color-btn.active').data('color') || 'white';
         if (chosen === 'random') chosen = Math.random() < 0.5 ? 'white' : 'black';
         setOrientation(chosen);
+        rating?.begin({
+            timeControl: { enabled: $('#timerEnableCb').is(':checked'), baseMinutes: Number($('#timerBase').val()) },
+            botLevel: getBotLevel(),
+            humanColor: chosen === 'black' ? 'b' : 'w'
+        });
 
         // If playing as black, the bot (white) makes the opening move
         window.setTimeout(function() {

@@ -19,7 +19,7 @@ export function createControls({
     });
 
     eventBus.on('engine:hint-completed', function() {
-        $('#hintBtn').prop('disabled', false).find('.action-btn-label').text('Подсказка');
+        $('#hintBtn').prop('disabled', store.getState().assistsOff).find('.action-btn-label').text('Подсказка');
     });
 
     $('#highlightAttacksCb, #highlightDefensesCb').on('change', function() {

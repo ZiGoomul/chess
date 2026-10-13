@@ -279,8 +279,10 @@ export function createBoardView({ $, eventBus, store }) {
             .removeAttr('data-attacks')
             .removeAttr('data-defenders');
             
-        var showAttacks = $('#highlightAttacksCb').is(':checked');
-        var showDefenses = $('#highlightDefensesCb').is(':checked');
+        // A rated game with help switched off hides them without touching the settings
+        var assistsOff = Boolean(store && store.getState().assistsOff);
+        var showAttacks = !assistsOff && $('#highlightAttacksCb').is(':checked');
+        var showDefenses = !assistsOff && $('#highlightDefensesCb').is(':checked');
         
         if (!showAttacks && !showDefenses) return;
 

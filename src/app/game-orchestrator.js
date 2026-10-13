@@ -26,6 +26,9 @@ import { createReviewAnnotations } from '../ui/review-annotations.js';
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 import { createPuzzleController } from './puzzle-controller.js';
 import { createLessonController } from './lesson-controller.js';
+import { createRatedGame } from './rated-game.js';
+import { getDisplayedGame } from '../domain/position.js';
+import { botLevelToRating } from '../services/game-review.js';
 import { createGameSession } from './game-session.js';
 import { createPositionEditor } from './position-editor.js';
 import { createMoveAnnouncer } from './move-announcer.js';
@@ -220,9 +223,25 @@ $(document).ready(function() {
         onStart: () => { if (puzzle.isActive()) puzzle.exit({ keepPosition: true }); }
     });
 
+    const rating = createRatedGame({
+        $, botLevelToRating,
+        initialRatings: storedSettings.ratings,
+        saveRatings: (ratings) => saveStoredSettings({ ratings }),
+        initialRatedMode: storedSettings.ratedMode !== false,
+        saveRatedMode: (ratedMode) => saveStoredSettings({ ratedMode }),
+        // «Играть на рейтинг»: hints and highlights are off for the game, the settings are untouched
+        onAssistsChange: (off) => {
+            store.setState({ assistsOff: off });
+            $('#hintBtn').prop('disabled', off).attr('title', off ? 'В рейтинговой партии подсказки выключены' : null);
+            boardView.clearArrows();
+            boardView.highlightAttackedPieces(getDisplayedGame(store.getState(), Chess));
+            if (!off) analysisCoordinator.autoHintIfNeeded();
+        }
+    });
+
     session = createGameSession({
         $, Chess, store, eventBus, boardView, clock, botCoordinator, analysisCoordinator, moveHistoryView,
-        services, puzzle: guided, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
+        rating, services, puzzle: guided, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
     });
 
     function uciToSan(fen, uci) {
@@ -298,7 +317,7 @@ $(document).ready(function() {
     const interaction = createBoardInteraction({
         $, Chess, store, eventBus, boardView, clock, puzzle: guided, session, getBotLevel, clearSelection
     });
-    const timeControl = createTimeControlController({ $, clock, saveStoredSettings });
+    const timeControl = createTimeControlController({ $, clock, saveStoredSettings, onChange: () => rating.render() });
 
     // Finished games: reopen one with its review
     const gamesList = createGamesList({

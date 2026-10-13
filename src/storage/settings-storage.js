@@ -20,7 +20,11 @@ export const DEFAULT_SETTINGS = {
     soundEnabled: true,
     soundVolume: 70,
     lessonProgress: {},
-    lessonCourse: 'kia'
+    lessonCourse: 'kia',
+    // Ratings against the bot per time control: { rapid: { rating, rd, vol, games, lastPlayedAt } }
+    ratings: {},
+    // «Играть на рейтинг»: every help is off during the game, the settings stay as they are
+    ratedMode: true
 };
 
 function getStorage(customStorage) {

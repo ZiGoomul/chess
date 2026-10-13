@@ -61,3 +61,23 @@ test('the evaluation says whose turn its sign is relative to', () => {
   coordinator.handleHintInfo({ multipv: 1, move: 'e7e5', cp: -30 });
   assert.deepEqual(evals.at(-1), { cp: -30, mate: undefined, isWhiteTurn: false });
 });
+
+test('with the help switched off for a rated game there are no hints, not even late ones', () => {
+  const { store, coordinator, requests, drawn, completed } = setup({ autoHint: true, botLevel: 0 });
+  coordinator.requestHint();
+  assert.equal(requests.length, 1);
+
+  store.setState({ assistsOff: true });
+  const before = drawn.length;
+  coordinator.handleHintInfo({ multipv: 1, move: 'e2e4' });
+  assert.equal(drawn.length, before, 'an answer that arrives after the game started is not drawn');
+
+  coordinator.requestHint();
+  coordinator.autoHintIfNeeded();
+  assert.equal(requests.length, 1, 'no new analysis');
+  assert.ok(completed.length >= 1, 'the hint button is released');
+
+  store.setState({ assistsOff: false });
+  coordinator.autoHintIfNeeded();
+  assert.equal(requests.length, 2, 'auto-hint comes back after the game');
+});

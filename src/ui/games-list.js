@@ -1,4 +1,5 @@
 import { summarizeReview } from '../services/game-review.js';
+import { CATEGORY_LABELS } from '../domain/game-rating.js';
 
 const END_REASONS = { checkmate: 'мат', timeout: 'время вышло', resign: 'вы сдались' };
 
@@ -26,8 +27,17 @@ export function describeGame(record, review) {
   if (review?.status === 'complete' && review.evaluations) {
     accuracy = summarizeReview({ record, evaluations: review.evaluations }).accuracy[human];
   }
+  const change = record.rating;
+  const rating = change && Number.isFinite(change.delta)
+    ? {
+      text: `${change.delta > 0 ? '+' : change.delta < 0 ? '−' : '±'}${Math.abs(change.delta)}`,
+      title: `${CATEGORY_LABELS[change.category] || 'Рейтинг'}: ${change.after}`,
+      sign: Math.sign(change.delta)
+    }
+    : null;
   return {
     outcome,
+    rating,
     title: reason ? `${title} · ${reason}` : title,
     meta: parts.join(' · '),
     score: winner === null ? '½' : winner === human ? '1' : '0',
@@ -54,6 +64,10 @@ export function createGamesList({ $, getRepository, onOpen }) {
           .append($('<strong></strong>').text(info.title))
           .append($('<span></span>').text(info.meta)))
         .on('click', () => onOpen(record, review));
+      if (info.rating) {
+        button.append($('<span class="panel-chip game-row-rating"></span>')
+          .attr('data-change', info.rating.sign).attr('title', info.rating.title).text(info.rating.text));
+      }
       if (info.accuracy) {
         button.append($('<span class="panel-chip game-row-accuracy"></span>').attr('title', 'Ваша точность').text(info.accuracy));
       }
