@@ -102,7 +102,7 @@ export function createReviewTrainerController({
       $('#reviewTrainerRefutationBtn').prop('hidden', true);
     }
 
-    $('#reviewTrainerNextBtn').prop('disabled', true);
+    $('#reviewTrainerNextBtn').prop('disabled', true).off('click').on('click', () => nextMoment());
     if (currentIndex === moments.length - 1) {
       $('#reviewTrainerNextBtn').text('Завершить');
     } else {
@@ -315,7 +315,7 @@ export function createReviewTrainerController({
       boardView.clearSquareFeedback?.();
       const summaryText = `Все ключевые моменты пройдены! Решено с первой попытки: ${firstTryCount} из ${moments.length}`;
       $('#reviewTrainerPrompt').text(summaryText).attr('data-tone', 'success');
-      $('#reviewTrainerNextBtn').prop('disabled', true);
+      $('#reviewTrainerNextBtn').text('Вернуться к разбору').prop('disabled', false).off('click').on('click', () => exit());
       $('#reviewTrainerHintBtn').prop('disabled', true);
       $('#reviewTrainerRefutationBtn').prop('hidden', true);
       onComplete?.({ total: moments.length, firstTry: firstTryCount, solved: solvedCount });

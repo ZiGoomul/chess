@@ -278,7 +278,12 @@ test('nextMoment() advances through moments and finishes with summary', () => {
   trainer.nextMoment();
 
   assert.ok(h.$('#reviewTrainerPrompt').text().includes('Все ключевые моменты пройдены'));
+  assert.equal(h.$('#reviewTrainerNextBtn').text(), 'Вернуться к разбору');
+  assert.equal(h.$('#reviewTrainerNextBtn').prop('disabled'), false);
   assert.deepEqual(completedStats, { total: 2, firstTry: 2, solved: 2 });
+
+  h.$('#reviewTrainerNextBtn').trigger('click');
+  assert.equal(trainer.isActive(), false);
 
   h.close();
 });
