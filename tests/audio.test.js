@@ -117,3 +117,39 @@ test('the sound switch and volume still apply', () => {
   audio.playSound('move');
   assert.equal(file(URLS.move).volume, 0.4);
 });
+
+test('AbortError does not drop the sound file or synthesize fallback', async () => {
+  const { audio, synthesized, file } = setup();
+  const element = file(URLS.move);
+  element.fire('canplaythrough');
+  element.playResult = Promise.reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+
+  audio.playSound('move');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(synthesized, []);
+
+  // File is not dropped
+  element.playResult = Promise.resolve();
+  audio.playSound('move');
+  assert.equal(element.played, 2);
+});
+
+test('playSoundForMove calls game function dynamically to inspect current state', () => {
+  const { file } = setup();
+  file(URLS.capture).fire('canplaythrough');
+  let currentFen = '8/8/8/8/8/8/8/8 w - - 0 1';
+  const gameGetter = () => ({
+    in_checkmate: () => false,
+    in_draw: () => false,
+    in_check: () => false,
+    fen: () => currentFen
+  });
+  const dynamicAudio = createAudio(gameGetter, {
+    soundFiles: { get: (type) => (type === 'capture' ? file(URLS.capture) : null), drop() {} },
+    synthesize: () => {}
+  });
+
+  dynamicAudio.playSoundForMove({ flags: 'c' });
+  assert.equal(file(URLS.capture).played, 1);
+});
+

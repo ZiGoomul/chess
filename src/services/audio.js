@@ -1,13 +1,13 @@
 import { determineMoveSound } from '../domain/check-state.js';
 
-// The familiar Chess.com sounds, used while they can be loaded; offline the sounds are synthesised
+// The familiar Chess.com sounds, bundled locally; offline or on load error sounds are synthesised
 export const SOUND_URLS = {
-  move: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-self.mp3',
-  capture: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3',
-  check: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-check.mp3',
-  castle: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/castle.mp3',
-  gameEnd: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-end.mp3',
-  gameStart: 'https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-start.mp3'
+  move: '/sounds/move.mp3',
+  capture: '/sounds/capture.mp3',
+  check: '/sounds/check.mp3',
+  castle: '/sounds/castle.mp3',
+  gameEnd: '/sounds/game-end.mp3',
+  gameStart: '/sounds/game-start.mp3'
 };
 
 let sharedAudioCtx = null;
@@ -165,11 +165,15 @@ export function createSoundFiles({
   /** The loaded file for a sound, or null when it should be synthesised. */
   function get(type) {
     const entry = files[type];
-    if (!entry || !entry.ready || !isOnline()) {
-      if (!entry) load(type);
+    if (!entry) {
+      load(type);
       return null;
     }
-    return entry.element;
+    const isLocal = typeof urls[type] === 'string' && urls[type].startsWith('/');
+    if (!isLocal && !isOnline()) {
+      return null;
+    }
+    return entry.ready || isLocal ? entry.element : null;
   }
 
   /** A file that failed to play is dropped and loaded again later. */
@@ -199,12 +203,13 @@ export function createAudio(game, { soundFiles = createSoundFiles(), synthesize 
       file.currentTime = 0;
       const playing = file.play();
       playing?.catch?.((error) => {
-        // Blocked autoplay is not a broken file; anything else falls back to the synthesised sound
-        if (error?.name === 'NotAllowedError') return;
+        // Blocked autoplay or interrupted playback is not a broken file; anything else falls back
+        if (error?.name === 'NotAllowedError' || error?.name === 'AbortError') return;
         soundFiles.drop(type);
         synthesize(type, volume);
       });
-    } catch {
+    } catch (error) {
+      if (error?.name === 'NotAllowedError' || error?.name === 'AbortError') return;
       soundFiles.drop(type);
       synthesize(type, volume);
     }
@@ -217,7 +222,7 @@ export function createAudio(game, { soundFiles = createSoundFiles(), synthesize 
   }
 
   function playSoundForMove(move, targetGame = null) {
-    const activeGame = targetGame || game;
+    const activeGame = targetGame || (typeof game === 'function' ? game() : game);
     const soundType = determineMoveSound(activeGame, move);
     playSound(soundType);
   }

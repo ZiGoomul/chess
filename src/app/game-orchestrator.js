@@ -130,7 +130,7 @@ $(document).ready(function() {
         boardView.removeHighlights();
     };
 
-    const audio = createAudio(store.getState().game);
+    const audio = createAudio(() => store.getState().game);
     const { playSound, playSoundForMove } = audio;
 
     // Sound settings live in the style tab
