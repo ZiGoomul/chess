@@ -315,3 +315,81 @@ test('exit() cleans up state, removes arrows/highlights, hides trainer card', ()
 
   h.close();
 });
+
+test('pawn promotion matches target piece in bestMove', () => {
+  const h = createHarness();
+  const trainer = createReviewTrainerController({
+    $: h.$,
+    Chess: h.Chess,
+    store: h.store,
+    eventBus: h.eventBus,
+    boardView: h.boardView,
+    moveHistoryView: h.moveHistoryView,
+    playSound: h.playSound,
+    playSoundForMove: h.playSoundForMove
+  });
+
+  const fen = 'k7/4P3/2K5/8/8/8/8/8 w - - 0 1';
+  const moments = [
+    { ply: 0, san: 'e8=R', bestMove: 'e7e8q' }
+  ];
+  const record = { fens: [fen], moves: [{ san: 'e8=R' }], humanColor: 'w' };
+  trainer.start(record, moments, 0);
+
+  // Wrong promotion piece (R instead of Q)
+  assert.equal(trainer.tryMove('e7', 'e8', 'r'), false);
+  assert.equal(trainer.isCompleted(), false);
+
+  // Correct promotion piece
+  assert.equal(trainer.tryMove('e7', 'e8', 'q'), true);
+  assert.equal(trainer.isCompleted(), true);
+  assert.equal(h.$('#reviewTrainerRefutationBtn').prop('hidden'), true);
+
+  h.close();
+});
+
+test('prevMoment() navigates back to previous moment and start() validates inputs', () => {
+  const h = createHarness();
+  const trainer = createReviewTrainerController({
+    $: h.$,
+    Chess: h.Chess,
+    store: h.store,
+    eventBus: h.eventBus,
+    boardView: h.boardView,
+    moveHistoryView: h.moveHistoryView,
+    playSound: h.playSound,
+    playSoundForMove: h.playSoundForMove
+  });
+
+  // Invalid start calls should be safely ignored
+  trainer.start(null, []);
+  assert.equal(trainer.isActive(), false);
+
+  trainer.start({ fens: ['8/8/8/8/8/8/8/8 w - - 0 1'] }, [{ ply: 0, bestMove: 'a1a2' }], 5);
+  assert.equal(trainer.isActive(), false);
+
+  const fens = [
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+    'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
+  ];
+  const moments = [
+    { ply: 0, san: 'e5', bestMove: 'c7c5' },
+    { ply: 1, san: 'd6', bestMove: 'b8c6' }
+  ];
+  const record = { fens, moves: [{ san: 'e5' }, { san: 'd6' }], humanColor: 'b' };
+  trainer.start(record, moments, 0);
+
+  trainer.nextMoment();
+  assert.equal(h.$('#reviewTrainerPosition').text(), 'Момент 2 из 2');
+
+  trainer.prevMoment();
+  assert.equal(h.$('#reviewTrainerPosition').text(), 'Момент 1 из 2');
+  assert.equal(h.store.getState().game.fen(), fens[0]);
+
+  // Calling destroy cleans up and unbinds
+  trainer.destroy();
+  assert.equal(trainer.isActive(), false);
+
+  h.close();
+});
+

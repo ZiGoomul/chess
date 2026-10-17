@@ -54,6 +54,16 @@ export function createReviewTrainerController({
     return moveObj ? moveObj.san : uci;
   }
 
+  function getInitialPrompt(moment) {
+    if (!moment) return 'Найдите лучший ход!';
+    const moveNumber = Math.floor(moment.ply / 2) + 1;
+    const prefix = `${moveNumber}${moment.ply % 2 === 0 ? '.' : '…'}`;
+    const playedSan = moment.san ? `${prefix} ${moment.san}` : '';
+    return playedSan
+      ? `В партии вы сыграли ${playedSan}. Найдите лучший ход!`
+      : 'Найдите лучший ход!';
+  }
+
   function loadMoment(index) {
     if (index < 0 || index >= moments.length) return;
     currentIndex = index;
@@ -78,12 +88,7 @@ export function createReviewTrainerController({
 
     $('#reviewTrainerPosition').text(`Момент ${currentIndex + 1} из ${moments.length}`);
 
-    const moveNumber = Math.floor(moment.ply / 2) + 1;
-    const prefix = `${moveNumber}${moment.ply % 2 === 0 ? '.' : '…'}`;
-    const playedSan = moment.san ? `${prefix} ${moment.san}` : '';
-    const initialPrompt = playedSan
-      ? `В партии вы сыграли ${playedSan}. Найдите лучший ход!`
-      : 'Найдите лучший ход!';
+    const initialPrompt = getInitialPrompt(moment);
     $('#reviewTrainerPrompt').text(initialPrompt).removeAttr('data-tone');
 
     $('#reviewTrainerHintBtn').text('Подсказка').prop('disabled', false);
@@ -103,7 +108,15 @@ export function createReviewTrainerController({
   }
 
   function start(newRecord, newMoments, startIndex = 0) {
-    if (!newMoments || newMoments.length === 0) return;
+    if (
+      !newRecord?.fens ||
+      !Array.isArray(newMoments) ||
+      newMoments.length === 0 ||
+      startIndex < 0 ||
+      startIndex >= newMoments.length
+    ) {
+      return;
+    }
     active = true;
     record = newRecord;
     moments = newMoments;
@@ -173,6 +186,7 @@ export function createReviewTrainerController({
     $('#reviewTrainerPrompt').text(`Отлично! ${bestSan} — лучший ход!`).attr('data-tone', 'success');
     $('#reviewTrainerNextBtn').prop('disabled', false);
     $('#reviewTrainerHintBtn').prop('disabled', true);
+    $('#reviewTrainerRefutationBtn').prop('hidden', true);
     eventBus?.emit('game:move-made', { fen: game.fen(), move: moveObj, game });
     moveHistoryView?.updateMoveHistory?.();
     return true;
@@ -220,6 +234,7 @@ export function createReviewTrainerController({
         $('#reviewTrainerPrompt').text(`Решение: ${moveObj.san}`).attr('data-tone', 'info');
         $('#reviewTrainerNextBtn').prop('disabled', false);
         $('#reviewTrainerHintBtn').prop('disabled', true);
+        $('#reviewTrainerRefutationBtn').prop('hidden', true);
         eventBus?.emit('game:move-made', { fen: game.fen(), move: moveObj, game });
         moveHistoryView?.updateMoveHistory?.();
       }
@@ -227,7 +242,7 @@ export function createReviewTrainerController({
   }
 
   function showRefutation() {
-    if (!active || isRefutationShown || allCompleted) return;
+    if (!active || solved || isRefutationShown || allCompleted) return;
     const moment = moments[currentIndex];
     isRefutationShown = true;
     $('#reviewTrainerRefutationBtn').text('Вернуться к решению');
@@ -279,12 +294,7 @@ export function createReviewTrainerController({
     boardView.clearSquareFeedback?.();
     boardView.highlightCheck?.(origGame);
 
-    const moveNumber = Math.floor(moment.ply / 2) + 1;
-    const prefix = `${moveNumber}${moment.ply % 2 === 0 ? '.' : '…'}`;
-    const playedSan = moment.san ? `${prefix} ${moment.san}` : '';
-    const initialPrompt = playedSan
-      ? `В партии вы сыграли ${playedSan}. Найдите лучший ход!`
-      : 'Найдите лучший ход!';
+    const initialPrompt = getInitialPrompt(moment);
     $('#reviewTrainerPrompt').text(initialPrompt).removeAttr('data-tone');
     eventBus?.emit('game:move-made', { fen: origGame.fen(), game: origGame });
     moveHistoryView?.updateMoveHistory?.();
@@ -331,14 +341,26 @@ export function createReviewTrainerController({
     store.setState({ mode: 'free' });
   }
 
+  function destroy() {
+    exit();
+    $('#reviewTrainerHintBtn').off('click');
+    $('#reviewTrainerRefutationBtn').off('click');
+    $('#reviewTrainerNextBtn').off('click');
+    $('#reviewTrainerExitBtn').off('click');
+  }
+
   // Wire UI event handlers
-  $('#reviewTrainerHintBtn').on('click', () => requestHint());
-  $('#reviewTrainerRefutationBtn').on('click', () => {
-    if (isRefutationShown) hideRefutation();
-    else showRefutation();
-  });
-  $('#reviewTrainerNextBtn').on('click', () => nextMoment());
-  $('#reviewTrainerExitBtn').on('click', () => exit());
+  function bindEvents() {
+    $('#reviewTrainerHintBtn').off('click').on('click', () => requestHint());
+    $('#reviewTrainerRefutationBtn').off('click').on('click', () => {
+      if (isRefutationShown) hideRefutation();
+      else showRefutation();
+    });
+    $('#reviewTrainerNextBtn').off('click').on('click', () => nextMoment());
+    $('#reviewTrainerExitBtn').off('click').on('click', () => exit());
+  }
+
+  bindEvents();
 
   return {
     isActive,
@@ -351,6 +373,7 @@ export function createReviewTrainerController({
     nextMoment,
     prevMoment,
     exit,
+    destroy,
     getCurrentMoment,
     getStats
   };

@@ -21,7 +21,7 @@ export function isEditorMode({ isPuzzleMode, botLevel }: { isPuzzleMode: boolean
   return !isPuzzleMode && botLevel === 0;
 }
 
-/** Puzzles and lessons: the moves are scripted, so no bot and no engine arrows. */
+/** Puzzles, lessons and review trainer: the moves are scripted, so no bot and no engine arrows. */
 export function isGuidedMode(mode: string | undefined): boolean {
-  return mode === 'puzzle' || mode === 'lesson';
+  return mode === 'puzzle' || mode === 'lesson' || mode === 'review-trainer';
 }

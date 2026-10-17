@@ -15,7 +15,8 @@ export interface GameState {
     historyFENs: string[];
     currentViewPly: number;
     selectedSquare: Square | null;
-    mode: 'free' | 'bot' | 'puzzle' | 'lesson';
+    mode: 'free' | 'bot' | 'puzzle' | 'lesson' | 'review-trainer';
+    playPhase: 'setup' | 'game' | 'review';
     orientation: 'white' | 'black';
     isThinking: boolean;
     /** A rated game is being played with every help switched off; the settings stay as they are */
@@ -40,6 +41,7 @@ export function createGameStore(initialState: Partial<GameState> = {}): GameStor
         currentViewPly: 0,
         selectedSquare: null,
         mode: 'free',
+        playPhase: 'setup',
         orientation: 'white',
         isThinking: false,
         assistsOff: false,
