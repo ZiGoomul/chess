@@ -434,3 +434,96 @@
   display: none;
 }
 
+.review-start-practice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.review-start-practice-btn[hidden] {
+  display: none;
+}
+
+.review-trainer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.review-trainer-card[hidden] {
+  display: none;
+}
+
+.review-trainer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-trainer-position {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--label-muted);
+}
+
+.review-trainer-exit-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.review-trainer-exit-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.review-trainer-prompt {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.review-trainer-prompt[data-tone="error"] {
+  color: var(--status-error);
+}
+
+.review-trainer-prompt[data-tone="success"] {
+  color: var(--status-success);
+}
+
+.review-trainer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-trainer-actions button {
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 14px;
+  flex: 1 1 auto;
+}
+
+.review-trainer-actions button[hidden] {
+  display: none;
+}
+

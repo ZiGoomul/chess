@@ -24,6 +24,7 @@ const PAGE = `<!doctype html><body>
   <button id="reviewRetryBtn" hidden></button>
   <button id="reviewPlayBestMoveBtn" hidden></button>
   <button id="reviewPlayFromBtn" hidden></button>
+  <button id="reviewPracticeMomentBtn" hidden></button>
   <button id="reviewPuzzleBtn" hidden></button>
   <div id="reviewTrainerCard" hidden>
     <div id="reviewTrainerNav">

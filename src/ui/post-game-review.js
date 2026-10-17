@@ -48,7 +48,19 @@ function formatAccuracy(value) {
   return value == null ? '–' : value.toFixed(1);
 }
 
-export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, onRetry, onSolvePuzzle, onPlayFromMoment, onPlayBestMove, onSummary = (_record, _summary, _report) => {} }) {
+export function createPostGameReviewView({
+  $,
+  toSan,
+  onSelectMoment,
+  onCancel,
+  onRetry,
+  onSolvePuzzle,
+  onPlayFromMoment,
+  onPlayBestMove,
+  onStartPractice = (_record, _moments) => {},
+  onPracticeMoment = (_record, _moment) => {},
+  onSummary = (_record, _summary, _report) => {}
+}) {
   const status = $('#reviewStatus');
   const list = $('#reviewMoments');
   const cancelBtn = $('#reviewCancelBtn');
@@ -56,8 +68,12 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
   const puzzleBtn = $('#reviewPuzzleBtn');
   const playFromBtn = $('#reviewPlayFromBtn');
   const playBestMoveBtn = $('#reviewPlayBestMoveBtn');
+  const startPracticeBtn = $('#reviewStartPracticeBtn');
+  const practiceMomentBtn = $('#reviewPracticeMomentBtn');
+  const trainerCard = $('#reviewTrainerCard');
   const summary = $('#reviewSummary');
   let gameId = null;
+  let currentMoments = [];
 
   function showSummary(report, record) {
     const result = summarizeReview({ record, evaluations: report.evaluations || [] });
@@ -111,13 +127,40 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
     puzzleBtn.prop('hidden', true).off('click');
     playFromBtn.prop('hidden', true).off('click');
     playBestMoveBtn.prop('hidden', true).off('click');
+    startPracticeBtn.prop('hidden', true).off('click');
+    practiceMomentBtn.prop('hidden', true).off('click');
+    trainerCard.prop('hidden', true);
+    currentMoments = [];
   }
 
   function hideMomentActions() {
     playFromBtn.prop('hidden', true).off('click');
     playBestMoveBtn.prop('hidden', true).off('click');
+    practiceMomentBtn.prop('hidden', true).off('click');
     list.find('.review-moment-btn').removeClass('is-active');
     updateMomentNav();
+  }
+
+  function showPracticeCard() {
+    hideMomentActions();
+    list.prop('hidden', true);
+    $('#reviewMomentsTitle').prop('hidden', true);
+    $('#reviewMomentNav').prop('hidden', true);
+    startPracticeBtn.prop('hidden', true);
+    trainerCard.prop('hidden', false);
+  }
+
+  function hidePracticeCard() {
+    trainerCard.prop('hidden', true);
+    const hasMoments = currentMoments.length > 0;
+    list.prop('hidden', !hasMoments);
+    $('#reviewMomentsTitle').prop('hidden', !hasMoments);
+    startPracticeBtn.prop('hidden', !hasMoments);
+    if (hasMoments) {
+      updateMomentNav();
+    } else {
+      $('#reviewMomentNav').prop('hidden', true);
+    }
   }
 
   return {
@@ -136,9 +179,21 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
       }
       showSummary(report, record);
       $('#openLastReviewBtn').prop('hidden', false);
-      const moments = (report.moments || []).slice().sort((a, b) => a.ply - b.ply);
+      currentMoments = (report.moments || []).slice().sort((a, b) => a.ply - b.ply);
+      const moments = currentMoments;
       status.text(moments.length ? '' : 'Серьёзных ошибок не найдено.');
       $('#reviewMomentsTitle').prop('hidden', moments.length === 0);
+      if (moments.length > 0) {
+        startPracticeBtn
+          .text(`Работа над ошибками (${moments.length})`)
+          .prop('hidden', false)
+          .off('click')
+          .on('click', () => {
+            onStartPractice(record, moments);
+          });
+      } else {
+        startPracticeBtn.prop('hidden', true).off('click');
+      }
       moments.forEach(moment => {
         const item = $('<li><button type="button" class="review-moment-btn"></button></li>');
         const btn = item.find('button');
@@ -156,6 +211,19 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
             btn.addClass('is-active');
             updateMomentNav();
             onSelectMoment(record, moment);
+
+            if (onPracticeMoment) {
+              practiceMomentBtn
+                .text('Исправить этот момент')
+                .prop('hidden', false)
+                .off('click')
+                .on('click', () => {
+                  hideMomentActions();
+                  onPracticeMoment(record, moment);
+                });
+            } else {
+              practiceMomentBtn.prop('hidden', true).off('click');
+            }
 
             if (onPlayBestMove && moment.bestMove) {
               playBestMoveBtn
@@ -202,6 +270,9 @@ export function createPostGameReviewView({ $, toSan, onSelectMoment, onCancel, o
       reset();
       status.text(message);
     },
-    hideMomentActions
+    hideMomentActions,
+    showPracticeCard,
+    hidePracticeCard
   };
 }
+

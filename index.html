@@ -447,6 +447,19 @@
                             </div>
                             <ul id="reviewClassChips" class="review-class-chips" aria-label="Ваши ходы по качеству"></ul>
                         </div>
+                        <button type="button" id="reviewStartPracticeBtn" class="btn-primary review-start-practice-btn" hidden>Работа над ошибками</button>
+                        <div id="reviewTrainerCard" class="review-trainer-card" hidden>
+                            <div class="review-trainer-header">
+                                <span id="reviewTrainerPosition" class="review-trainer-position"></span>
+                                <button type="button" id="reviewTrainerExitBtn" class="review-trainer-exit-btn" aria-label="Выйти из тренировки" title="Выйти из тренировки">✕</button>
+                            </div>
+                            <div id="reviewTrainerPrompt" class="review-trainer-prompt"></div>
+                            <div class="review-trainer-actions">
+                                <button type="button" id="reviewTrainerHintBtn" class="btn-secondary">💡 Подсказка</button>
+                                <button type="button" id="reviewTrainerRefutationBtn" class="btn-secondary" hidden>❓ Опровержение</button>
+                                <button type="button" id="reviewTrainerNextBtn" class="btn-primary" disabled>Следующий момент ➔</button>
+                            </div>
+                        </div>
                         <h3 id="reviewMomentsTitle" class="panel-subtitle" hidden>Ключевые моменты</h3>
                         <ol id="reviewMoments" class="review-moments" aria-labelledby="reviewMomentsTitle" hidden></ol>
                         <div id="reviewMomentNav" class="review-moment-nav" hidden>
@@ -461,6 +474,7 @@
                         <div class="review-actions">
                             <button type="button" id="reviewCancelBtn" class="btn-secondary" hidden>Отменить разбор</button>
                             <button type="button" id="reviewRetryBtn" class="btn-secondary" hidden>Повторить разбор</button>
+                            <button type="button" id="reviewPracticeMomentBtn" class="btn-secondary" hidden>Исправить этот момент</button>
                             <button type="button" id="reviewPlayBestMoveBtn" class="btn-secondary" hidden>Сыграть лучший ход</button>
                             <button type="button" id="reviewPlayFromBtn" class="btn-secondary" hidden>Доиграть отсюда</button>
                         </div>

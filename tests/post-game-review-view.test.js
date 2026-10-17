@@ -134,3 +134,131 @@ test('key moments are listed in game order and can be stepped through', () => {
   assert.deepEqual(selected, [8, 20]);
   h.close();
 });
+
+test('post-game review view displays start practice button and triggers onStartPractice', () => {
+  const h = createHarness();
+  let practiceCalledWith = null;
+  const view = createPostGameReviewView({
+    $: h.$,
+    toSan: () => null,
+    onSelectMoment: () => {},
+    onCancel: () => {},
+    onRetry: () => {},
+    onSolvePuzzle: () => {},
+    onStartPractice: (record, moments) => {
+      practiceCalledWith = { record, moments };
+    }
+  });
+
+  const record = {
+    id: 'game-practice-1',
+    humanColor: 'w',
+    fens: ['fen-0', 'fen-1'],
+    moves: [{ san: 'e4' }]
+  };
+  const moments = [
+    { ply: 1, san: 'e5', lossCp: 150, beforeCp: 30, afterCp: -120, bestMove: 'g1f3' }
+  ];
+  const report = {
+    gameId: 'game-practice-1',
+    status: 'complete',
+    moments
+  };
+
+  view.showReport(report, record, null);
+
+  const startBtn = h.$('#reviewStartPracticeBtn');
+  assert.equal(startBtn.prop('hidden'), false);
+  assert.equal(startBtn.text(), 'Работа над ошибками (1)');
+
+  startBtn.trigger('click');
+  assert.ok(practiceCalledWith);
+  assert.equal(practiceCalledWith.record.id, 'game-practice-1');
+  assert.equal(practiceCalledWith.moments.length, 1);
+  assert.equal(practiceCalledWith.moments[0].ply, 1);
+
+  h.close();
+});
+
+test('selecting a moment shows practice moment button and triggers onPracticeMoment', () => {
+  const h = createHarness();
+  let practicedMoment = null;
+  const view = createPostGameReviewView({
+    $: h.$,
+    toSan: () => null,
+    onSelectMoment: () => {},
+    onCancel: () => {},
+    onRetry: () => {},
+    onSolvePuzzle: () => {},
+    onPracticeMoment: (record, moment) => {
+      practicedMoment = { record, moment };
+    }
+  });
+
+  const record = {
+    id: 'game-practice-2',
+    humanColor: 'w',
+    fens: ['fen-0', 'fen-1'],
+    moves: [{ san: 'e4' }]
+  };
+  const moment = { ply: 1, san: 'e5', lossCp: 150, beforeCp: 30, afterCp: -120, bestMove: 'g1f3' };
+  view.showReport({ gameId: 'game-practice-2', status: 'complete', moments: [moment] }, record, null);
+
+  const practiceMomentBtn = h.$('#reviewPracticeMomentBtn');
+  assert.equal(practiceMomentBtn.prop('hidden'), true);
+
+  // Click the moment
+  h.$('#reviewMoments li button').trigger('click');
+  assert.equal(practiceMomentBtn.prop('hidden'), false);
+  assert.equal(practiceMomentBtn.text(), 'Исправить этот момент');
+
+  practiceMomentBtn.trigger('click');
+  assert.ok(practicedMoment);
+  assert.equal(practicedMoment.record.id, 'game-practice-2');
+  assert.equal(practicedMoment.moment.ply, 1);
+  assert.equal(practiceMomentBtn.prop('hidden'), true);
+
+  h.close();
+});
+
+test('showPracticeCard and hidePracticeCard toggle practice card and moments list', () => {
+  const h = createHarness();
+  const view = createPostGameReviewView({
+    $: h.$,
+    toSan: () => null,
+    onSelectMoment: () => {},
+    onCancel: () => {},
+    onRetry: () => {},
+    onSolvePuzzle: () => {}
+  });
+
+  const record = { id: 'game-practice-3', humanColor: 'w', fens: ['fen-0', 'fen-1'], moves: [] };
+  const moments = [
+    { ply: 1, san: 'e5', lossCp: 150, beforeCp: 30, afterCp: -120, bestMove: 'g1f3' },
+    { ply: 3, san: 'd5', lossCp: 200, beforeCp: 10, afterCp: -190, bestMove: 'd2d4' }
+  ];
+  view.showReport({ gameId: 'game-practice-3', status: 'complete', moments }, record, null);
+
+  assert.equal(h.$('#reviewMoments').prop('hidden'), false);
+  assert.equal(h.$('#reviewMomentsTitle').prop('hidden'), false);
+  assert.equal(h.$('#reviewStartPracticeBtn').prop('hidden'), false);
+  assert.equal(h.$('#reviewTrainerCard').prop('hidden'), true);
+
+  view.showPracticeCard();
+
+  assert.equal(h.$('#reviewMoments').prop('hidden'), true);
+  assert.equal(h.$('#reviewMomentsTitle').prop('hidden'), true);
+  assert.equal(h.$('#reviewMomentNav').prop('hidden'), true);
+  assert.equal(h.$('#reviewStartPracticeBtn').prop('hidden'), true);
+  assert.equal(h.$('#reviewTrainerCard').prop('hidden'), false);
+
+  view.hidePracticeCard();
+
+  assert.equal(h.$('#reviewMoments').prop('hidden'), false);
+  assert.equal(h.$('#reviewMomentsTitle').prop('hidden'), false);
+  assert.equal(h.$('#reviewMomentNav').prop('hidden'), false);
+  assert.equal(h.$('#reviewStartPracticeBtn').prop('hidden'), false);
+  assert.equal(h.$('#reviewTrainerCard').prop('hidden'), true);
+
+  h.close();
+});
