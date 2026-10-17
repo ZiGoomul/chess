@@ -26,6 +26,7 @@ import { createReviewAnnotations } from '../ui/review-annotations.js';
 import { loadStoredSettings, saveStoredSettings } from '../storage/settings-storage.js';
 import { createPuzzleController } from './puzzle-controller.js';
 import { createLessonController } from './lesson-controller.js';
+import { createReviewTrainerController } from './review-trainer-controller.js';
 import { createRatedGame } from './rated-game.js';
 import { getDisplayedGame } from '../domain/position.js';
 import { botLevelToRating } from '../services/game-review.js';
@@ -152,16 +153,25 @@ $(document).ready(function() {
     // Controllers reference each other; these are assigned below, before any event can fire.
     let puzzle;
     let lesson;
+    let trainer;
     let session;
+    let reviewView;
 
-    // Puzzles and opening lessons both script the moves; the game session sees them as one mode
+    // Puzzles, opening lessons, and review trainer script the moves; the game session sees them as one mode
     const guided = {
-        isActive: () => puzzle.isActive() || lesson.isActive(),
-        isCompleted: () => (lesson.isActive() ? lesson.isCompleted() : puzzle.isCompleted()),
-        tryMove: (source, target, promotion) => (lesson.isActive()
-            ? lesson.tryMove(source, target, promotion)
-            : puzzle.tryMove(source, target, promotion)),
+        isActive: () => puzzle.isActive() || lesson.isActive() || trainer.isActive(),
+        isCompleted: () => (trainer.isActive() ? trainer.isCompleted() : (lesson.isActive() ? lesson.isCompleted() : puzzle.isCompleted())),
+        tryMove: (source, target, promotion) => {
+            if (trainer.isActive()) return trainer.tryMove(source, target, promotion);
+            return lesson.isActive()
+                ? lesson.tryMove(source, target, promotion)
+                : puzzle.tryMove(source, target, promotion);
+        },
         exit: (options) => {
+            if (trainer.isActive()) {
+                trainer.exit(options);
+                reviewView?.hidePracticeCard();
+            }
             if (lesson.isActive()) lesson.exit(options);
             if (puzzle.isActive()) puzzle.exit(options);
         }
@@ -220,7 +230,22 @@ $(document).ready(function() {
         playSound, playSoundForMove, saveStoredSettings,
         initialProgress: storedSettings.lessonProgress,
         initialCourse: storedSettings.lessonCourse,
-        onStart: () => { if (puzzle.isActive()) puzzle.exit({ keepPosition: true }); }
+        onStart: () => {
+            if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+            if (trainer.isActive()) trainer.exit({ keepPosition: true });
+        }
+    });
+
+    function uciToSan(fen, uci) {
+        if (!fen || !uci) return null;
+        const move = applyUciMove(new Chess(fen), uci);
+        return move ? move.san : null;
+    }
+
+    trainer = createReviewTrainerController({
+        $, Chess, store, eventBus, boardView, moveHistoryView, clearSelection,
+        playSound, playSoundForMove, toSan: uciToSan,
+        onComplete: () => {}
     });
 
     const rating = createRatedGame({
@@ -244,18 +269,26 @@ $(document).ready(function() {
         rating, services, puzzle: guided, getBotLevel, clearSelection, playSound, playSoundForMove, saveStoredSettings
     });
 
-    function uciToSan(fen, uci) {
-        if (!fen || !uci) return null;
-        const move = applyUciMove(new Chess(fen), uci);
-        return move ? move.san : null;
-    }
-
-    const reviewView = createPostGameReviewView({
+    reviewView = createPostGameReviewView({
         $: $,
         toSan: uciToSan,
         onSelectMoment: session.showReviewMoment,
         onPlayFromMoment: session.playFromReviewMoment,
         onPlayBestMove: session.playBestMoveFromMoment,
+        onStartPractice: (record, moments) => {
+            if (lesson.isActive()) lesson.exit({ keepPosition: true });
+            if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+            reviewView.showPracticeCard();
+            trainer.start(record, moments, 0);
+        },
+        onPracticeMoment: (record, moment) => {
+            if (lesson.isActive()) lesson.exit({ keepPosition: true });
+            if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
+            reviewView.showPracticeCard();
+            const moments = (record.moments || [moment]).slice().sort((a, b) => a.ply - b.ply);
+            const idx = moments.findIndex(m => m.ply === moment.ply);
+            trainer.start(record, moments, Math.max(0, idx));
+        },
         onSummary: (record, summary, report) => {
             const accuracy = summary.accuracy[record.humanColor === 'b' ? 'b' : 'w'];
             if (accuracy != null) $('#gameOverReviewNote').text(`Ваша точность: ${accuracy.toFixed(1)}. Подробности — в разборе.`);
@@ -269,6 +302,7 @@ $(document).ready(function() {
         onSolvePuzzle: (puzzleToSolve) => {
             $('.tab-btn[data-tab="tab-puzzles"]').trigger('click');
             if (lesson.isActive()) lesson.exit({ keepPosition: true });
+            if (trainer.isActive()) trainer.exit({ keepPosition: true });
             puzzle.load(puzzleToSolve);
         }
     });
@@ -303,15 +337,21 @@ $(document).ready(function() {
     createPositionEditor({ $, Chess, store, eventBus, session });
     createMoveAnnouncer({ $, eventBus });
 
-    // Opening the editor leaves puzzle or lesson mode but keeps the position to edit
-    $('.tab-btn[data-tab="tab-setup"]').on('click', function() {
+    // Opening the editor or puzzles leaves guided mode but keeps the position to edit
+    $('.tab-btn[data-tab="tab-setup"], .tab-btn[data-tab="tab-puzzles"]').on('click', function() {
         guided.exit({ keepPosition: true });
         session.updateStatus();
     });
 
-    // Puzzles take over the board: a lesson in progress ends
+    // Puzzles take over the board: a lesson or review trainer in progress ends
     $('#loadPuzzleBtn, #dailyPuzzleBtn').on('click', function() {
         if (lesson.isActive()) lesson.exit({ keepPosition: true });
+        if (trainer.isActive()) trainer.exit({ keepPosition: true });
+    });
+
+    $('#reviewTrainerExitBtn').on('click', function() {
+        trainer.exit();
+        reviewView.hidePracticeCard();
     });
 
     const interaction = createBoardInteraction({

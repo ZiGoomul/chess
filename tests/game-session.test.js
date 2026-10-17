@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createGameSession } from '../src/app/game-session.js';
 import { createHarness, playMoves } from './helpers/harness.js';
 import { createRatedGame } from '../src/app/rated-game.js';
+import { createReviewTrainerController } from '../src/app/review-trainer-controller.js';
 
 function memoryStorage() {
   const data = new Map();
@@ -344,3 +345,133 @@ test('a game played without pressing «Играть» shows no rating', () => {
   assert.equal(h.$('#gameOverRating').prop('hidden'), true);
   h.close();
 });
+
+test('after «Доиграть отсюда» on a finished game the bot answers the next move', () => {
+  const { h, session } = setup();
+  const moves = [['e2', 'e4'], ['e7', 'e5'], ['f1', 'c4'], ['b8', 'c6'], ['d1', 'h5'], ['g8', 'f6']];
+  for (let i = 0; i < moves.length; i += 2) {
+    session.makeMove(...moves[i]);
+    h.eventBus.emit('bot:move-ready', { bestmove: moves[i + 1].join('') });
+  }
+  session.makeMove('h5', 'f7');
+  assert.equal(h.$('#tab-play').attr('data-phase'), 'review');
+
+  const record = {
+    humanColor: 'w', botLevel: 10, fens: state(h).historyFENs.slice(),
+    moves: [...moves, ['h5', 'f7']].map(([from, to]) => ({ from, to }))
+  };
+  session.playFromReviewMoment(record, { ply: 4, bestMove: 'g1f3' });
+  assert.equal(h.$('#tab-play').attr('data-phase'), 'game');
+
+  session.makeMove('g1', 'f3');
+  h.eventBus.emit('bot:move-ready', { bestmove: 'g8f6' });
+  assert.equal(state(h).game.history().join(' '), 'e4 e5 Bc4 Nc6 Nf3 Nf6');
+  h.close();
+});
+
+test('when reviewTrainer is active via guided, session.makeMove routes to reviewTrainer.tryMove and switching tabs exits guided', () => {
+  const h = createHarness();
+  h.$('body').append('<button class="tab-btn" data-tab="tab-setup"></button><button class="tab-btn" data-tab="tab-puzzles"></button><button id="loadPuzzleBtn"></button>');
+
+  let puzzleActive = false;
+  let lessonActive = false;
+  const puzzleMock = { isActive: () => puzzleActive, isCompleted: () => false, tryMove: () => false, exit: () => { puzzleActive = false; } };
+  const lessonMock = { isActive: () => lessonActive, isCompleted: () => false, tryMove: () => false, exit: () => { lessonActive = false; } };
+
+  let trainer;
+  const guided = {
+    isActive: () => puzzleMock.isActive() || lessonMock.isActive() || trainer.isActive(),
+    isCompleted: () => (trainer.isActive() ? trainer.isCompleted() : (lessonMock.isActive() ? lessonMock.isCompleted() : puzzleMock.isCompleted())),
+    tryMove: (source, target, promotion) => {
+      if (trainer.isActive()) return trainer.tryMove(source, target, promotion);
+      return lessonMock.isActive()
+        ? lessonMock.tryMove(source, target, promotion)
+        : puzzleMock.tryMove(source, target, promotion);
+    },
+    exit: (options) => {
+      if (trainer.isActive()) trainer.exit(options);
+      if (lessonMock.isActive()) lessonMock.exit(options);
+      if (puzzleMock.isActive()) puzzleMock.exit(options);
+    }
+  };
+
+  trainer = createReviewTrainerController({
+    $: h.$,
+    Chess: h.Chess,
+    store: h.store,
+    eventBus: h.eventBus,
+    boardView: h.boardView,
+    moveHistoryView: h.moveHistoryView,
+    clearSelection: h.clearSelection,
+    playSound: h.playSound,
+    playSoundForMove: h.playSoundForMove,
+    toSan: () => null,
+    onComplete: () => {}
+  });
+
+  const session = createGameSession({
+    $: h.$, Chess: h.Chess, store: h.store, eventBus: h.eventBus, boardView: h.boardView, clock: h.clock,
+    botCoordinator: h.botCoordinator, analysisCoordinator: h.analysisCoordinator, moveHistoryView: h.moveHistoryView,
+    services: h.services, puzzle: guided, getBotLevel: h.getBotLevel, clearSelection: h.clearSelection,
+    playSound: h.playSound, playSoundForMove: h.playSoundForMove, saveStoredSettings: h.saveStoredSettings
+  });
+
+  h.$('.tab-btn[data-tab="tab-setup"], .tab-btn[data-tab="tab-puzzles"]').on('click', function() {
+    guided.exit({ keepPosition: true });
+    session.updateStatus();
+  });
+  h.$('#loadPuzzleBtn').on('click', function() {
+    if (trainer.isActive()) trainer.exit({ keepPosition: true });
+  });
+
+  const record = {
+    humanColor: 'b',
+    fens: ['rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1']
+  };
+  const moments = [{ ply: 0, bestMove: 'e7e5', san: 'e5' }];
+
+  // Before trainer start, guided is inactive
+  assert.equal(guided.isActive(), false);
+  assert.equal(trainer.isActive(), false);
+
+  // Start trainer
+  trainer.start(record, moments, 0);
+  assert.equal(trainer.isActive(), true);
+  assert.equal(guided.isActive(), true);
+
+  // session.makeMove routes to guided.tryMove -> trainer.tryMove
+  // An incorrect move is rejected by trainer
+  const wrongMoveResult = session.makeMove('d7', 'd5');
+  assert.equal(wrongMoveResult, false);
+  assert.equal(trainer.isCompleted(), false);
+
+  // A correct move solves the trainer moment
+  const correctMoveResult = session.makeMove('e7', 'e5');
+  assert.equal(correctMoveResult, true);
+  assert.equal(trainer.isCompleted(), true);
+  assert.equal(guided.isCompleted(), true);
+
+  // Switching to editor via tab-setup exits guided (and thus reviewTrainer)
+  h.$('.tab-btn[data-tab="tab-setup"]').trigger('click');
+  assert.equal(guided.isActive(), false);
+  assert.equal(trainer.isActive(), false);
+
+  // Restart trainer and verify puzzle loading exits trainer/guided
+  trainer.start(record, moments, 0);
+  assert.equal(guided.isActive(), true);
+  assert.equal(trainer.isActive(), true);
+
+  h.$('#loadPuzzleBtn').trigger('click');
+  assert.equal(trainer.isActive(), false);
+  assert.equal(guided.isActive(), false);
+
+  // Restart trainer and verify switching to tab-puzzles exits trainer/guided
+  trainer.start(record, moments, 0);
+  assert.equal(guided.isActive(), true);
+  h.$('.tab-btn[data-tab="tab-puzzles"]').trigger('click');
+  assert.equal(guided.isActive(), false);
+  assert.equal(trainer.isActive(), false);
+
+  h.close();
+});
+

@@ -7,6 +7,7 @@ export function createReviewTrainerController({
   eventBus,
   boardView,
   moveHistoryView,
+  clearSelection = () => {},
   playSound,
   playSoundForMove,
   toSan,
@@ -78,6 +79,7 @@ export function createReviewTrainerController({
     const game = new Chess(fen);
     store.setState({ game, historyFENs: [fen], currentViewPly: 0, mode: 'review-trainer' });
 
+    clearSelection?.();
     boardView.clearArrows?.();
     boardView.clearHighlights?.();
     boardView.clearSquareFeedback?.();
@@ -333,6 +335,7 @@ export function createReviewTrainerController({
     active = false;
     allCompleted = false;
     solved = false;
+    clearSelection?.();
     boardView.clearArrows?.();
     boardView.clearHighlights?.();
     boardView.clearSquareFeedback?.();
