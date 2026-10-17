@@ -50,6 +50,41 @@ test('flags only human moves at or above the threshold, capped and ranked', () =
   assert.equal(blackMoments.length, 1);
 });
 
+test('findCriticalMoments captures opponent refutation move from next evaluation', () => {
+  const fens = [
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    'rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 2',
+    'rnbqkbnr/pppp1ppp/8/4p3/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 2'
+  ];
+  const moves = [{ san: 'e5' }, { san: 'Nf3' }];
+  const evaluations = [
+    { evaluation: { type: 'cp', value: 20, pv: 'g8f6' } },
+    { evaluation: { type: 'cp', value: -250, pv: 'd2d4' } },
+    { evaluation: { type: 'cp', value: 250, pv: 'b8c6' } }
+  ];
+  const moments = findCriticalMoments({
+    record: { fens, moves, humanColor: 'w' },
+    evaluations,
+    thresholdCp: 80
+  });
+
+  assert.equal(moments.length, 1);
+  assert.equal(moments[0].bestMove, 'g8f6');
+  assert.equal(moments[0].refutationMove, 'd2d4');
+
+  const momentsWithoutPv = findCriticalMoments({
+    record: { fens, moves, humanColor: 'w' },
+    evaluations: [
+      { evaluation: { type: 'cp', value: 20, pv: 'g8f6' } },
+      { evaluation: { type: 'cp', value: -250 } }
+    ],
+    thresholdCp: 80
+  });
+  assert.equal(momentsWithoutPv.length, 1);
+  assert.equal(momentsWithoutPv[0].refutationMove, null);
+});
+
+
 test('classifies forced-mate changes and nothing else', () => {
   assert.deepEqual(classifySupportedMotif({ before: mate(2), after: cp(-100) }), { themes: ['mate'], confidence: 'high', kind: 'missed-mate' });
   assert.deepEqual(classifySupportedMotif({ before: cp(0), after: mate(3) }), { themes: ['mate'], confidence: 'high', kind: 'allowed-mate' });

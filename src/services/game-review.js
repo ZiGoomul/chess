@@ -54,6 +54,7 @@ export function findCriticalMoments({ record, evaluations, thresholdCp = REVIEW_
     const sign = mover === 'w' ? 1 : -1;
     const lossCp = sign * (beforeScore - afterScore);
     if (lossCp < thresholdCp) continue;
+    const nextEval = evaluations[index + 1]?.evaluation;
     moments.push({
       ply: index,
       san: moves[index].san || null,
@@ -61,8 +62,10 @@ export function findCriticalMoments({ record, evaluations, thresholdCp = REVIEW_
       beforeCp: beforeScore,
       afterCp: afterScore,
       bestMove: before.pv,
+      refutationMove: nextEval?.pv || null,
       motif: classifySupportedMotif({ before, after })
     });
+
   }
   return moments.sort((a, b) => b.lossCp - a.lossCp).slice(0, limit);
 }
