@@ -6,5 +6,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src/globals.d.ts", "src/core/**/*.ts", "src/domain/**/*.ts", "src/services/chess-engine.ts"]
+  "include": ["src/globals.d.ts", "src/core/**/*.ts", "src/domain/**/*.ts", "src/services/chess-engine.ts", "src/services/engine-workers.ts"]
 }

@@ -37,3 +37,17 @@ test('changing the piece set redraws the captured pieces', () => {
   assert.equal($('#bottomMaterial img').attr('src'), 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150/bp.png');
   close();
 });
+
+test('pawn promotion does not count as opponent captured pawn', () => {
+  const { $, eventBus, close } = setup('cburnett');
+  // Position where White has 2 Queens, 7 Pawns (one pawn promoted to Queen), no captures
+  const TWO_WHITE_QUEENS = 'rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPP1/RNBQKBNR b KQkq - 0 1';
+  eventBus.emit('game:move-made', { fen: TWO_WHITE_QUEENS });
+
+  // Black has captured 0 white pawns
+  assert.equal($('#topMaterial img').length, 0);
+  // Score for White is +8 (9 - 1: pawn promoted to Queen)
+  assert.equal($('#bottomMaterial .material-score').text(), '+8');
+  close();
+});
+

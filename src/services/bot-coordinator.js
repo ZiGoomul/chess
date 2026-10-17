@@ -1,17 +1,27 @@
 import { isGuidedMode } from '../domain/position.js';
+import { findOpeningBookMove } from '../domain/bot-openings.js';
+import { refineBotMove, getHumanThinkTime } from '../domain/human-blunder.js';
 
-const MIN_THINK_MS = 400;
-const THINK_SPREAD_MS = 700;
-
-/** How long the bot appears to think at least, so instant engine answers do not feel mechanical. */
-function defaultThinkTime() {
-    return MIN_THINK_MS + Math.random() * THINK_SPREAD_MS;
-}
-
-export function createBotCoordinator({ eventBus, store, engine, thinkTime = defaultThinkTime, now = () => Date.now() }) {
+export function createBotCoordinator({
+    eventBus,
+    store,
+    engine,
+    findBookMove = findOpeningBookMove,
+    refineMove = refineBotMove,
+    thinkTime = null,
+    now = () => Date.now()
+}) {
     let requestedAt = 0;
     let requestFen = null;
     let deliveryTimer = null;
+    let isBookMove = false;
+
+    function calcThinkTime(game) {
+        if (typeof thinkTime === 'function') {
+            return thinkTime(game, isBookMove);
+        }
+        return getHumanThinkTime(game, isBookMove);
+    }
 
     function makeBotMove() {
         const state = store.getState();
@@ -28,8 +38,25 @@ export function createBotCoordinator({ eventBus, store, engine, thinkTime = defa
             return;
         }
 
+        if (deliveryTimer) {
+            clearTimeout(deliveryTimer);
+            deliveryTimer = null;
+            store.setState({ isThinking: false });
+        }
+
+        const game = state.game;
+        const bookMove = typeof findBookMove === 'function' ? findBookMove(game, level) : null;
+        if (bookMove) {
+            isBookMove = true;
+            requestedAt = now();
+            requestFen = game.fen();
+            deliverBotMove({ bestmove: bookMove.uci, uci: bookMove.uci });
+            return;
+        }
+
+        isBookMove = false;
         requestedAt = now();
-        requestFen = state.game.fen();
+        requestFen = game.fen();
         engine.requestBotMove(requestFen, level);
     }
 
@@ -39,14 +66,34 @@ export function createBotCoordinator({ eventBus, store, engine, thinkTime = defa
      */
     function deliverBotMove(result) {
         const fen = requestFen;
-        const wait = Math.max(0, thinkTime() - (now() - requestedAt));
+        const game = store.getState().game;
+        const level = store.getState().settings?.botLevel || 0;
+        const wait = Math.max(0, calcThinkTime(game) - (now() - requestedAt));
         clearTimeout(deliveryTimer);
         store.setState({ isThinking: true });
         deliveryTimer = setTimeout(() => {
             deliveryTimer = null;
             store.setState({ isThinking: false });
             if (store.getState().game?.fen?.() !== fen) return;
-            eventBus.emit('bot:move-ready', result);
+
+            const state = store.getState();
+            const humanTurn = state.orientation === 'white' ? 'w' : 'b';
+            const currentTurn = typeof state.game?.turn === 'function' ? state.game.turn() : state.game?.turn;
+            if (currentTurn === humanTurn) return;
+
+            let finalResult = result;
+            if (result && result.bestmove && typeof refineMove === 'function' && !isBookMove) {
+                const refined = refineMove(
+                    game,
+                    { from: result.bestmove.slice(0, 2), to: result.bestmove.slice(2, 4), promotion: result.bestmove[4] },
+                    level
+                );
+                if (refined) {
+                    finalResult = { bestmove: refined.uci, uci: refined.uci };
+                }
+            }
+
+            eventBus.emit('bot:move-ready', finalResult);
         }, wait);
     }
 
@@ -74,3 +121,4 @@ export function createBotCoordinator({ eventBus, store, engine, thinkTime = defa
 
     return { makeBotMove, cancelBotSearch, updateStockfishLevel, deliverBotMove };
 }
+

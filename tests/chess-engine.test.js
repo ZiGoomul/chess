@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createChessEngine, parseBestMove, parseHintInfo } from '../src/services/chess-engine.ts';
+import { createChessEngine, getBotSearchProfile, parseBestMove, parseHintInfo } from '../src/services/chess-engine.ts';
 
 function createMockWorker() {
   return {
@@ -9,6 +9,38 @@ function createMockWorker() {
     emit(data) { this.onmessage({ data }); }
   };
 }
+
+test('calibrates bot search profile across levels 1 to 20', () => {
+  assert.deepEqual(getBotSearchProfile(1), { skillLevel: 0, depth: 1 });
+  assert.deepEqual(getBotSearchProfile(2), { skillLevel: 1, depth: 2 });
+  assert.deepEqual(getBotSearchProfile(3), { skillLevel: 2, depth: 3 });
+  assert.deepEqual(getBotSearchProfile(4), { skillLevel: 3, depth: 4 });
+  assert.deepEqual(getBotSearchProfile(5), { skillLevel: 5, depth: 5 });
+  assert.deepEqual(getBotSearchProfile(10), { skillLevel: 10, depth: 8 });
+  assert.deepEqual(getBotSearchProfile(15), { skillLevel: 15, depth: 12 });
+  assert.deepEqual(getBotSearchProfile(20), { skillLevel: 20, depth: 16 });
+});
+
+test('sends calibrated Skill Level and depth commands to gameWorker', () => {
+  const gameWorker = createMockWorker();
+  const hintWorker = createMockWorker();
+  const engine = createChessEngine({
+    gameWorker,
+    hintWorker,
+    getCurrentFen: () => 'fen-one',
+    onBotMove() {},
+    onBotThinkingChange() {},
+    onHint() {},
+    onHintComplete() {}
+  });
+
+  engine.requestBotMove('fen-one', 1);
+  assert.deepEqual(gameWorker.messages, [
+    'setoption name Skill Level value 0',
+    'position fen fen-one',
+    'go depth 1'
+  ]);
+});
 
 test('parses bestmove and defaults promotion to queen', () => {
   assert.deepEqual(parseBestMove('bestmove e7e8'), {
@@ -33,6 +65,12 @@ test('parses MultiPV move and centipawn score', () => {
     multipv: 2,
     move: 'g1f3',
     cp: -34,
+    mate: null
+  });
+  assert.deepEqual(parseHintInfo('info depth 10 multipv 1 score cp 500 pv e7e8q e1e2'), {
+    multipv: 1,
+    move: 'e7e8q',
+    cp: 500,
     mate: null
   });
 });

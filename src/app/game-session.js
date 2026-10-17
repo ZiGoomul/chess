@@ -16,6 +16,7 @@ export function createGameSession({
 }) {
     // The play panel shows the new-game form, the live game or the finished game.
     function setPanelPhase(phase) {
+        if (store?.setState) store.setState({ playPhase: phase });
         $('#tab-play').attr('data-phase', phase);
         if (phase === 'setup') refreshResumeCard();
         updateGameActions();
@@ -24,7 +25,8 @@ export function createGameSession({
     const END_REASONS = { checkmate: 'мат', draw: '', timeout: 'время вышло', resign: 'вы сдались' };
 
     const humanColor = () => (boardView.orientation() === 'black' ? 'b' : 'w');
-    const isLiveGame = () => !finished && !puzzle.isActive() && getBotLevel() > 0 && $('#tab-play').attr('data-phase') === 'game';
+    const isLiveGame = () => !finished && !puzzle.isActive() && getBotLevel() > 0 &&
+        ((store?.getState()?.playPhase) ? store.getState().playPhase === 'game' : $('#tab-play').attr('data-phase') === 'game');
 
     // --- The game in progress survives a reload ---
     function persistLiveGame() {
@@ -435,7 +437,7 @@ export function createGameSession({
             botCoordinator.updateStockfishLevel(record.botLevel);
         }
 
-        boardView.orientation(record.humanColor === 'b' ? 'black' : 'white');
+        setOrientation(record.humanColor === 'b' ? 'black' : 'white');
         overlayDismissed = true;
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
         setPanelPhase('review');
@@ -464,7 +466,12 @@ export function createGameSession({
         store.setState({ currentViewPly: moment.ply });
         moveHistoryView.goToPly(moment.ply);
         truncateToViewedPly();
+        // The game goes on: the bot answers again
+        finished = null;
+        setPanelPhase('game');
         $('.tab-btn[data-tab="tab-play"]').trigger('click');
+        const game = store.getState().game;
+        if (game.turn() !== humanColor() && !game.game_over()) botCoordinator.makeBotMove();
     }
 
     function playBestMoveFromMoment(record, moment) {
@@ -571,6 +578,49 @@ export function createGameSession({
         updateStatus();
     });
 
+    eventBus.on('shell:get-pgn-requested', () => {
+        const pgn = store.getState().game.pgn();
+        $('#pgnInput').val(pgn);
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(pgn).then(() => {
+                const btn = $('#copyPgnBtn');
+                const orig = btn.text();
+                btn.text('Скопировано!');
+                setTimeout(() => { btn.text(orig); }, 2000);
+            }).catch(() => {});
+        }
+    });
+
+    eventBus.on('shell:set-pgn-requested', (event) => {
+        const pgn = (event.pgn || '').trim();
+        if (!pgn) return;
+        const candidateGame = new Chess();
+        try {
+            if (!candidateGame.load_pgn(pgn)) throw new Error('Invalid PGN');
+        } catch {
+            $('#pgnError').text('Некорректная запись PGN.').show();
+            return;
+        }
+
+        clearSelection();
+        botCoordinator.cancelBotSearch();
+        boardView.clearArrows();
+        $('#pgnError').hide();
+
+        const replay = new Chess();
+        const fens = [replay.fen()];
+        for (const move of candidateGame.history({ verbose: true })) {
+            replay.move(move);
+            fens.push(replay.fen());
+        }
+
+        const game = store.getState().game;
+        game.load_pgn(pgn);
+        store.setState({ historyFENs: fens, currentViewPly: fens.length - 1 });
+        eventBus.emit('game:move-made', { fen: game.fen(), game: game });
+        updateStatus();
+    });
+
     $('#startPositionBtn').on('click', function() {
         clearSelection();
         resetPosition(game => game.reset());
@@ -590,17 +640,21 @@ export function createGameSession({
     });
 
     $('#ccStartGameBtn').on('click', function() {
-        if (puzzle.isActive()) puzzle.exit();
-        else $('#startPositionBtn').trigger('click');
+        botCoordinator.cancelBotSearch();
         finished = null;
         clearLiveGame(liveGameStorage);
-        setPanelPhase('game');
-        clock.applySettings(true);
-        clock.startClock();
 
         let chosen = $('.color-btn.active').data('color') || 'white';
         if (chosen === 'random') chosen = Math.random() < 0.5 ? 'white' : 'black';
         setOrientation(chosen);
+
+        if (puzzle.isActive()) puzzle.exit();
+        else $('#startPositionBtn').trigger('click');
+
+        setPanelPhase('game');
+        clock.applySettings(true);
+        clock.startClock();
+
         rating?.begin({
             timeControl: { enabled: $('#timerEnableCb').is(':checked'), baseMinutes: Number($('#timerBase').val()) },
             botLevel: getBotLevel(),

@@ -11,6 +11,7 @@ export function createBoardInteraction({
     $, Chess, store, eventBus, boardView, clock, puzzle, session, getBotLevel, clearSelection
 }) {
     let dragJustEnded = false;
+    let lastSquareClicked = null;
     let lastSquareClickTime = 0;
 
     const isEditor = () => isEditorMode({ isPuzzleMode: puzzle.isActive(), botLevel: getBotLevel() });
@@ -31,7 +32,8 @@ export function createBoardInteraction({
 
     function handleSquareClick(square) {
         const now = Date.now();
-        if (now - lastSquareClickTime < CLICK_DEBOUNCE_MS) return;
+        if (square === lastSquareClicked && (now - lastSquareClickTime < CLICK_DEBOUNCE_MS)) return;
+        lastSquareClicked = square;
         lastSquareClickTime = now;
         if (dragJustEnded) return;
 

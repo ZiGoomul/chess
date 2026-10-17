@@ -60,14 +60,17 @@ npm run import-puzzles -- /path/to/lichess_db_puzzle.csv public/puzzles/lichess 
 ## Source layout
 
 - `src/main.js`: application entry point
-- `src/app/`: game orchestration and UI event wiring
-- `src/services/`: audio, clock, engine workers, and the typed Stockfish service
-- `src/data/`: built-in puzzle content
-- `src/storage/`: local IndexedDB persistence
-- `src/ui/`: move-history rendering and navigation
+- `src/core/`: reactive game store (`GameStore`) and event bus
+- `src/domain/`: pure chess domain models (attack map, check state, material calculation, move input, time controls, Glicko-2 ratings)
+- `src/app/`: game orchestration (`game-orchestrator.js`, `game-session.js`, `board-interaction.js`, `lesson-controller.js`, `puzzle-controller.js`)
+- `src/services/`: audio, clock, lazy Stockfish engine workers, analysis and review coordinators, Lichess puzzle source
+- `src/data/`: opening theory trees (`openings.js`) and curated puzzle datasets
+- `src/storage/`: local IndexedDB repository (`local-database.js`) and persistent settings
+- `src/ui/`: board rendering (Chessboard.js), move history, material balance, eval bar, and post-game review
+- `extension/`: companion browser extension for real-time attack/defense highlights on Chess.com
 - `tests/`: Node-based unit tests
 
-The TypeScript migration is incremental: `src/services/chess-engine.ts` is the first strict-typed module; the rest of the app remains JavaScript. `src/app/game-controller.js` still coordinates board events and game flow. New features should use the existing service, data, or UI boundaries instead of adding another global script.
+The TypeScript migration is incremental: `src/core/`, `src/domain/`, `src/services/chess-engine.ts`, and `src/services/engine-workers.ts` are strictly typed (`tsconfig.strict.json`); UI controllers and view wiring use ES2022 JavaScript with JSDoc and ESLint. PGN export and import are supported via the setup tab and finished game cards.
 
 ## Context7 in VS Code
 

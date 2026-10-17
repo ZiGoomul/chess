@@ -58,7 +58,7 @@ export function createPostGameReviewView({
   onPlayFromMoment,
   onPlayBestMove,
   onStartPractice = (_record, _moments) => {},
-  onPracticeMoment = (_record, _moment) => {},
+  onPracticeMoment = (_record, _moment, _moments) => {},
   onSummary = (_record, _summary, _report) => {}
 }) {
   const status = $('#reviewStatus');
@@ -219,7 +219,7 @@ export function createPostGameReviewView({
                 .off('click')
                 .on('click', () => {
                   hideMomentActions();
-                  onPracticeMoment(record, moment);
+                  onPracticeMoment(record, moment, currentMoments);
                 });
             } else {
               practiceMomentBtn.prop('hidden', true).off('click');

@@ -115,7 +115,18 @@ export function createPuzzleCatalog({ builtIns, repository, onlineSource = null,
     /** @param {PuzzleFilter} [filter] */
     async getRecommendation({ themes, targetRating } = {}) {
       const puzzles = await list({ themes });
-      const scored = await Promise.all(puzzles.map(async puzzle => ({ puzzle, attempts: await repository.attempts.listByPuzzleId(puzzle.id) })));
+      let scored;
+      if (typeof repository.attempts?.list === 'function') {
+        const allAttempts = (await repository.attempts.list()) || [];
+        const byId = new Map();
+        for (const a of allAttempts) {
+          if (!byId.has(a.puzzleId)) byId.set(a.puzzleId, []);
+          byId.get(a.puzzleId).push(a);
+        }
+        scored = puzzles.map(puzzle => ({ puzzle, attempts: byId.get(puzzle.id) || [] }));
+      } else {
+        scored = await Promise.all(puzzles.map(async puzzle => ({ puzzle, attempts: await repository.attempts.listByPuzzleId(puzzle.id) })));
+      }
       const candidates = scored.filter(({ attempts }) => attempts.length === 0);
       const source = candidates.length ? candidates : scored;
       if (!source.length) return null;

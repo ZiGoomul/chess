@@ -602,6 +602,12 @@ body.is-lesson-mode .player-badge {
     font-size: 14px;
 }
 
+textarea.panel-input {
+    min-height: 80px;
+    padding: 10px 14px;
+    resize: vertical;
+}
+
 /* Label on the left, switch on the right */
 .toggle-row {
     display: flex;

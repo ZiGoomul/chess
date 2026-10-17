@@ -68,8 +68,7 @@ export function createAnalysisCoordinator({ eventBus, store, engine }) {
         }
         
         const state = store.getState();
-        const domLevel = (typeof window !== 'undefined' && window.$ && window.$('#hintLevel').length) ? parseInt(String(window.$('#hintLevel').val()), 10) : 10;
-        const level = state.settings?.hintLevel || domLevel || 10;
+        const level = state.settings?.hintLevel ?? 10;
         
         currentHints = {};
         hintFen = fen;

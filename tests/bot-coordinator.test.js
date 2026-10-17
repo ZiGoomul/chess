@@ -47,3 +47,69 @@ test('cancelling stops a pending bot move', async () => {
   await wait(80);
   assert.deepEqual(moves, []);
 });
+
+test('makeBotMove plays opening book move without querying engine', async () => {
+  const eventBus = createEventBus();
+  const store = createGameStore({ game: new Chess() });
+  store.setState({ orientation: 'black', settings: { ...store.getState().settings, botLevel: 5 } });
+  let engineCalled = false;
+  const engine = {
+    requestBotMove() { engineCalled = true; },
+    cancelBotMove() {},
+    setBotLevel() {}
+  };
+  const moves = [];
+  eventBus.on('bot:move-ready', result => moves.push(result.bestmove));
+  const bot = createBotCoordinator({
+    eventBus,
+    store,
+    engine,
+    thinkTime: () => 30,
+    findBookMove: () => ({ uci: 'e2e4', san: 'e4' })
+  });
+
+  bot.makeBotMove();
+  assert.equal(engineCalled, false, 'Engine should not be called when book move is found');
+  assert.equal(store.getState().isThinking, true);
+  await wait(50);
+  assert.deepEqual(moves, ['e2e4']);
+});
+
+test('makeBotMove does nothing when it is human turn', () => {
+  const eventBus = createEventBus();
+  const store = createGameStore({ game: new Chess() });
+  // Orientation is white, and game.turn() is 'w' -> Human turn!
+  store.setState({ orientation: 'white', settings: { ...store.getState().settings, botLevel: 5 } });
+  let engineCalled = false;
+  const engine = {
+    requestBotMove() { engineCalled = true; },
+    cancelBotMove() {},
+    setBotLevel() {}
+  };
+  const moves = [];
+  eventBus.on('bot:move-ready', result => moves.push(result.bestmove));
+  const bot = createBotCoordinator({
+    eventBus,
+    store,
+    engine,
+    thinkTime: () => 30,
+    findBookMove: () => ({ uci: 'e2e4', san: 'e4' })
+  });
+
+  bot.makeBotMove();
+  assert.equal(engineCalled, false);
+  assert.equal(store.getState().isThinking, false);
+  assert.deepEqual(moves, []);
+});
+
+test('deliverBotMove drops move if orientation changes to human turn before timer expires', async () => {
+  const { store, bot, moves } = setup();
+  bot.makeBotMove();
+  bot.deliverBotMove({ bestmove: 'e2e4' });
+  // Orientation flips to white (human's turn for 'w' in starting position)
+  store.setState({ orientation: 'white' });
+  await wait(80);
+  assert.deepEqual(moves, [], 'Should not emit move when it is human turn');
+});
+
+

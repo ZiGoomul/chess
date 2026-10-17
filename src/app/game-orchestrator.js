@@ -245,7 +245,8 @@ $(document).ready(function() {
     trainer = createReviewTrainerController({
         $, Chess, store, eventBus, boardView, moveHistoryView, clearSelection,
         playSound, playSoundForMove, toSan: uciToSan,
-        onComplete: () => {}
+        onComplete: () => {},
+        onExit: () => reviewView?.hidePracticeCard()
     });
 
     const rating = createRatedGame({
@@ -281,11 +282,11 @@ $(document).ready(function() {
             reviewView.showPracticeCard();
             trainer.start(record, moments, 0);
         },
-        onPracticeMoment: (record, moment) => {
+        onPracticeMoment: (record, moment, allMoments) => {
             if (lesson.isActive()) lesson.exit({ keepPosition: true });
             if (puzzle.isActive()) puzzle.exit({ keepPosition: true });
             reviewView.showPracticeCard();
-            const moments = (record.moments || [moment]).slice().sort((a, b) => a.ply - b.ply);
+            const moments = (allMoments || record.moments || [moment]).slice().sort((a, b) => a.ply - b.ply);
             const idx = moments.findIndex(m => m.ply === moment.ply);
             trainer.start(record, moments, Math.max(0, idx));
         },

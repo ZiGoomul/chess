@@ -11,7 +11,8 @@ export function createReviewTrainerController({
   playSound,
   playSoundForMove,
   toSan,
-  onComplete
+  onComplete,
+  onExit
 }) {
   let active = false;
   let record = null;
@@ -329,7 +330,7 @@ export function createReviewTrainerController({
     }
   }
 
-  function exit(_options = {}) {
+  function exit(options = {}) {
     if (!active) return;
     if (isRefutationShown) hideRefutation();
     active = false;
@@ -342,6 +343,7 @@ export function createReviewTrainerController({
     boardView.removeHighlights?.();
     $('#reviewTrainerCard').prop('hidden', true);
     store.setState({ mode: 'free' });
+    onExit?.(options);
   }
 
   function destroy() {

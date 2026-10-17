@@ -14,8 +14,8 @@ export default [
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none' }],
       'no-empty': ['error', { allowEmptyCatch: true }],
-      // The UI code predates ESLint and uses function-scoped `var`; tolerate repeats until it is modernised.
-      'no-redeclare': 'warn'
+      'no-redeclare': 'error',
+      'no-var': 'error'
     }
   },
   {

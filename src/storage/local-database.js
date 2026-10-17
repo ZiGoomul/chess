@@ -45,7 +45,12 @@ export async function openLocalDatabase({ indexedDB = globalThis.indexedDB, data
       get: id => read('puzzles', store => store.get(id)),
       /** @param {{ themes?: string[], minRating?: number, maxRating?: number }} [filter] */
       list: async ({ themes, minRating, maxRating } = {}) => {
-        const all = await read('puzzles', store => store.getAll());
+        let all;
+        if (themes && themes.length > 0) {
+          all = await read('puzzles', store => store.index('themes').getAll(themes[0]));
+        } else {
+          all = await read('puzzles', store => store.getAll());
+        }
         return all.filter(puzzle =>
           (!themes?.length || themes.every(theme => puzzle.themes?.includes(theme))) &&
           (minRating == null || puzzle.rating >= minRating) &&
@@ -78,7 +83,24 @@ export async function openLocalDatabase({ indexedDB = globalThis.indexedDB, data
     games: {
       put: async game => { await write('games', transaction => transaction.objectStore('games').put(game)); },
       get: id => read('games', store => store.get(id)),
-      listRecent: async (limit = 20) => (await read('games', store => store.getAll())).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)).slice(0, limit)
+      listRecent: async (limit = 20) => {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction('games', 'readonly');
+          const index = transaction.objectStore('games').index('completedAt');
+          const request = index.openCursor(null, 'prev');
+          const results = [];
+          request.onsuccess = () => {
+            const cursor = request.result;
+            if (cursor && results.length < limit) {
+              results.push(cursor.value);
+              cursor.continue();
+            } else {
+              resolve(results);
+            }
+          };
+          request.onerror = () => reject(request.error || new Error('Failed to read games'));
+        });
+      }
     },
     reviews: {
       put: async review => { await write('reviews', transaction => transaction.objectStore('reviews').put(review)); },

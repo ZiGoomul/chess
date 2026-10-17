@@ -45,6 +45,16 @@ test('clicking a legal destination makes the move and clears the selection', asy
   h.close();
 });
 
+test('clicking a legal destination immediately without delay makes the move', () => {
+  const { h, makeMoveCalls } = setup();
+  h.eventBus.emit('board:square-clicked', { square: 'e2' });
+  h.eventBus.emit('board:square-clicked', { square: 'e4' });
+
+  assert.deepEqual(makeMoveCalls, [['e2', 'e4']]);
+  assert.equal(h.store.getState().selectedSquare, null);
+  h.close();
+});
+
 test('starting a drag shows the same hints as a click', () => {
   const { h } = setup();
   const event = { source: 'g1', piece: 'wN', cancel: false };

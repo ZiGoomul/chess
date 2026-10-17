@@ -24,25 +24,24 @@ export function createShellView({ $, eventBus }) {
 
         // --- Redesign Logic (Themes and Tabs) ---
         $('#themeToggleBtn').on('click', function() {
-            var current = $('body').attr('data-theme');
-            var next = current === 'dark' ? 'light' : 'dark';
+            const current = $('body').attr('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
             $('body').attr('data-theme', next);
             saveStoredSettings({ theme: next });
             eventBus.emit('theme:changed', { theme: next });
         });
 
         $('.tab-btn').on('click', function() {
-            var tabName = $(this).data('tab');
+            const tabName = $(this).data('tab');
             $('.tab-btn').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1');
             $(this).addClass('active').attr('aria-selected', 'true').attr('tabindex', '0');
 
             $('.tab-content').removeClass('is-active').attr('aria-hidden', 'true');
             $('#' + tabName).addClass('is-active').attr('aria-hidden', 'false');
 
-
             // The editor is a mode of its own tab only: entering it parks the bot level,
             // leaving it brings the bot (and the player badges) back
-            var botLevel = $('#botLevel');
+            const botLevel = $('#botLevel');
             if (tabName === 'tab-setup') {
                 if (botLevel.val() !== '0') botLevel.data('playLevel', botLevel.val());
                 $('body').addClass('is-editor-mode');
@@ -56,8 +55,8 @@ export function createShellView({ $, eventBus }) {
 
         // The left rail is the tab list (vertical; horizontal on phones)
         $('.app-nav-list').on('keydown', '.tab-btn', function(event) {
-            var tabs = $('.tab-btn');
-            var index = tabs.index(this);
+            const tabs = $('.tab-btn');
+            let index = tabs.index(this);
             if (event.key === 'ArrowDown' || event.key === 'ArrowRight') index = (index + 1) % tabs.length;
             else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') index = (index - 1 + tabs.length) % tabs.length;
             else if (event.key === 'Home') index = 0;
@@ -70,16 +69,16 @@ export function createShellView({ $, eventBus }) {
 
         // Theme selects
         $('#pieceThemeSelect').on('change', function() {
-            var theme = $(this).val();
-            saveStoredSettings({ pieceTheme: theme });
-            eventBus.emit('settings:changed', { pieceTheme: theme });
+            const selectedTheme = $(this).val();
+            saveStoredSettings({ pieceTheme: selectedTheme });
+            eventBus.emit('settings:changed', { pieceTheme: selectedTheme });
         });
 
         $('#boardThemeSelect').on('change', function() {
-            var theme = $(this).val();
-            $('body').attr('data-board-theme', theme);
-            saveStoredSettings({ boardTheme: theme });
-            eventBus.emit('settings:changed', { boardTheme: theme });
+            const selectedTheme = $(this).val();
+            $('body').attr('data-board-theme', selectedTheme);
+            saveStoredSettings({ boardTheme: selectedTheme });
+            eventBus.emit('settings:changed', { boardTheme: selectedTheme });
         });
 
         // FEN inputs
@@ -88,8 +87,17 @@ export function createShellView({ $, eventBus }) {
         });
 
         $('#setFenBtn').on('click', function() {
-            var fen = $('#fenInput').val().trim();
+            const fen = $('#fenInput').val().trim();
             eventBus.emit('shell:set-fen-requested', { fen: fen });
+        });
+
+        $('#copyPgnBtn').on('click', function() {
+            eventBus.emit('shell:get-pgn-requested');
+        });
+
+        $('#setPgnBtn').on('click', function() {
+            const pgn = $('#pgnInput').val().trim();
+            eventBus.emit('shell:set-pgn-requested', { pgn: pgn });
         });
 
         // Time Control Dialog

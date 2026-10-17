@@ -9,9 +9,11 @@ export interface BestMove {
   promotion: PromotionPiece;
 }
 
+export type HintMove = `${ChessSquare}${ChessSquare}${PromotionPiece | ''}`;
+
 export interface HintInfo {
   multipv: number;
-  move: `${ChessSquare}${ChessSquare}`;
+  move: HintMove;
   cp: number | null;
   mate: number | null;
 }
@@ -44,6 +46,29 @@ export interface ChessEngine {
   readonly isThinking: boolean;
 }
 
+export interface BotSearchProfile {
+  skillLevel: number;
+  depth: number;
+}
+
+export function getBotSearchProfile(level: number): BotSearchProfile {
+  const clamped = Math.max(1, Math.min(20, Math.trunc(level)));
+  const skillLevel = clamped <= 1 ? 0 : clamped <= 4 ? clamped - 1 : clamped;
+
+  let depth: number;
+  if (clamped <= 5) {
+    depth = clamped;
+  } else if (clamped <= 10) {
+    depth = 8;
+  } else if (clamped <= 15) {
+    depth = 12;
+  } else {
+    depth = 16;
+  }
+
+  return { skillLevel, depth };
+}
+
 export function parseBestMove(line: string): BestMove | null {
   const match = /^bestmove ([a-h][1-8])([a-h][1-8])([qrbn])?/.exec(line);
   if (!match) return null;
@@ -59,7 +84,7 @@ export function parseHintInfo(line: string): HintInfo | null {
   if (!line.includes('info depth') || !line.includes(' pv ')) return null;
 
   const multipvMatch = /\bmultipv (\d+)/.exec(line);
-  const moveMatch = /\b pv ([a-h][1-8][a-h][1-8])/.exec(line);
+  const moveMatch = /\b pv ([a-h][1-8][a-h][1-8][qrbn]?)/.exec(line);
   if (!multipvMatch || !moveMatch) return null;
 
   const cpMatch = /\bscore cp (-?\d+)/.exec(line);
@@ -107,13 +132,17 @@ export function createChessEngine({
     searches.push(search);
     activeSearchId = search.id;
     setThinking(true);
-    gameWorker.postMessage(`setoption name Skill Level value ${level}`);
+    const { skillLevel, depth } = getBotSearchProfile(level);
+    gameWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
     gameWorker.postMessage(`position fen ${fen}`);
-    gameWorker.postMessage(`go depth ${level > 10 ? 15 : 10}`);
+    gameWorker.postMessage(`go depth ${depth}`);
   }
 
   function setBotLevel(level: number): void {
-    if (level > 0) gameWorker.postMessage(`setoption name Skill Level value ${level}`);
+    if (level > 0) {
+      const { skillLevel } = getBotSearchProfile(level);
+      gameWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
+    }
   }
 
   gameWorker.onmessage = event => {
@@ -138,10 +167,11 @@ export function createChessEngine({
     const search = { id: ++nextHintId, fen };
     hintSearches.push(search);
     activeHintId = search.id;
-    hintWorker.postMessage(`setoption name Skill Level value ${level}`);
+    const { skillLevel, depth } = getBotSearchProfile(level);
+    hintWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
     hintWorker.postMessage('setoption name MultiPV value 3');
     hintWorker.postMessage(`position fen ${fen}`);
-    hintWorker.postMessage(`go depth ${level > 10 ? 15 : 10}`);
+    hintWorker.postMessage(`go depth ${depth}`);
   }
 
   hintWorker.onmessage = event => {

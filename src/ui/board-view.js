@@ -1,31 +1,32 @@
 import { getSquareFromCoords } from '../domain/move-input.js';
 import { getKingSquareInCheck } from '../domain/check-state.js';
-import { Chess } from 'chess.js';
 import { MOVE_CLASS_LABELS } from './move-classes.js';
 import { pieceImageUrl, LOCAL_PIECE_THEME } from './piece-images.js';
 import { isGuidedMode } from '../domain/position.js';
+import { computeHighlights, extractPiecesFromGame } from '../domain/attack-map.js';
 
 export function createBoardView({ $, eventBus, store }) {
-    var board = null;
-    var currentCheckGame = null;
-    var currentLastMove = null;
-    var currentFeedback = null;
+    let board = null;
+    let currentCheckGame = null;
+    let currentLastMove = null;
+    let currentFeedback = null;
+    let lastPointerUpSquareTime = 0;
 
     function clearArrows() {
-        var group = document.getElementById('arrowsGroup');
+        const group = document.getElementById('arrowsGroup');
         if (group) group.innerHTML = '';
     }
 
     function getSquareCenter(square) {
-        var squareEl = $('#myBoard [data-square="' + square + '"]');
+        let squareEl = $('#myBoard [data-square="' + square + '"]');
         if (!squareEl.length) {
             squareEl = $('#myBoard .square-' + square);
         }
-        var overlayEl = $('#arrowOverlay');
+        const overlayEl = $('#arrowOverlay');
         if (!squareEl.length || !overlayEl.length) return { x: 0, y: 0 };
 
-        var squareOffset = squareEl.offset();
-        var overlayOffset = overlayEl.offset();
+        const squareOffset = squareEl.offset();
+        const overlayOffset = overlayEl.offset();
         if (!squareOffset || !overlayOffset) return { x: 0, y: 0 };
 
         return {
@@ -35,18 +36,18 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function drawArrow(source, target, multipv, game) {
-        var p1 = getSquareCenter(source);
-        var p2 = getSquareCenter(target);
+        const p1 = getSquareCenter(source);
+        const p2 = getSquareCenter(target);
         if ((!p1.x && !p1.y) || (!p2.x && !p2.y)) return;
 
-        var piece = game ? game.get(source) : null;
-        var isKnight = piece && piece.type === 'n';
+        const piece = game ? game.get(source) : null;
+        const isKnight = piece && piece.type === 'n';
 
-        var sqSize = $('#myBoard').width() / 8;
-        var shorten = sqSize * 0.35;
+        const sqSize = $('#myBoard').width() / 8;
+        const shorten = sqSize * 0.35;
 
         // One orange family: the best move bold, the alternatives fainter and thinner
-        var color, strokeWidth, markerId;
+        let color, strokeWidth, markerId;
         if (multipv === 'guide') {
             // Lessons: the move to play, in green
             color = "rgba(129, 182, 76, 0.9)";
@@ -66,12 +67,12 @@ export function createBoardView({ $, eventBus, store }) {
             markerId = "url(#arrowhead3)";
         }
 
-        var svgElem;
+        let svgElem;
         
         if (isKnight) {
-            var dx = p2.x - p1.x;
-            var dy = p2.y - p1.y;
-            var elbowX, elbowY;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            let elbowX, elbowY;
             if (Math.abs(dx) > Math.abs(dy)) {
                 elbowX = p2.x;
                 elbowY = p1.y;
@@ -80,28 +81,28 @@ export function createBoardView({ $, eventBus, store }) {
                 elbowY = p2.y;
             }
             
-            var finalDist = Math.sqrt(Math.pow(p2.x - elbowX, 2) + Math.pow(p2.y - elbowY, 2));
-            if (finalDist < shorten) shorten = finalDist * 0.5;
+            const finalDist = Math.sqrt(Math.pow(p2.x - elbowX, 2) + Math.pow(p2.y - elbowY, 2));
+            const actualShorten = finalDist < shorten ? finalDist * 0.5 : shorten;
             
-            var ratio = (finalDist - shorten) / finalDist;
-            var finalX = elbowX + (p2.x - elbowX) * ratio;
-            var finalY = elbowY + (p2.y - elbowY) * ratio;
+            const ratio = (finalDist - actualShorten) / finalDist;
+            const finalX = elbowX + (p2.x - elbowX) * ratio;
+            const finalY = elbowY + (p2.y - elbowY) * ratio;
             
             svgElem = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            var d = "M " + p1.x + " " + p1.y + " L " + elbowX + " " + elbowY + " L " + finalX + " " + finalY;
+            const d = "M " + p1.x + " " + p1.y + " L " + elbowX + " " + elbowY + " L " + finalX + " " + finalY;
             svgElem.setAttribute("d", d);
             svgElem.setAttribute("fill", "none");
             svgElem.setAttribute("stroke-linejoin", "round");
             svgElem.setAttribute("stroke-linecap", "round");
         } else {
-            var dx = p2.x - p1.x;
-            var dy = p2.y - p1.y;
-            var dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < shorten) shorten = dist * 0.5;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const actualShorten = dist < shorten ? dist * 0.5 : shorten;
             
-            var ratio = (dist - shorten) / dist;
-            var lineEndX = p1.x + dx * ratio;
-            var lineEndY = p1.y + dy * ratio;
+            const ratio = (dist - actualShorten) / dist;
+            const lineEndX = p1.x + dx * ratio;
+            const lineEndY = p1.y + dy * ratio;
 
             svgElem = document.createElementNS("http://www.w3.org/2000/svg", "line");
             svgElem.setAttribute("x1", p1.x);
@@ -115,7 +116,7 @@ export function createBoardView({ $, eventBus, store }) {
         svgElem.setAttribute("stroke-width", strokeWidth);
         svgElem.setAttribute("marker-end", markerId);
         
-        var group = document.getElementById("arrowsGroup");
+        const group = document.getElementById("arrowsGroup");
         if (group) group.appendChild(svgElem);
     }
 
@@ -142,27 +143,27 @@ export function createBoardView({ $, eventBus, store }) {
     // Review badge in the corner of a square (★, ?!, ?? …)
     function showMoveClass(square, cls) {
         clearMoveClass();
-        var label = MOVE_CLASS_LABELS[cls];
-        var squareEl = $('#myBoard [data-square="' + square + '"]');
+        const label = MOVE_CLASS_LABELS[cls];
+        const squareEl = $('#myBoard [data-square="' + square + '"]');
         if (!label || !squareEl.length) return;
         squareEl.first().append(
             $('<span class="board-move-class" aria-hidden="true"></span>').addClass('move-class--' + cls).attr('title', label.label).text(label.icon)
         );
     }
 
-    var PROMOTION_PIECES = [
+    const PROMOTION_PIECES = [
         { type: 'q', label: 'Ферзь' },
         { type: 'r', label: 'Ладья' },
         { type: 'b', label: 'Слон' },
         { type: 'n', label: 'Конь' }
     ];
-    var resolvePromotion = null;
+    let resolvePromotion = null;
 
     function closePromotion(choice) {
         $('.promotion-layer').remove();
         $(document).off('keydown.promotion');
         if (resolvePromotion) {
-            var resolve = resolvePromotion;
+            const resolve = resolvePromotion;
             resolvePromotion = null;
             resolve(choice);
         }
@@ -174,19 +175,19 @@ export function createBoardView({ $, eventBus, store }) {
      */
     function choosePromotion(square, color) {
         closePromotion(null);
-        var squareEl = $('#myBoard [data-square="' + square + '"]').first();
-        var stage = $('#myBoard').closest('.board-stage');
+        const squareEl = $('#myBoard [data-square="' + square + '"]').first();
+        const stage = $('#myBoard').closest('.board-stage');
         if (!squareEl.length || !stage.length) return Promise.resolve('q');
 
-        var size = squareEl.outerWidth();
-        var squareOffset = squareEl.offset();
-        var stageOffset = stage.offset();
-        var left = squareOffset.left - stageOffset.left;
-        var top = squareOffset.top - stageOffset.top;
-        var downward = top + size / 2 < stage.height() / 2;
+        const size = squareEl.outerWidth();
+        const squareOffset = squareEl.offset();
+        const stageOffset = stage.offset();
+        const left = squareOffset.left - stageOffset.left;
+        const top = squareOffset.top - stageOffset.top;
+        const downward = top + size / 2 < stage.height() / 2;
 
-        var layer = $('<div class="promotion-layer"></div>');
-        var picker = $('<div class="promotion-picker" role="dialog" aria-label="Выберите фигуру для превращения"></div>')
+        const layer = $('<div class="promotion-layer"></div>');
+        const picker = $('<div class="promotion-picker" role="dialog" aria-label="Выберите фигуру для превращения"></div>')
             .toggleClass('promotion-picker--up', !downward)
             .css({ left: left, width: size, top: downward ? top : 'auto', bottom: downward ? 'auto' : stage.height() - top - size });
 
@@ -221,7 +222,7 @@ export function createBoardView({ $, eventBus, store }) {
     // Puzzle feedback on the destination square: kind is 'correct' (✓) or 'wrong' (✗)
     function showSquareFeedback(square, kind) {
         clearSquareFeedback();
-        var squareEl = $('#myBoard [data-square="' + square + '"]').first();
+        const squareEl = $('#myBoard [data-square="' + square + '"]').first();
         if (!squareEl.length) return;
         currentFeedback = { square: square, kind: kind };
         squareEl.addClass('square-feedback--' + kind).append(
@@ -252,10 +253,12 @@ export function createBoardView({ $, eventBus, store }) {
         removeHighlights();
         $('#myBoard .square-' + square).addClass('selected-square');
 
-        if (!$('#highlightMovesCb').is(':checked')) return;
+        const stateSettings = store && store.getState ? store.getState().settings : null;
+        const showMoves = stateSettings ? stateSettings.highlightMoves : $('#highlightMovesCb').is(':checked');
+        if (!showMoves) return;
 
         (destinations || []).forEach(function(dest) {
-            var $destSq = $('#myBoard .square-' + dest.square);
+            const $destSq = $('#myBoard .square-' + dest.square);
             $destSq.addClass('has-dest-marker');
             $destSq.append('<div class="move-dest-marker' + (dest.isCapture ? ' is-capture' : '') + '"></div>');
         });
@@ -266,7 +269,7 @@ export function createBoardView({ $, eventBus, store }) {
         $('#myBoard .square-55d63').removeClass('in-check');
         if (!currentCheckGame) return;
 
-        var kingSquare = getKingSquareInCheck(currentCheckGame);
+        const kingSquare = getKingSquareInCheck(currentCheckGame);
         if (kingSquare) {
             $('#myBoard [data-square="' + kingSquare + '"], #myBoard .square-' + kingSquare).addClass('in-check');
         }
@@ -280,93 +283,27 @@ export function createBoardView({ $, eventBus, store }) {
             .removeAttr('data-defenders');
             
         // A rated game with help switched off hides them without touching the settings
-        var assistsOff = Boolean(store && store.getState().assistsOff);
-        var showAttacks = !assistsOff && $('#highlightAttacksCb').is(':checked');
-        var showDefenses = !assistsOff && $('#highlightDefensesCb').is(':checked');
+        const assistsOff = Boolean(store && store.getState().assistsOff);
+        const storeSettings = store && store.getState ? store.getState().settings : null;
+        const showAttacks = !assistsOff && (storeSettings ? storeSettings.highlightAttacks : $('#highlightAttacksCb').is(':checked'));
+        const showDefenses = !assistsOff && (storeSettings ? storeSettings.highlightDefenses : $('#highlightDefensesCb').is(':checked'));
         
         if (!showAttacks && !showDefenses) return;
 
-        var position = positionGame;
-        var fen = position.fen();
-        var parts = fen.split(' ');
-        
-        var attackedByWhite = {};
-        var attackedByBlack = {};
+        const pieces = extractPiecesFromGame(positionGame);
+        const { attacks, defenders } = computeHighlights(pieces);
 
-        function processMoves(moves) {
-            for (var i = 0; i < moves.length; i++) {
-                if (moves[i].captured) {
-                    var sq = moves[i].to;
-                    if (moves[i].color === 'w') {
-                        attackedByWhite[sq] = (attackedByWhite[sq] || 0) + 1;
-                    } else {
-                        attackedByBlack[sq] = (attackedByBlack[sq] || 0) + 1;
-                    }
-                }
-            }
-        }
-        
         if (showAttacks) {
-            processMoves(position.moves({verbose: true}));
-            var otherColor = parts[1] === 'w' ? 'b' : 'w';
-            parts[1] = otherColor;
-            parts[3] = '-'; 
-            
-            var tempGame = new Chess();
-            if (tempGame.load(parts.join(' '))) {
-                processMoves(tempGame.moves({verbose: true}));
+            for (const sq in attacks) {
+                const info = attacks[sq];
+                $('#myBoard .square-' + sq)
+                    .addClass(info.by === 'w' ? 'attacked-by-white' : 'attacked-by-black')
+                    .attr('data-attacks', info.count);
             }
         }
 
-        var defenders = {};
         if (showDefenses) {
-            var boardState = position.board();
-            var files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            var tempDefGame = new Chess();
-            for (var r = 0; r < 8; r++) {
-                for (var c = 0; c < 8; c++) {
-                    var piece = boardState[r][c];
-                    if (piece && piece.type !== 'k') { 
-                        var sq = files[c] + (8 - r);
-                        /** @type {'w' | 'b'} */
-                        var enemyColor = piece.color === 'w' ? 'b' : 'w';
-                        
-                        tempDefGame.load(fen);
-                        tempDefGame.put({ type: piece.type, color: enemyColor }, /** @type {import('chess.js').Square} */ (sq));
-                        var partsTemp = tempDefGame.fen().split(' ');
-                        partsTemp[1] = piece.color;
-                        partsTemp[3] = '-';
-                        
-                        if (tempDefGame.load(partsTemp.join(' '))) {
-                            var moves = tempDefGame.moves({ verbose: true });
-                            var count = 0;
-                            for (var i = 0; i < moves.length; i++) {
-                                if (moves[i].to === sq) count++;
-                            }
-                            if (count > 0) {
-                                defenders[sq] = count;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (showAttacks) {
-            for (var sq in attackedByWhite) {
-                $('#myBoard .square-' + sq)
-                    .addClass('attacked-by-white')
-                    .attr('data-attacks', attackedByWhite[sq]);
-            }
-            for (var sq in attackedByBlack) {
-                $('#myBoard .square-' + sq)
-                    .addClass('attacked-by-black')
-                    .attr('data-attacks', attackedByBlack[sq]);
-            }
-        }
-        
-        if (showDefenses) {
-            for (var sq in defenders) {
+            for (const sq in defenders) {
                 $('#myBoard .square-' + sq)
                     .addClass('defenders-badge')
                     .attr('data-defenders', defenders[sq]);
@@ -379,15 +316,15 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function getSquareAtPoint(clientX, clientY) {
-        var el = document.elementFromPoint(clientX, clientY);
+        const el = document.elementFromPoint(clientX, clientY);
         if (el) {
-            var $sq = $(el).closest('.square-55d63');
+            const $sq = $(el).closest('.square-55d63');
             if ($sq.length) {
-                var sq = $sq.attr('data-square') || ($sq.attr('class') || '').match(/square-([a-h][1-8])/)?.[1];
+                const sq = $sq.attr('data-square') || ($sq.attr('class') || '').match(/square-([a-h][1-8])/)?.[1];
                 if (sq) return sq;
             }
         }
-        var boardEl = $('#myBoard .board-b72b1')[0] || $('#myBoard')[0];
+        const boardEl = $('#myBoard .board-b72b1')[0] || $('#myBoard')[0];
         if (boardEl && board) {
             return getSquareFromCoords({
                 clientX: clientX,
@@ -400,7 +337,7 @@ export function createBoardView({ $, eventBus, store }) {
     }
 
     function initBoard() {
-        var config = {
+        const config = {
             draggable: true,
             dropOffBoard: 'trash',
             sparePieces: true,
@@ -410,12 +347,12 @@ export function createBoardView({ $, eventBus, store }) {
             snapSpeed: 60,
             snapbackSpeed: 60,
             onDragStart: function(source, piece, position, orientation) {
-                var event = { source, piece, position, orientation, cancel: false };
+                const event = { source, piece, position, orientation, cancel: false };
                 eventBus.emit('board:drag-start', event);
                 if (event.cancel) return false;
             },
             onDrop: function(source, target, piece, newPos, oldPos, orientation) {
-                var event = { source, target, piece, newPos, oldPos, orientation, action: null };
+                const event = { source, target, piece, newPos, oldPos, orientation, action: null };
                 eventBus.emit('board:drop', event);
                 if (event.action === 'snapback') return 'snapback';
             },
@@ -426,8 +363,8 @@ export function createBoardView({ $, eventBus, store }) {
                 eventBus.emit('board:mouseover-square', { square, piece });
             },
             onSnapEnd: function() {
-                var state = store ? store.getState() : null;
-                var currentFen = state && state.historyFENs && typeof state.currentViewPly === 'number' 
+                const state = store ? store.getState() : null;
+                const currentFen = state && state.historyFENs && typeof state.currentViewPly === 'number' 
                     ? state.historyFENs[state.currentViewPly] 
                     : (state && state.game ? state.game.fen() : null);
                 if (board && currentFen) {
@@ -444,50 +381,52 @@ export function createBoardView({ $, eventBus, store }) {
         };
         board = Chessboard('myBoard', config);
 
-        var downTrackInfo = null;
+        let downTrackInfo = null;
         $(document).on('pointerdown mousedown touchstart', function(e) {
             if (e.button !== undefined && e.button !== 0 && e.type === 'mousedown') return;
             // The promotion picker handles its own clicks
             if ($(e.target).closest('.promotion-layer').length) { downTrackInfo = null; return; }
-            var clientX = e.clientX ?? e.originalEvent?.touches?.[0]?.clientX;
-            var clientY = e.clientY ?? e.originalEvent?.touches?.[0]?.clientY;
+            const clientX = e.clientX ?? e.originalEvent?.touches?.[0]?.clientX;
+            const clientY = e.clientY ?? e.originalEvent?.touches?.[0]?.clientY;
             if (clientX === undefined || clientY === undefined) return;
 
-            var boardEl = $('#myBoard .board-b72b1')[0] || $('#myBoard')[0];
+            const boardEl = $('#myBoard .board-b72b1')[0] || $('#myBoard')[0];
             if (!boardEl) return;
-            var rect = boardEl.getBoundingClientRect();
+            const rect = boardEl.getBoundingClientRect();
 
             if (clientX >= rect.left - 4 && clientX <= rect.right + 4 &&
                 clientY >= rect.top - 4 && clientY <= rect.bottom + 4) {
                 downTrackInfo = { x: clientX, y: clientY, time: Date.now() };
             } else {
                 downTrackInfo = null;
-                var isPiece = $(e.target).closest('.piece-417db').length > 0;
+                const isPiece = $(e.target).closest('.piece-417db').length > 0;
                 eventBus.emit('board:pointer-down-outside', { isPiece });
             }
         });
 
         $(document).on('pointerup mouseup touchend', function(e) {
             if (!downTrackInfo) return;
-            var clientX = e.clientX ?? e.originalEvent?.changedTouches?.[0]?.clientX;
-            var clientY = e.clientY ?? e.originalEvent?.changedTouches?.[0]?.clientY;
+            const clientX = e.clientX ?? e.originalEvent?.changedTouches?.[0]?.clientX;
+            const clientY = e.clientY ?? e.originalEvent?.changedTouches?.[0]?.clientY;
             if (clientX === undefined || clientY === undefined) return;
 
-            var dx = Math.abs(clientX - downTrackInfo.x);
-            var dy = Math.abs(clientY - downTrackInfo.y);
-            var elapsed = Date.now() - downTrackInfo.time;
+            const dx = Math.abs(clientX - downTrackInfo.x);
+            const dy = Math.abs(clientY - downTrackInfo.y);
+            const elapsed = Date.now() - downTrackInfo.time;
             downTrackInfo = null;
 
             if (dx < 24 && dy < 24 && elapsed < 750) {
-                var square = getSquareAtPoint(clientX, clientY);
+                const square = getSquareAtPoint(clientX, clientY);
                 if (square) {
+                    lastPointerUpSquareTime = Date.now();
                     eventBus.emit('board:square-clicked', { square });
                 }
             }
         });
 
         $('#myBoard').on('click', '.square-55d63', function() {
-            var square = $(this).attr('data-square') || ($(this).attr('class') || '').match(/square-([a-h][1-8])/)?.[1];
+            if (Date.now() - lastPointerUpSquareTime < 400) return;
+            const square = $(this).attr('data-square') || ($(this).attr('class') || '').match(/square-([a-h][1-8])/)?.[1];
             if (square) {
                 eventBus.emit('board:square-clicked', { square });
             }
@@ -495,12 +434,12 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('game:move-made', function(data) {
              if (board && data.fen) {
-                 var useAnimation = data.animate !== undefined ? data.animate : true;
+                 const useAnimation = data.animate !== undefined ? data.animate : true;
                  board.position(data.fen, useAnimation);
                  if (data.move && data.move.from && data.move.to) {
                      highlightLastMove(data.move.from, data.move.to);
                  }
-                 var checkGame = data.game || (store && store.getState ? store.getState().game : currentCheckGame);
+                 const checkGame = data.game || (store && store.getState ? store.getState().game : currentCheckGame);
                  if (checkGame) {
                      highlightCheck(checkGame);
                  }
@@ -511,25 +450,25 @@ export function createBoardView({ $, eventBus, store }) {
              clearArrows();
              // No engine arrows while solving a puzzle or in a lesson
              if (!data || (store && isGuidedMode(store.getState().mode))) return;
-             var game = data.game || (store && store.getState() ? store.getState().game : null);
+             const game = data.game || (store && store.getState ? store.getState().game : null);
              if (data.hints) {
-                 for (var i = 3; i >= 1; i--) {
+                 for (let i = 3; i >= 1; i--) {
                      if (data.hints[i]) {
-                         var from = data.hints[i].substring(0, 2);
-                         var to = data.hints[i].substring(2, 4);
+                         const from = data.hints[i].substring(0, 2);
+                         const to = data.hints[i].substring(2, 4);
                          drawArrow(from, to, i, game);
                      }
                  }
              } else if (data.arrows && Array.isArray(data.arrows)) {
-                 for (var a = 0; a < data.arrows.length; a++) {
-                     var arr = data.arrows[a];
+                 for (let a = 0; a < data.arrows.length; a++) {
+                     const arr = data.arrows[a];
                      drawArrow(arr.from, arr.to, arr.rank, game);
                  }
              }
         });
 
         eventBus.on('board:orientation-changed', function(data) {
-             var color = data && (data.orientation || data.color);
+             const color = data && (data.orientation || data.color);
              if (board && color) {
                  board.orientation(color);
                  restoreSquareMarks();
@@ -538,12 +477,15 @@ export function createBoardView({ $, eventBus, store }) {
 
         eventBus.on('settings:changed', function(data) {
              if (data.pieceTheme && board) {
-                 var currentFen = board.fen();
-                 var currentOrientation = board.orientation();
+                 const currentFen = board.fen();
+                 const currentOrientation = board.orientation();
                  board.destroy();
                  config.position = currentFen;
                  config.orientation = currentOrientation;
                  board = Chessboard('myBoard', config);
+                 restoreSquareMarks();
+                 if (currentCheckGame) highlightAttackedPieces(currentCheckGame);
+                 eventBus.emit('board:resized');
              }
         });
 
