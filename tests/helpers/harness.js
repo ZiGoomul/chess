@@ -25,25 +25,51 @@ const PAGE = `<!doctype html><body>
   <button id="reviewPlayBestMoveBtn" hidden></button>
   <button id="reviewPlayFromBtn" hidden></button>
   <button id="reviewPuzzleBtn" hidden></button>
+  <div id="reviewTrainerCard" hidden>
+    <div id="reviewTrainerNav">
+      <span id="reviewTrainerPosition"></span>
+      <button id="reviewTrainerExitBtn"></button>
+    </div>
+    <div id="reviewTrainerPrompt"></div>
+    <div id="reviewTrainerActions">
+      <button id="reviewTrainerHintBtn"></button>
+      <button id="reviewTrainerRefutationBtn" hidden></button>
+      <button id="reviewTrainerNextBtn" disabled></button>
+    </div>
+  </div>
+  <button id="reviewStartPracticeBtn" hidden></button>
   <span id="puzzleStreakCount"></span><span id="puzzleStreak"></span><span id="puzzleBestStreak"></span><button id="showSolutionBtn" hidden></button>
   <div id="puzzleStatusText"></div><div id="puzzleDescText"></div><span id="puzzlesScore"></span>
+  <textarea id="pgnInput"></textarea><div id="pgnError"></div><button id="copyPgnBtn"></button>
   <button id="startPositionBtn"></button>
 </body>`;
 
 /** Board stand-in that records what the controllers ask it to draw. */
 function createFakeBoardView() {
-  const calls = { showMoveHints: [], removeHighlights: 0, feedback: [] };
+  const calls = { showMoveHints: [], removeHighlights: 0, feedback: [], arrows: [], highlights: [] };
+  let currentOrientation = 'white';
   return {
     calls,
     showMoveHints: (square, destinations) => { calls.showMoveHints.push({ square, destinations }); },
     removeHighlights: () => { calls.removeHighlights += 1; },
     showSquareFeedback: (square, kind) => { calls.feedback.push({ square, kind }); },
     clearSquareFeedback: () => { calls.feedback.push(null); },
-    clearArrows() {},
+    drawArrow: (from, to, tone) => { calls.arrows.push({ from, to, tone }); },
+    showGuideArrow: (from, to) => { calls.arrows.push({ from, to, tone: 'guide' }); },
+    highlightSquares: (squares) => { calls.highlights.push(squares); },
+    clearHighlights: () => { calls.highlights.push(null); },
+    clearArrows: () => { calls.arrows.push(null); },
     clearLastMoveHighlight() {},
     highlightCheck() {},
     highlightAttackedPieces() {},
-    orientation: () => 'white',
+    orientation: (color) => {
+      if (color) {
+        currentOrientation = color;
+        calls.orientation = color;
+        return color;
+      }
+      return currentOrientation;
+    },
     getFen: () => '',
     flip() {}
   };
